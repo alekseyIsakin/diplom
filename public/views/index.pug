@@ -1,0 +1,15 @@
+doctype html
+html
+  head
+    title Render HTML using PUG
+  body
+    h1 Welcome 
+    form(action="/login", method="post")
+      p 
+        | title:
+        input(type="text", name="nick")
+        | password:
+        input(type="password", name="password")
+        | 
+      input(type="submit")
+        
