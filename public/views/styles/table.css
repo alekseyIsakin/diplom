@@ -1,0 +1,62 @@
+div {
+  background-color: yellow;
+  word-break: break-all;
+}
+
+.table_piece {
+  height: 100%;
+  outline: 1px solid black;
+  display: flex;
+
+  align-content: center;
+  justify-content: center;
+  flex-wrap: wrap-reverse;
+  word-break: normal;
+  min-width: 20px;
+}
+
+
+
+.item_holder {
+  width: 100%;
+  display: flex;
+}
+
+.table_item {
+  width: 100%;
+}
+
+.table_title {
+  max-height: 32px;
+}
+
+.group_title {
+  width:50vw;
+}
+
+.date_title {
+  width: 60px;
+  max-width: 60px;
+  min-width: 60px;
+}
+
+.time_title {
+  width: 80px;
+  max-width: 80px;
+  min-width: 80px;
+}
+
+.stick_top{
+  top: 0;
+  position: sticky;
+}
+
+.container_as_row {
+  display: flex;
+  flex-direction: row;
+}
+
+.container_as_col {
+  display: flex;
+  flex-direction: column;
+}

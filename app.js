@@ -99,7 +99,7 @@ app.get('/', async (req, res) => {
 	res.render('main');
 })
 
-app.get('/logout',function (req, res, next) {
+app.get('/logout', function (req, res, next) {
 	console.log(`[${req.sessionID}] logout`)
 	req.logout(function (err) {
 		if (err) { return next(err); }
@@ -107,10 +107,13 @@ app.get('/logout',function (req, res, next) {
 	});
 })
 
+app.get('/table', async (req, res) => {
+	res.render('table', { user: req.session.passport });
+})
 app.get('/manage', ensureLogIn('/'), async (req, res) => {
 	console.log(`[${req.sessionID}] manage [${req.isAuthenticated()}]`)
 
-	res.render('manage', {user: req.session.passport});
+	res.render('manage', { user: req.session.passport });
 })
 
 app.listen(port, () => console.log('server has been started'))
