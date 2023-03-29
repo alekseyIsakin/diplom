@@ -37,15 +37,14 @@ $$
 LANGUAGE plpgsql;
 
 CREATE OR REPLACE FUNCTION check_user_password(user_name TEXT, passw TEXT) 
-RETURNS BOOLEAN AS
+RETURNS TABLE (id INTEGER, nick VARCHAR(50)) AS
 $$
 DECLARE passed BOOLEAN;
 BEGIN
-	SELECT (password = crypt(passw, password)) INTO passed
-	from users
-	where users.nick = user_name;
-	
-	RETURN passed;
+	RETURN query
+		SELECT users.id, users.nick
+		FROM users
+		WHERE users.nick = user_name AND users.password = crypt(passw, users.password);
 END;
 $$
 LANGUAGE plpgsql;

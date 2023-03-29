@@ -5,7 +5,6 @@ const LocalStrategy = require('passport-local').Strategy;
 const { pool } = require('../db')
 const router = express.Router()
 
-
 passport.use(new LocalStrategy(
   { usernameField: 'nick', passwordField: 'password' },
   async (nick, password, next) => {
@@ -15,11 +14,17 @@ passport.use(new LocalStrategy(
         "select * from check_user_password($1, $2);",
         [nick, password]
       );
-      check = res_query.rows[0]['check_user_password']
-      if (check == true)
-        return next(null, nick)
+
+      if (res_query.rows.length > 0 && Object.hasOwn(res_query.rows[0], 'id')) {
+
+        check = {
+          id: res_query.rows[0]['id'],
+          nick: res_query.rows[0]['nick'],
+        }
+        return next(null, check)
+      }
     } catch (error) {
-      return next(null, error)
+      return next(null, false)
     }
     return next(null, false)
   }
