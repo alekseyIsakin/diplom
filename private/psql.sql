@@ -36,3 +36,16 @@ END;
 $$
 LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION check_user_password(user_name TEXT, passw TEXT) 
+RETURNS BOOLEAN AS
+$$
+DECLARE passed BOOLEAN;
+BEGIN
+	SELECT (password = crypt(passw, password)) INTO passed
+	from users
+	where users.nick = user_name;
+	
+	RETURN passed;
+END;
+$$
+LANGUAGE plpgsql;

@@ -3,36 +3,111 @@
 const express = require('express')
 const app = express()
 const path = require('path')
+const uuid = require('uuid').v4
+const session = require('express-session')
+const FileStore = require('session-file-store')(session)
+const passport = require('passport');
+const LocalStrategy = require('passport-local').Strategy;
+const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
+
 const port = 80
 
-app.use(express.static(path.join(__dirname, 'public')))
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
+const { pool } = require('./db')
 
 app.set("view engine", "pug");
 app.set("views", path.join(__dirname, "public/views"));
 
-const { pool } = require('./db')
+app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
+app.use(session({
+	genid: (req) => {
+		console.log(`Request object sessionID from client: ${req.sessionID}`)
+		return uuid() // use UUIDs for session IDs
+	},
+	secret: 'keyboard cat',
+	resave: false, // don't save session if unmodified
+	saveUninitialized: false, // don't create session until something stored
+	store: new FileStore(),
+	cookie: { maxAge: 60e3 },
+}));
+app.use(passport.authenticate('session'));
+app.use(function (req, res, next) {
+	var msgs = req.session.messages || [];
+	res.locals.messages = msgs;
+	res.locals.hasMessages = !!msgs.length;
+	req.session.messages = [];
+	next();
+});
 
-app.post('/login', async (req,res) => {
-	console.log(`${req.body.nick} ${req.body.password}`)
-	
-})
-app.get('/', async (req,res) => {
-	try{
-		const res_query = await pool.query(
-			"select * from users"
-		);
-		let t = res_query.rows[0]
-		console.log(`receive ${t.nick}`)
-		// res.send(res_query.rows)
-		res.render('index', {users: res_query.rows});
-	} catch (error) {
-		res.send(error)
-		console.error(error)
+
+
+passport.use(new LocalStrategy(
+	{ usernameField: 'nick', passwordField: 'password' },
+	async (nick, password, next) => {
+		let check = false
+		console.log('Inside local strategy callback')
+		try {
+			const res_query = await pool.query(
+				"select * from check_user_password($1, $2);",
+				[nick, password]
+			);
+			check = res_query.rows[0]['check_user_password']
+			if (check == true)
+				return next(null, nick)
+		} catch (error) {
+			console.log(error)
+			return next(null, error)
+		}
+		return next(null, false)
 	}
+))
+passport.serializeUser((user, done) => {
+	console.log('Inside serializeUser callback. User id is save to the session file store here')
+	done(null, user);
+});
 
+passport.deserializeUser((user, cb) => {
+	process.nextTick(function () {
+		return cb(null, user);
+	});
+});
+
+
+
+
+app.get('/logout', (req, res, next) => {
+	console.log(`[${req.sessionID}] logout [${req.session}]`)
+	req.logout(function (err) {
+		if (err) { return next(err); }
+	});
+	res.redirect('/login');
+})
+
+app.post('/login/password',
+	passport.authenticate('local', {
+		failureRedirect: '/login',
+		successReturnToOrRedirect: '/manage',
+		failureMessage: true
+	}),
+)
+
+app.get('/manage', ensureLogIn(), async (req, res) => {
+	console.log(`[${req.sessionID}] manage [${req.session.login}]`)
+
+	res.render('manage', {user: req.session.passport});
+})
+
+app.get('/login', async (req, res) => {
+	console.log(`[${req.sessionID}] login [${'asd'}]`)
+	res.render('login');
+})
+
+app.get('/', async (req, res) => {
+	console.log(`[${req.sessionID}] home [${'asd'}]`)
+	res.render('main');
 })
 
 
-app.listen(port, ()=>console.log('serrver has been started'))
+app.listen(port, () => console.log('server has been started'))
