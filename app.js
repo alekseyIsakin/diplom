@@ -7,16 +7,16 @@ const uuid = require('uuid').v4
 const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const passport = require('passport');
-const LocalStrategy = require('passport-local').Strategy;
-const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
-var cookieParser = require('cookie-parser');
+const cookieParser = require('cookie-parser');
+const authRouter = require('./routes/auth');
+const indexRouter = require('./routes/index');
 
-const port = 80
+require('dotenv').config();
+const port = process.env.PORT
 
-const { pool } = require('./db')
 
 app.set("view engine", "pug");
-app.set("views", path.join(__dirname, "public/views"));
+// app.set("views", path.join(__dirname, "public/views"));
 
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.json())
@@ -24,7 +24,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(session({
 	genid: (req) => {
-		console.log(`Request object sessionID from client: ${req.sessionID}`)
 		return uuid() // use UUIDs for session IDs
 	},
 	secret: 'keyboard cat',
@@ -42,78 +41,14 @@ app.use(function (req, res, next) {
 	next();
 });
 
+app.use('/', authRouter);
+app.use('/', indexRouter);
 
-
-passport.use(new LocalStrategy(
-	{ usernameField: 'nick', passwordField: 'password' },
-	async (nick, password, next) => {
-		let check = false
-		console.log('Inside local strategy callback')
-		try {
-			const res_query = await pool.query(
-				"select * from check_user_password($1, $2);",
-				[nick, password]
-			);
-			check = res_query.rows[0]['check_user_password']
-			if (check == true)
-				return next(null, nick)
-		} catch (error) {
-			console.log(error)
-			return next(null, error)
-		}
-		return next(null, false)
-	}
-))
-passport.serializeUser((user, done) => {
-	console.log('Inside serializeUser callback. User id is save to the session file store here')
-	done(null, user);
-});
-
-passport.deserializeUser((user, cb) => {
-	process.nextTick(function () {
-		return cb(null, user);
-	});
+app.use(function(req, res, next) {
+	res.send(404)
+  next(null, next);
 });
 
 
-
-
-
-
-app.post('/login/password',
-	passport.authenticate('local', {
-		failureRedirect: '/login',
-		successReturnToOrRedirect: '/manage',
-		failureMessage: true
-	}),
-)
-
-
-app.get('/login', (req, res) => {
-	console.log(`[${req.sessionID}] login [${req.isAuthenticated()}]`)
-	res.render('login');
-})
-
-app.get('/', async (req, res) => {
-	console.log(`[${req.sessionID}] home [${req.isAuthenticated()}]`)
-	res.render('main');
-})
-
-app.get('/logout', function (req, res, next) {
-	console.log(`[${req.sessionID}] logout`)
-	req.logout(function (err) {
-		if (err) { return next(err); }
-		res.redirect('/');
-	});
-})
-
-app.get('/table', async (req, res) => {
-	res.render('table', { user: req.session.passport });
-})
-app.get('/manage', ensureLogIn('/'), async (req, res) => {
-	console.log(`[${req.sessionID}] manage [${req.isAuthenticated()}]`)
-
-	res.render('manage', { user: req.session.passport });
-})
 
 app.listen(port, () => console.log('server has been started'))
