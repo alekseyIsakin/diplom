@@ -9,6 +9,7 @@ const FileStore = require('session-file-store')(session)
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
+var cookieParser = require('cookie-parser');
 
 const port = 80
 
@@ -77,13 +78,7 @@ passport.deserializeUser((user, cb) => {
 
 
 
-app.get('/logout', (req, res, next) => {
-	console.log(`[${req.sessionID}] logout [${req.session}]`)
-	req.logout(function (err) {
-		if (err) { return next(err); }
-	});
-	res.redirect('/login');
-})
+
 
 app.post('/login/password',
 	passport.authenticate('local', {
@@ -93,21 +88,29 @@ app.post('/login/password',
 	}),
 )
 
-app.get('/manage', ensureLogIn(), async (req, res) => {
-	console.log(`[${req.sessionID}] manage [${req.session.login}]`)
 
-	res.render('manage', {user: req.session.passport});
-})
-
-app.get('/login', async (req, res) => {
-	console.log(`[${req.sessionID}] login [${'asd'}]`)
+app.get('/login', (req, res) => {
+	console.log(`[${req.sessionID}] login [${req.isAuthenticated()}]`)
 	res.render('login');
 })
 
 app.get('/', async (req, res) => {
-	console.log(`[${req.sessionID}] home [${'asd'}]`)
+	console.log(`[${req.sessionID}] home [${req.isAuthenticated()}]`)
 	res.render('main');
 })
 
+app.get('/logout',function (req, res, next) {
+	console.log(`[${req.sessionID}] logout`)
+	req.logout(function (err) {
+		if (err) { return next(err); }
+		res.redirect('/');
+	});
+})
+
+app.get('/manage', ensureLogIn('/'), async (req, res) => {
+	console.log(`[${req.sessionID}] manage [${req.isAuthenticated()}]`)
+
+	res.render('manage', {user: req.session.passport});
+})
 
 app.listen(port, () => console.log('server has been started'))
