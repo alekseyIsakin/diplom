@@ -51,4 +51,4 @@ app.use(function(req, res, next) {
 
 
 
-app.listen(port, () => console.log('server has been started'))
+app.listen(port, () => console.log(`server has been started\nnode version: ${process.version}`))
