@@ -20,10 +20,12 @@ passport.use(new LocalStrategy(
         check = {
           id: res_query.rows[0]['id'],
           nick: res_query.rows[0]['nick'],
+          role: res_query.rows[0]['role'],
         }
         return next(null, check)
       }
     } catch (error) {
+      console.log(error)
       return next(null, false)
     }
     return next(null, false)

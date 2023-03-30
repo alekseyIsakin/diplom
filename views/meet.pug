@@ -1,8 +1,13 @@
 doctype html
 html
+  link(rel="stylesheet", href="styles/meet.css", type="text/css")
   head
     title Render HTML using PUG
   body
     h1 meet_area
+    p=user.role
+    if user.role==1
+      .teacher
+    div(width=100 height=100)
 
         

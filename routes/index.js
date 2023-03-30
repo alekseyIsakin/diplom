@@ -14,13 +14,12 @@ router.get('/', async (req, res) => {
 router.get('/table', async (req, res) => {
   res.render('table', { user: req.session.passport });
 })
-router.get('/meet', async (req, res) => {
-  res.render('table', { user: req.session.passport });
-})
 router.get('/manage', ensureLogIn('/'), async (req, res) => {
-  console.log(`[${req.sessionID}] manage [${req.isAuthenticated()}]`)
-
   res.render('manage', { nick: JSON.stringify(req.session.passport.user) });
+})
+
+router.get('/meet', ensureLogIn('/'), async (req, res) => {
+  res.render('meet', req.session.passport);
 })
 
 module.exports = router;
