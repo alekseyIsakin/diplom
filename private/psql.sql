@@ -9,6 +9,10 @@ CREATE TABLE roles (
 	name TEXT NOT NULL UNIQUE
 );
 
+INSERT INTO roles(id, name) VALUES (0, 'student');
+INSERT INTO roles(id, name) VALUES (1, 'teacher');
+INSERT INTO roles(id, name) VALUES (2, 'admin');
+
 CREATE TABLE users (
 	id serial PRIMARY KEY UNIQUE,
 	nick varchar (50) NOT NULL UNIQUE,
@@ -22,9 +26,21 @@ CREATE TABLE users (
 
 
 
-INSERT INTO roles(id, name) VALUES (0, 'student');
-INSERT INTO roles(id, name) VALUES (1, 'teacher');
-INSERT INTO roles(id, name) VALUES (2, 'admin');
+
+CREATE TABLE schedule (
+	id SERIAL PRIMARY KEY,
+	minuts_from SMALLINT UNSIGNED,
+	duration SMALLINT UNSIGNED,
+);
+
+CREATE TABLE schedule_days(
+	id SERIAL PRIMARY KEY,
+	day_of_week TINYINT NOT NULL,
+	lecture_couple_id INTEGER NOT NULL,
+	FOREIGN KEY (lecture_couple_id) REFERENCES schedule (id)
+);
+
+
 
 
 CREATE OR REPLACE PROCEDURE add_new_user(nick_name TEXT, f_name TEXT, s_name TEXT, t_name TEXT, passw TEXT) AS 
