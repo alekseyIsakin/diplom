@@ -36,10 +36,10 @@ UPDATE students SET st_group = 2 WHERE id = 4;
 
 -- default values
 -- time
-INSERT into shedule_time VALUES (0, 540, 45);
-INSERT into shedule_time VALUES (1, 600, 45);
-INSERT into shedule_time VALUES (2, 660, 45);
-INSERT into shedule_time VALUES (3, 720, 45);
+INSERT into shedule_time VALUES (0, 495, 95);
+INSERT into shedule_time VALUES (1, 600, 95);
+INSERT into shedule_time VALUES (2, 705, 95);
+INSERT into shedule_time VALUES (3, 810, 95);
 -- day
 INSERT into day_of_week VALUES (0, 'mon');
 INSERT into day_of_week VALUES (1, 'thu');
@@ -78,23 +78,26 @@ INSERT into shedule VALUES (0, 0, 1);
 INSERT into shedule VALUES (0, 1, 2);
 INSERT into shedule VALUES (0, 2, 3);
 INSERT into shedule VALUES (0, 3, NULL);
-
+INSERT into shedule VALUES (1, 0, NULL);
+INSERT into shedule VALUES (1, 1, 1);
+INSERT into shedule VALUES (1, 2, 2);
+INSERT into shedule VALUES (1, 3, NULL);
 -- Query
-select day_of_week.title, 
-	shedule_time.from_as_minuts,
-	users.nick,
-	teacher_classes.title, 
-	teacher_classes.cabinet, 
-	students_group.title,
-from shedule 
-	right join classes on shedule.classes_id = classes.shedule_id 
-	right join teacher_classes on classes.class_id = teacher_classes.id
-	right join students_group on teacher_classes.group_id = students_group.id
-	right join users on teacher_classes.teacher_id = users.id
-	right join day_of_week on day_of_week.id = shedule.day_id
-	right join shedule_time ON shedule_time.id = shedule.time_id
-	--order by 
-where classes.up = false
+-- select day_of_week.title, 
+-- 	shedule_time.from_as_minuts,
+-- 	users.nick,
+-- 	teacher_classes.title, 
+-- 	teacher_classes.cabinet, 
+-- 	students_group.title,
+-- from shedule 
+-- 	right join classes on shedule.classes_id = classes.shedule_id 
+-- 	right join teacher_classes on classes.class_id = teacher_classes.id
+-- 	right join students_group on teacher_classes.group_id = students_group.id
+-- 	right join users on teacher_classes.teacher_id = users.id
+-- 	right join day_of_week on day_of_week.id = shedule.day_id
+-- 	right join shedule_time ON shedule_time.id = shedule.time_id
+-- 	--order by 
+-- where classes.up = false
 
 
 
