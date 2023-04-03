@@ -56,9 +56,7 @@ router.get('/table', async (req, res) => {
     for (row in res_query.rows) {
       let cl = res_query.rows[row]
       let index =  (cl.up ? 0 : 1) +  (cl.group_id - 1) * 2 + (cl.time_id) * group_cnt * 2 + cl.day_id * times.length * group_cnt * 2
-      // let index = (cl.group_id - 1) + (cl.up ? 0 : 2) + (cl.time_id) * times.length + (cl.day_id) * days.length * 2
       if (cl.day_id != null){
-        console.log(`${index} ${JSON.stringify(cl)}`)
         rasp[index] = {class: cl.class, cabinet: cl.cabinet, teacher: cl.teacher}
       }
     }
