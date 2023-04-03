@@ -30,7 +30,7 @@ const init_db = async () => {
     const res_query = await pool.query(
       "select count(id) from students_group;"
     );
-    times = Number(res_query.rows[0].count)
+    group_cnt = Number(res_query.rows[0].count) - 1
   } catch (error) {
     console.error(error);
   }
@@ -50,20 +50,20 @@ router.get('/table', async (req, res) => {
       "select * from get_class_shedule();"
     );
 
+    rasp = []
+    rasp.length = days.length * times.length * group_cnt * 2
 
-    const w = {
-      cur: 0,
-      group: 0,
-      up: false,
-      day: 0,
-      time: 0,
+    for (row in res_query.rows) {
+      let cl = res_query.rows[row]
+      let index =  (cl.up ? 0 : 1) +  (cl.group_id - 1) * 2 + (cl.time_id) * group_cnt * 2 + cl.day_id * times.length * group_cnt * 2
+      // let index = (cl.group_id - 1) + (cl.up ? 0 : 2) + (cl.time_id) * times.length + (cl.day_id) * days.length * 2
+      if (cl.day_id != null){
+        console.log(`${index} ${JSON.stringify(cl)}`)
+        rasp[index] = {class: cl.class, cabinet: cl.cabinet, teacher: cl.teacher}
+      }
     }
-    
-    while (true) {
 
-    }
-
-    res.render('table', { days: days, time: times, rasp: res_query.rows });
+    res.render('table', { days: days, time: times, rasp: rasp , group_count: group_cnt});
   } catch (error) {
     console.error(error);
   }

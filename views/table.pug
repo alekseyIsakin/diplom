@@ -31,19 +31,19 @@ html
                   - var minuts=t.from_as_minuts%60
                   - var tm = `${hours}:${minuts < 10 ? '0' : ''}${minuts}`
                   p= tm
-              div(class='container_as_row group_title')
-                if rasp.length > item
-                  -var class_ = `${rasp[item].class} ${rasp[item].teacher} ${rasp[item].cabinet}`
-                  -item++
-                  div(class='table_piece table_item')
-                    p=class_
-                  div(class='table_piece table_item')
-                    p=class_
-                else
-                  div(class='table_piece table_item')
-                    p -
-                  div(class='table_piece table_item')
-                    p -
+              div(class='container_as_row group_title group_holder')
+                - for (var i=0; i < group_count; i++ )
+                  div(class='container_as_col group_title up_holder')
+                    - for (var up=0; up < 2; up++ )
+                      if rasp[item]
+                        - var class_ = `${rasp[item].class} ${rasp[item].teacher} ${rasp[item].cabinet}`
+                        div(class='table_piece table_item')
+                          p=class_
+                      else
+                        div(class='table_piece table_item')
+                          p -
+
+                      - item++
 
 
 
