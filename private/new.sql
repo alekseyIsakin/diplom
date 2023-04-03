@@ -115,11 +115,13 @@ INSERT ON admins FOR EACH ROW EXECUTE FUNCTION change_user_role();
 CREATE TRIGGER change_teacher_role BEFORE
 INSERT ON teachers FOR EACH ROW EXECUTE FUNCTION change_user_role();
 -- Functions
+DROP FUNCTION IF EXISTS get_class_shedule;
 CREATE FUNCTION get_class_shedule() RETURNS TABLE (
 	day_id integer,
 	time_id integer,
 	up boolean,
 	group_id integer,
+	duration smallint,
 	
 	day VARCHAR(10),
 	from_as_minuts SMALLINT,
@@ -134,6 +136,7 @@ select
 	shedule_time.id,
 	classes.up,
 	students_group.id,
+	shedule_time.duration_as_minuts,
 	
 	day_of_week.title,
 	shedule_time.from_as_minuts,

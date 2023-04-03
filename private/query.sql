@@ -13,6 +13,7 @@ DELETE from day_of_week;
 INSERT into students_group VALUES (0, 'without group','');
 INSERT into students_group VALUES (1, 'g1','');
 INSERT into students_group VALUES (2, 'g2','');
+INSERT into students_group VALUES (3, 'g3','');
 -- all users
 INSERT into users VALUES (0, 'a1','','','','***');
 INSERT into users VALUES (1, 's1','','','','***');
@@ -60,19 +61,37 @@ INSERT into teacher_classes VALUES (6, 7, 'p3','1113', 2);
 INSERT into teacher_classes VALUES (7, 8, 'p3','1114', 1);
 INSERT into teacher_classes VALUES (8, 8, 'p2','1113', 2);
 INSERT into teacher_classes VALUES (9, 5, 'p1','1111', 2);
+INSERT into teacher_classes VALUES (10, 5, 'p1','1111', 2);
+INSERT into teacher_classes VALUES (11, 5, 'p2','1111', 3);
+INSERT into teacher_classes VALUES (12, 7, 'p2','1112', 2);
+INSERT into teacher_classes VALUES (13, 7, 'p3','1114', 2);
+INSERT into teacher_classes VALUES (14, 7, 'p1','1112', 3);
+INSERT into teacher_classes VALUES (15, 7, 'p3','1113', 3);
+INSERT into teacher_classes VALUES (16, 8, 'p3','1114', 2);
+INSERT into teacher_classes VALUES (17, 8, 'p2','1113', 3);
+INSERT into teacher_classes VALUES (18, 5, 'p1','1111', 3);
 
 -- classes
-INSERT into classes VALUES (1,1,TRUE ,1);
-INSERT into classes VALUES (2,1,TRUE ,8);
-INSERT into classes VALUES (3,1,FALSE ,3);
-INSERT into classes VALUES (4,1,FALSE ,2);
-INSERT into classes VALUES (5,2,TRUE ,7);
-INSERT into classes VALUES (6,2,TRUE ,6);
-INSERT into classes VALUES (7,2,FALSE ,1);
-INSERT into classes VALUES (8,2,FALSE ,9);
-INSERT into classes VALUES (9,3,TRUE ,6);
-INSERT into classes VALUES (10,3,FALSE ,1);
-
+INSERT into classes VALUES (1,    1,  TRUE,   1);
+INSERT into classes VALUES (2,    1,  TRUE,   8);
+INSERT into classes VALUES (3,    1,  FALSE,  3);
+INSERT into classes VALUES (4,    1,  FALSE,  2);
+INSERT into classes VALUES (5,    2,  TRUE,   7);
+INSERT into classes VALUES (6,    2,  TRUE,   6);
+INSERT into classes VALUES (7,    2,  FALSE,  1);
+INSERT into classes VALUES (8,    2,  FALSE,  9);
+INSERT into classes VALUES (9,    3,  TRUE,   6);
+INSERT into classes VALUES (10,   3,  FALSE,  1);
+INSERT into classes VALUES (11,   1,  TRUE,   10);
+INSERT into classes VALUES (12,   1,  TRUE,   17);
+INSERT into classes VALUES (13,   1,  FALSE,  12);
+INSERT into classes VALUES (14,   1,  FALSE,  11);
+INSERT into classes VALUES (15,   2,  TRUE,   16);
+INSERT into classes VALUES (16,   2,  TRUE,   15);
+INSERT into classes VALUES (17,   2,  FALSE,  10);
+INSERT into classes VALUES (18,   2,  FALSE,  18);
+INSERT into classes VALUES (19,   3,  TRUE,   15);
+INSERT into classes VALUES (20,   3,  FALSE,  10);
 -- shedule
 INSERT into shedule VALUES (0, 0, 1);
 INSERT into shedule VALUES (0, 1, 2);
@@ -82,6 +101,7 @@ INSERT into shedule VALUES (1, 0, NULL);
 INSERT into shedule VALUES (1, 1, 1);
 INSERT into shedule VALUES (1, 2, 2);
 INSERT into shedule VALUES (1, 3, NULL);
+
 -- Query
 -- select day_of_week.title, 
 -- 	shedule_time.from_as_minuts,

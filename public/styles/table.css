@@ -15,7 +15,10 @@ div {
   min-width: 20px;
 }
 
-
+.current_class {
+  background-color: green;
+  word-break: break-all;
+}
 
 .item_holder {
   width: 100%;
@@ -30,8 +33,13 @@ div {
   max-height: 32px;
 }
 
+.group_holder,
+.up_holder {
+  width: 100%;
+}
+
 .group_title {
-  width:50vw;
+  width: 100vw;
 }
 
 .date_title {
@@ -46,7 +54,7 @@ div {
   min-width: 80px;
 }
 
-.stick_top{
+.stick_top {
   top: 0;
   position: sticky;
   position: -webkit-sticky;
