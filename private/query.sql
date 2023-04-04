@@ -73,6 +73,21 @@ INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (
 INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (11, 10, 'л. Прикладные пакеты в экономике','1348', 1);
 INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (12, 10, 'лаб. Прикладные пакеты в экономике','1343', 1);
 INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (13, 10, 'лаб. Прикладные пакеты в экономике','1346', 1);
+
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (15, 5, 'л. Прикладные пакеты общего назначения','1348', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (16, 5, 'л. Прикладные пакеты общего назначения','1343', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (17, 5, 'лаб. Прикладные пакеты общего назначения','1348', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (18, 5, 'лаб. Прикладные пакеты общего назначения','1343', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (19, 7, 'л. Технические и программные средства защиты информации','1348', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (20, 8, 'л. Средства интеграции программных модулей','1346', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (21, 8, 'л. Средства интеграции программных модулей','1348', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (22, 8, 'лаб. Средства интеграции программных модулей','1343', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (28, 8, 'лаб. Средства интеграции программных модулей','1346', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (23, 9, 'л. Экспертные системы','1344', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (24, 9, 'лаб. Экспертные системы','1344', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (25, 10, 'л. Прикладные пакеты в экономике','1348', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (26, 10, 'лаб. Прикладные пакеты в экономике','1343', 2);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (27, 10, 'лаб. Прикладные пакеты в экономике','1346', 2);
 --
 -- classes one for day-time-group line
 INSERT into classes (id, shedule_id, up, class_id) VALUES (1,		1,		TRUE,			1);
@@ -85,8 +100,21 @@ INSERT into classes (id, shedule_id, up, class_id) VALUES (7,		5,		TRUE,			7);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (8,		6,		TRUE,			3);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (9,		7,		TRUE,			14);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (10,	7,		FALSE,		9);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (11,		8,		TRUE,			14);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (11,	8,		TRUE,			14);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (12,	8,		FALSE,		10);
+
+INSERT into classes (id, shedule_id, up, class_id) VALUES (13,		1,		TRUE,			15);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (14,		1,		FALSE,		16);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (15,		2,		TRUE,			17);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (16,		2,		FALSE,		18);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (17,		3,		TRUE,			19);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (18,		4,		TRUE,			19);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (19,		5,		TRUE,			21);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (20,		6,		TRUE,			17);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (21,		7,		TRUE,			28);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (22,  	7,		FALSE,		23);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (23,  	8,		TRUE,			28);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (24,  	8,		FALSE,		24);
 
 -- shedule
 INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 0, null);
