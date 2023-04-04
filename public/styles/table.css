@@ -1,6 +1,10 @@
-div {
-  background-color: yellow;
-  word-break: break-all;
+p {
+  margin-top: 3px;
+  margin-bottom: 3px;
+  margin-left: 2px;
+  margin-right: 3px;
+  text-align: center;
+  word-break: normal;
 }
 
 .table_piece {
@@ -13,10 +17,8 @@ div {
   flex-wrap: wrap-reverse;
   word-break: normal;
   min-width: 20px;
-}
 
-.current_class {
-  background-color: green;
+  background-color: yellow;
   word-break: break-all;
 }
 
@@ -26,7 +28,13 @@ div {
 }
 
 .table_item {
+  background-color: darkgrey;
   width: 100%;
+}
+
+.current_class {
+  background-color: green;
+  word-break: normal;
 }
 
 .table_title {
@@ -39,6 +47,7 @@ div {
 }
 
 .group_title {
+  flex-wrap: nowrap;
   width: 100vw;
 }
 

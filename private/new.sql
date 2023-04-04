@@ -1,20 +1,21 @@
 --
+-- Drop views
+DROP VIEW IF EXISTS get_class_shedule;
+--
 -- Drop tables
-DROP TABLE IF EXISTS shedule;
 DROP TABLE IF EXISTS classes;
 DROP TABLE IF EXISTS teacher_classes;
 DROP TABLE IF EXISTS teachers;
 DROP TABLE IF EXISTS students;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS students_group;
+DROP TABLE IF EXISTS shedule;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS shedule_time;
-DROP TABLE IF EXISTS day_of_week;
---
+DROP TABLE IF EXISTS day_of_week;--
 -- Drop functions
 drop function if exists new_user_append;
 drop function if exists change_user_role;
-drop function if exists get_class_shedule;
 --
 -- Tables
 CREATE TABLE users (
@@ -52,7 +53,7 @@ CREATE TABLE admins(
 CREATE TABLE teacher_classes (
 	id SERIAL PRIMARY KEY UNIQUE,
 	teacher_id INTEGER NOT NULL,
-	title VARCHAR(50),
+	title VARCHAR(100),
 	cabinet VARCHAR(50),
 	group_id INTEGER,
 	FOREIGN KEY (teacher_id) REFERENCES teachers (id) ON
@@ -115,45 +116,32 @@ INSERT ON admins FOR EACH ROW EXECUTE FUNCTION change_user_role();
 CREATE TRIGGER change_teacher_role BEFORE
 INSERT ON teachers FOR EACH ROW EXECUTE FUNCTION change_user_role();
 -- Functions
-DROP FUNCTION IF EXISTS get_class_shedule;
-CREATE FUNCTION get_class_shedule() RETURNS TABLE (
-	day_id integer,
-	time_id integer,
-	up boolean,
-	group_id integer,
-	duration smallint,
-	
-	day VARCHAR(10),
-	from_as_minuts SMALLINT,
-	teacher VARCHAR(50),
-	class VARCHAR(50),
-	cabinet VARCHAR(50),
-	student_group VARCHAR(50)
-) LANGUAGE plpgsql AS $$ BEGIN
-return query
-select 
-	day_of_week.id,
-	shedule_time.id,
-	classes.up,
-	students_group.id,
-	shedule_time.duration_as_minuts,
-	
-	day_of_week.title,
-	shedule_time.from_as_minuts,
-	users.nick,
-	teacher_classes.title,
-	teacher_classes.cabinet,
-	students_group.title
-from shedule
-	right join classes on shedule.classes_id = classes.shedule_id
-	right join teacher_classes on classes.class_id = teacher_classes.id
-	right join students_group on teacher_classes.group_id = students_group.id
-	right join users on teacher_classes.teacher_id = users.id
-	right join day_of_week on day_of_week.id = shedule.day_id
-	right join shedule_time ON shedule_time.id = shedule.time_id --where shedule.day_id = 0
-order by day_of_week.id ASC,
-	shedule_time.from_as_minuts ASC,
-	students_group.title ASC,
-	classes.up DESC;
+CREATE VIEW get_class_shedule AS
+	select 
+		day_of_week.id as day_id,
+		shedule_time.id as time_id,
+		classes.up as up,
+		students_group.id as group_id,
+		shedule_time.duration_as_minuts as duration,
+		classes.id as class_id,
+
+		day_of_week.title as day,
+		shedule_time.from_as_minuts as from_as_minuts,
+		users.first_name as t_fname,
+		users.second_name as t_sname,
+		users.thrid_name as t_tname,
+		teacher_classes.title as class,
+		teacher_classes.cabinet as cabinet,
+		students_group.title as student_group
+	from shedule
+		right join classes on shedule.classes_id = classes.shedule_id
+		right join teacher_classes on classes.class_id = teacher_classes.id
+		right join students_group on teacher_classes.group_id = students_group.id
+		right join users on teacher_classes.teacher_id = users.id
+		right join day_of_week on day_of_week.id = shedule.day_id
+		right join shedule_time ON shedule_time.id = shedule.time_id
+	order by day_of_week.id ASC,
+		shedule_time.from_as_minuts ASC,
+		students_group.title ASC,
+		classes.up DESC;
 END;
-$$

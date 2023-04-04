@@ -11,29 +11,33 @@ DELETE from shedule_time;
 DELETE from day_of_week;
 -- groups
 INSERT into students_group VALUES (0, 'without group','');
-INSERT into students_group VALUES (1, 'g1','');
-INSERT into students_group VALUES (2, 'g2','');
-INSERT into students_group VALUES (3, 'g3','');
+INSERT into students_group VALUES (1, 'ИПО-19','');
+INSERT into students_group VALUES (2, 'ИСиТ-19','');
+INSERT into students_group VALUES (3, 'МТС-19','');
 -- all users
 INSERT into users VALUES (0, 'a1','','','','***');
 INSERT into users VALUES (1, 's1','','','','***');
 INSERT into users VALUES (2, 's2','','','','***');
 INSERT into users VALUES (3, 's3','','','','***');
 INSERT into users VALUES (4, 's4','','','','***');
-INSERT into users VALUES (5, 't1','','','','***');
-INSERT into users VALUES (7, 't2','','','','***');
-INSERT into users VALUES (8, 't3','','','','***');
+INSERT into users VALUES (5,		't1',		'М.',		'Полячкова',		'А.',		'***');
+INSERT into users VALUES (7,		't2',		'В.',		'Кушнарёв',			'С.',		'***');
+INSERT into users VALUES (8,		't3',		'К.',		'Фигура',				'Н.',		'***');
+INSERT into users VALUES (9,		't4',		'Д.',		'Горохов',			'Б.',		'***');
+INSERT into users VALUES (10,		't5',		'С.',		'Шаров',				'В.',		'***');
 -- teachers
 INSERT into teachers VALUES (5);
 INSERT into teachers VALUES (7);
 INSERT into teachers VALUES (8);
+INSERT into teachers VALUES (9);
+INSERT into teachers VALUES (10);
 -- admins
 INSERT into admins VALUES (0);
 -- student groups
 UPDATE students SET st_group = 1 WHERE id = 1;
-UPDATE students SET st_group = 1 WHERE id = 2;
 UPDATE students SET st_group = 2 WHERE id = 3;
 UPDATE students SET st_group = 2 WHERE id = 4;
+UPDATE students SET st_group = 1 WHERE id = 2;
 
 -- default values
 -- time
@@ -41,6 +45,9 @@ INSERT into shedule_time VALUES (0, 495, 95);
 INSERT into shedule_time VALUES (1, 600, 95);
 INSERT into shedule_time VALUES (2, 705, 95);
 INSERT into shedule_time VALUES (3, 810, 95);
+INSERT into shedule_time VALUES (4, 915, 95);
+INSERT into shedule_time VALUES (5, 1020, 95);
+INSERT into shedule_time VALUES (6, 1125, 95);
 -- day
 INSERT into day_of_week VALUES (0, 'mon');
 INSERT into day_of_week VALUES (1, 'thu');
@@ -52,72 +59,58 @@ INSERT into day_of_week VALUES (6, 'sun');
 --
 
 -- teacher classes
-INSERT into teacher_classes VALUES (1, 5, 'p1','1111', 1);
-INSERT into teacher_classes VALUES (2, 5, 'p2','1111', 2);
-INSERT into teacher_classes VALUES (3, 7, 'p2','1112', 1);
-INSERT into teacher_classes VALUES (4, 7, 'p3','1114', 1);
-INSERT into teacher_classes VALUES (5, 7, 'p1','1112', 2);
-INSERT into teacher_classes VALUES (6, 7, 'p3','1113', 2);
-INSERT into teacher_classes VALUES (7, 8, 'p3','1114', 1);
-INSERT into teacher_classes VALUES (8, 8, 'p2','1113', 2);
-INSERT into teacher_classes VALUES (9, 5, 'p1','1111', 2);
-INSERT into teacher_classes VALUES (10, 5, 'p1','1111', 2);
-INSERT into teacher_classes VALUES (11, 5, 'p2','1111', 3);
-INSERT into teacher_classes VALUES (12, 7, 'p2','1112', 2);
-INSERT into teacher_classes VALUES (13, 7, 'p3','1114', 2);
-INSERT into teacher_classes VALUES (14, 7, 'p1','1112', 3);
-INSERT into teacher_classes VALUES (15, 7, 'p3','1113', 3);
-INSERT into teacher_classes VALUES (16, 8, 'p3','1114', 2);
-INSERT into teacher_classes VALUES (17, 8, 'p2','1113', 3);
-INSERT into teacher_classes VALUES (18, 5, 'p1','1111', 3);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (1, 5, 'л. Прикладные пакеты общего назначения','1348', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (2, 5, 'л. Прикладные пакеты общего назначения','1343', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (3, 5, 'лаб. Прикладные пакеты общего назначения','1348', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (4, 5, 'лаб. Прикладные пакеты общего назначения','1343', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (5, 7, 'л. Технические и программные средства защиты информации','1348', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (6, 8, 'л. Средства интеграции программных модулей','1346', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (7, 8, 'л. Средства интеграции программных модулей','1348', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (8, 8, 'лаб. Средства интеграции программных модулей','1343', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (14, 8, 'лаб. Средства интеграции программных модулей','1346', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (9, 9, 'л. Экспертные системы','1344', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (10, 9, 'лаб. Экспертные системы','1344', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (11, 10, 'л. Прикладные пакеты в экономике','1348', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (12, 10, 'лаб. Прикладные пакеты в экономике','1343', 1);
+INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (13, 10, 'лаб. Прикладные пакеты в экономике','1346', 1);
+--
+-- classes one for day-time-group line
+INSERT into classes (id, shedule_id, up, class_id) VALUES (1,		1,		TRUE,			1);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (2,		1,		FALSE,		2);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (3,		2,		TRUE,			3);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (4,		2,		FALSE,		4);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (5,		3,		TRUE,			5);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (6,		4,		TRUE,			5);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (7,		5,		TRUE,			7);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (8,		6,		TRUE,			3);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (9,		7,		TRUE,			14);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (10,	7,		FALSE,		9);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (11,		8,		TRUE,			14);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (12,	8,		FALSE,		10);
 
--- classes
-INSERT into classes VALUES (1,    1,  TRUE,   1);
-INSERT into classes VALUES (2,    1,  TRUE,   8);
-INSERT into classes VALUES (3,    1,  FALSE,  3);
-INSERT into classes VALUES (4,    1,  FALSE,  2);
-INSERT into classes VALUES (5,    2,  TRUE,   7);
-INSERT into classes VALUES (6,    2,  TRUE,   6);
-INSERT into classes VALUES (7,    2,  FALSE,  1);
-INSERT into classes VALUES (8,    2,  FALSE,  9);
-INSERT into classes VALUES (9,    3,  TRUE,   6);
-INSERT into classes VALUES (10,   3,  FALSE,  1);
-INSERT into classes VALUES (11,   1,  TRUE,   10);
-INSERT into classes VALUES (12,   1,  TRUE,   17);
-INSERT into classes VALUES (13,   1,  FALSE,  12);
-INSERT into classes VALUES (14,   1,  FALSE,  11);
-INSERT into classes VALUES (15,   2,  TRUE,   16);
-INSERT into classes VALUES (16,   2,  TRUE,   15);
-INSERT into classes VALUES (17,   2,  FALSE,  10);
-INSERT into classes VALUES (18,   2,  FALSE,  18);
-INSERT into classes VALUES (19,   3,  TRUE,   15);
-INSERT into classes VALUES (20,   3,  FALSE,  10);
 -- shedule
-INSERT into shedule VALUES (0, 0, 1);
-INSERT into shedule VALUES (0, 1, 2);
-INSERT into shedule VALUES (0, 2, 3);
-INSERT into shedule VALUES (0, 3, NULL);
-INSERT into shedule VALUES (1, 0, NULL);
-INSERT into shedule VALUES (1, 1, 1);
-INSERT into shedule VALUES (1, 2, 2);
-INSERT into shedule VALUES (1, 3, NULL);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 0, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 1, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 2, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 3, 1);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 4, 2);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 5, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 6, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 0, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 1, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 2, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 3, 3);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 4, 4);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 5, 5);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 6, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 0, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 1, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 2, 6);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 3, 7);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 4, 8);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 5, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 6, null);
 
--- Query
--- select day_of_week.title, 
--- 	shedule_time.from_as_minuts,
--- 	users.nick,
--- 	teacher_classes.title, 
--- 	teacher_classes.cabinet, 
--- 	students_group.title,
--- from shedule 
--- 	right join classes on shedule.classes_id = classes.shedule_id 
--- 	right join teacher_classes on classes.class_id = teacher_classes.id
--- 	right join students_group on teacher_classes.group_id = students_group.id
--- 	right join users on teacher_classes.teacher_id = users.id
--- 	right join day_of_week on day_of_week.id = shedule.day_id
--- 	right join shedule_time ON shedule_time.id = shedule.time_id
--- 	--order by 
--- where classes.up = false
 
 
 

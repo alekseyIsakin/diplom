@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "agora-access-token": "^2.0.4",
+    "agora-rtc-sdk-ng": "^4.17.0",
     "connect-ensure-login": "^0.1.1",
     "cookie-parser": "^1.4.6",
     "csurf": "^1.11.0",

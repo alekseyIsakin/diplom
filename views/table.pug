@@ -1,6 +1,6 @@
 doctype html
 link(rel="stylesheet", href="styles/table.css", type="text/css")
-
+meta(http-equiv="refresh", content="300")
 html
   h1 table
   //- - var days = ['1', '2', '3', '4', '5', '6']
@@ -8,13 +8,25 @@ html
   //- - var rasp = ['','','','','','','"л.Прикладные пакеты общего назначенияст.пр.Полячкова М.А.   1348"','','"л.Прикладные пакеты общего назначенияст.пр.Полячкова М.А.   1343"','','"лаб.Прикладные пакеты общего назначенияст.пр.Полячкова М.А.   1348"','','"лаб.Прикладные пакеты общего назначенияст.пр.Полячкова М.А.   1343"','','','','','','','','','','','','"л.Технические и программные средства защиты информациидоц.Кушнарев В.С.   1348"','','','"л.Технические и программные средства защиты информациидоц.Кушнарев В.С.   1348"','','','"л.Средства интеграции программных модулейдоц.Фигура К.Н.   1348"','','','','','','','','','"лаб.Прикладные пакеты общего назначенияст.пр.Полячкова М.А. 1348"','','','"лаб.Средства интеграции программных модулейдоц.Фигура К.Н.   1346"','','"л.Экспертные системыпроф.Горохов Д.Б.   1344"','','"лаб.Средства интеграции программных модулейдоц.Фигура К.Н.   1346"','','"лаб.Экспертные системыпроф.Горохов Д.Б.   1344"','','','','','','','','','"л.Экспертные системыпроф.Горохов Д.Б.   1344"','','','"лаб.Экспертные системыпроф.Горохов Д.Б.   1344"','','"л.Средства интеграции программных модулейдоц.Фигура К.Н.   1348"','','','"лаб.Средства интеграции программных модулейдоц.Фигура К.Н.   1343"','','','','','','','','','','','"л.Экспертные системыпроф.Горохов Д.Б.   1344"','','','"лаб.Экспертные системыпроф.Горохов Д.Б.   1344"','','','"л.Прикладные пакеты общего назначенияст.пр.Полячкова М.А.   1348"','','','','','','"л.Прикладные пакеты в экономикедоц.Шаров С.В.   1348"','','','"л.Прикладные пакеты в экономикедоц.Шаров С.В.   1348"','','','"лаб.Прикладные пакеты в экономикедоц.Шаров С.В.   1343"','','"лаб.Прикладные пакеты в экономикедоц.Шаров С.В.   1346"','','"лаб.Прикладные пакеты в экономикедоц.Шаров С.В.   1343"','','"лаб.Технические и программные средства защиты информациидоц.Кушнарев В.С.   1343"','','','"лаб.Технические и программные средства защиты информациидоц.Кушнарев В.С.   1343"','','','"лаб.Технические и программные средства защиты информациидоц.Кушнарев В.С.   1343"','','','',]
 
   - var item = 0
-  div(class='container_as_row stick_top')
-    div(class='table_piece date_title')
-     | Date
-    div(class='table_piece time_title')
-     | Time
-    div(class='table_piece group_title')
-     | Group 
+  div(class='stick_top')
+    div(class='container_as_col')
+      div(class='container_as_row')
+        div(class='table_piece date_title')
+          span Date
+        div(class='table_piece time_title')
+          span Time
+        div(class='table_piece group_title')
+          span Groups
+      div(class='container_as_row')
+        div(class='table_piece date_title')
+          span -
+        div(class='table_piece time_title')
+          span -
+        div(class='table_piece group_title')
+          each g in groups
+            div(class='table_piece table_item')
+              text #{g.title}
+          
   div(class='container_as_col')
 
     each d in days
@@ -30,19 +42,21 @@ html
                   - var hours=Math.floor(t.from_as_minuts/60)
                   - var minuts=t.from_as_minuts%60
                   - var tm = `${hours}:${minuts < 10 ? '0' : ''}${minuts}`
-                  p= tm
+                  - hours=Math.floor((t.from_as_minuts + t.duration_as_minuts)/60)
+                  - minuts=(t.from_as_minuts + t.duration_as_minuts)%60
+                  - tm += ` - ${hours}:${minuts < 10 ? '0' : ''}${minuts}`
+                  p=tm
               div(class='container_as_row group_holder table_item')
-                - for (var i=0; i < group_count; i++ )
+                - for (var i=0; i < groups.length; i++ )
                   div(class='container_as_col up_holder')
                     - for (var up=0; up < 2; up++ )
+                      - var title = '-'
+                      - var cur = ''
                       if rasp[item]
-                        - var class_ = `${rasp[item].class} ${rasp[item].teacher} ${rasp[item].cabinet}`
-                        div(class=`table_piece table_item ${rasp[item].is_now ? 'current_class' : ''}`)
-                          p=class_
-                      else
-                        div(class='table_piece table_item')
-                          p -
-
+                        - title = `${rasp[item].class} ${rasp[item].teacher} ${rasp[item].cabinet}`
+                        - cur = rasp[item].is_now ? 'current_class' : ''
+                      div(class=`table_piece table_item ${cur}`)
+                        p=title
                       - item++
 
 

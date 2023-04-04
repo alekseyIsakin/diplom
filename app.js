@@ -1,5 +1,6 @@
 'use strict'
 
+const dt = require('./private/dateTime')
 const express = require('express')
 const app = express()
 const path = require('path')
@@ -10,8 +11,19 @@ const passport = require('passport');
 const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/auth');
 const indexRouter = require('./routes/index');
+const token_generator = require('./private/token_generator');
+const { error } = require('console')
+
+
+// const token_generator = require('./private/token_generator');
 
 require('dotenv').config();
+require('./private/db').init_db((error) => {
+	if (error)
+		return
+	dt.setup_cur_time()
+	token_generator.generate_tokens()
+})
 const port = process.env.PORT
 
 
@@ -44,9 +56,9 @@ app.use(function (req, res, next) {
 app.use('/', authRouter);
 app.use('/', indexRouter);
 
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
 	res.send(404)
-  next(null, next);
+	next(null, next);
 });
 
 

@@ -2,7 +2,7 @@
 const express = require('express')
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const { pool } = require('../db')
+const { pool } = require('../private/db')
 const router = express.Router()
 
 passport.use(new LocalStrategy(
