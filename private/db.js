@@ -17,7 +17,7 @@ const stored_data = {
 	groups: [],
 }
 
-const init_db = async (callback) => {
+const load_common_date_time = async (callback) => {
 	try {
 		const res_query = await pool.query(
 			"select id, title from day_of_week;"
@@ -50,7 +50,7 @@ const init_db = async (callback) => {
 const get_certain_classes = async (day_id, time_id, up, callback) => {
 	try {
 		const res_query = await pool.query(
-			"select group_id, class_id, duration from get_class_shedule where day_id = $1 and time_id = $2 and up = $3;", [
+			"select group_id, class_id, from_as_minuts, duration from get_class_shedule where day_id = $1 and time_id = $2 and up = $3;", [
 				day_id, time_id, Boolean(up)
 			]
 		);
@@ -62,7 +62,7 @@ const get_certain_classes = async (day_id, time_id, up, callback) => {
 }
 
 module.exports.pool = pool;
-module.exports.init_db = init_db;
+module.exports.init_db = load_common_date_time;
 module.exports.stored_data = stored_data;
 module.exports.get_classes = get_certain_classes;
 

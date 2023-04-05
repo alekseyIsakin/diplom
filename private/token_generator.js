@@ -12,28 +12,33 @@ const appCertificate = process.env.APPCERTIFICATE;
 
 const uid = 0;
 const role = RtcRole.PUBLISHER;
-const currentTimestamp = Math.floor(Date.now() / 1000) + 3600
 
 
 
 const generate_tokens = () => {
-  const now = cur_time()
-  let t = db.get_classes(now.day_id, now.time_id, now.is_up, (error, ret) => {
+  const now_time_id = cur_time()
+  const dt = new Date()
+  const day_start = Math.floor(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime() / 1000)
+  const cur_date = Date.now() / 1000
+
+  db.get_classes(now_time_id.day_id, now_time_id.time_id, now_time_id.is_up, (error, ret) => {
     console.log(ret)
     let duration = 0
+
     for (let r in ret) {
       const el = ret[r]
       const channel_name = `group-${el.group_id}`
-      // const privilegeExpiredTs =  currentTimestamp + el.duration * 60
-      const privilegeExpiredTs = currentTimestamp + 60
+      const privilegeExpiredTs = day_start + (el.from_as_minuts + el.duration + 5) * 60
+      duration = Math.min(privilegeExpiredTs - cur_date, duration)
+
       const tokenA = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channel_name, uid, role, privilegeExpiredTs);
-      duration = el.duration
+
       console.log(`${channel_name} ${tokenA}`)
     }
-    if (duration == 0){
-      const dt = Date.now()
-      new Date(dt.getFullYear(), dt.getMonth(), dt.getDate())
+    if (duration == 0) {
+
     }
+
     setTimeout(() => { console.log(Date.now()); generate_tokens() }, duration * 1000)
   })
 }
