@@ -24,7 +24,8 @@ html
           span -
         div(class='table_piece group_title')
           each g in groups
-            div(class='table_piece table_item')
+            - //${g.id -1 != 0 ? 'hide_col' : ''}
+            div(class=`table_piece table_item `)
               text #{g.title}
           
   div(class='container_as_col')
@@ -47,16 +48,19 @@ html
                   - tm += ` - ${hours}:${minuts < 10 ? '0' : ''}${minuts}`
                   p=tm
               div(class='container_as_row group_holder table_item')
-                - for (var i=0; i < groups.length; i++ )
-                  div(class='container_as_col up_holder')
+                - //${i != 0 ? 'hide_col' : ''}
+                - for (let i=0; i < groups.length; i++ )
+                  div(class=`container_as_col up_holder `)
                     - for (var up=0; up < 2; up++ )
                       - var title = '-'
                       - var cur = ''
                       if rasp[item]
-                        - title = `${rasp[item].class} ${rasp[item].teacher} ${rasp[item].cabinet}`
-                        - cur = rasp[item].is_now ? 'current_class' : ''
+                        if rasp[item].class
+                          - title = `${rasp[item].class} ${rasp[item].teacher} ${rasp[item].cabinet}`
+                        - cur = rasp[item].is_now ? 'current_class ' : ''
+                      - cur += d.id == cur_day ? 'current_day' : ''
                       div(class=`table_piece table_item ${cur}`)
-                        p=title
+                        p(class='class_text')=title
                       - item++
 
 

@@ -10,12 +10,12 @@ Date.prototype.getDayOfWeek = function () {
   return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
 }
 
-const cur_time = { day_id: -1, time_id: -1, is_up: false }
 
 const setup_cur_time = () => {
+  const cur_time = { day_id: -1, time_id: -1, is_up: false }
   const date = new Date();
-  const day_of_week = date.getDay() - 1
-  const is_up = date.getWeek() % 2 == 0
+  const day_of_week = date.getDay()
+  const is_up = date.getWeek() % 2 == 1
   const now = date.getMinutes() + (date.getHours() * 60)
 
   cur_time.day_id = day_of_week - 1 == -1 ? 6 : day_of_week - 1
@@ -32,7 +32,7 @@ const setup_cur_time = () => {
       break
     }
   }
+  return cur_time
 }
 
 module.exports.setup_cur_time = setup_cur_time
-module.exports.cur_time = cur_time

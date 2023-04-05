@@ -4,6 +4,7 @@ const express = require('express')
 const router = express.Router()
 const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 const pool = require('../private/db').pool
+const cur_time = require('../private/dateTime').setup_cur_time
 const shedule_data = require('../private/db').stored_data
 
 router.get('/', async (req, res) => {
@@ -14,10 +15,6 @@ router.get('/', async (req, res) => {
 })
 
 router.get('/table', async (req, res) => {
-  const date = new Date();
-  const day_of_week = date.getDay() - 1
-  const is_up = date.getWeek() % 2 == 0
-  const now = date.getMinutes() + (date.getHours() * 60)
 
   try {
     const res_query = await pool.query(
@@ -26,27 +23,33 @@ router.get('/table', async (req, res) => {
 
     let rasp = []
     rasp.length = shedule_data.days.length * shedule_data.times.length * shedule_data.groups.length * 2
+    let ct = cur_time()
 
     for (let row in res_query.rows) {
       const cl = res_query.rows[row]
       const index = (cl.up ? 0 : 1) + (cl.group_id - 1) * 2 + (cl.time_id) * shedule_data.groups.length * 2 + cl.day_id * shedule_data.times.length * shedule_data.groups.length * 2
 
       if (cl.day_id != null) {
-        const is_now = day_of_week == cl.day_id &&
-          is_up == cl.up &&
-          now >= cl.from_as_minuts - 5 &&
-          now < cl.from_as_minuts + cl.duration + 5
-
         rasp[index] = {
           class: cl.class,
           cabinet: cl.cabinet,
           teacher: `${cl.t_sname} ${cl.t_fname} ${cl.t_tname}`,
-          is_now: is_now
+          is_now: false
         }
       }
     }
 
-    res.render('table', { days: shedule_data.days, time: shedule_data.times, rasp: rasp, groups: shedule_data.groups });
+    for (let i in shedule_data.groups) {
+      const index = (ct.is_up ? 0 : 1) + (shedule_data.groups[i].id - 1) * 2 + (ct.time_id) * shedule_data.groups.length * 2 + ct.day_id * shedule_data.times.length * shedule_data.groups.length * 2
+      if (rasp[index]) {
+        rasp[index].is_now = true
+      }
+      else {
+        rasp[index] = { is_now: true }
+      }
+    }
+
+    res.render('table', { days: shedule_data.days, time: shedule_data.times, rasp: rasp, groups: shedule_data.groups, cur_day: ct.day_id });
   } catch (error) {
     console.error(error);
   }

@@ -14,14 +14,13 @@ const pool = new Pool({
 const stored_data = {
 	days: [],
 	times: [],
-	rasp: [],
 	groups: [],
 }
 
 const init_db = async (callback) => {
 	try {
 		const res_query = await pool.query(
-			"select title from day_of_week;"
+			"select id, title from day_of_week;"
 		);
 		stored_data.days = res_query.rows
 	} catch (error) {
@@ -37,7 +36,7 @@ const init_db = async (callback) => {
 	}
 	try {
 		const res_query = await pool.query(
-			"select title from students_group where not id = 0; "
+			"select id, title from students_group where not id = 0; "
 		);
 		stored_data.groups = res_query.rows
 	} catch (error) {

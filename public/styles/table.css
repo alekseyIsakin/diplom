@@ -7,6 +7,7 @@ p {
   word-break: normal;
 }
 
+
 .table_piece {
   height: 100%;
   outline: 1px solid black;
@@ -32,10 +33,24 @@ p {
   width: 100%;
 }
 
+.current_day {
+  background-color: gray;
+  word-break: normal;
+}
+
+.class_text {
+  color: rgb(54, 54, 54);
+}
+
+.current_day p {
+  color: black;
+}
+
 .current_class {
   background-color: green;
   word-break: normal;
 }
+
 
 .table_title {
   max-height: 32px;
@@ -77,4 +92,14 @@ p {
 .container_as_col {
   display: flex;
   flex-direction: column;
+}
+
+.hide_col {
+  width: 0px;
+  height: 5px;
+}
+
+.hide_col * {
+  visibility: collapse;
+  width: 0px;
 }
