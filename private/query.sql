@@ -48,6 +48,13 @@ INSERT into shedule_time VALUES (3, 810, 95);
 INSERT into shedule_time VALUES (4, 915, 95);
 INSERT into shedule_time VALUES (5, 1020, 95);
 INSERT into shedule_time VALUES (6, 1125, 95);
+-- INSERT into shedule_time VALUES (0, 495, 30);
+-- INSERT into shedule_time VALUES (1, 600, 15);
+-- INSERT into shedule_time VALUES (2, 705, 10);
+-- INSERT into shedule_time VALUES (3, 810, 20);
+-- INSERT into shedule_time VALUES (4, 915, 95);
+-- INSERT into shedule_time VALUES (5, 1020, 95);
+-- INSERT into shedule_time VALUES (6, 1125, 300);
 -- day
 INSERT into day_of_week VALUES (0, 'mon');
 INSERT into day_of_week VALUES (1, 'thu');
@@ -117,13 +124,13 @@ INSERT into classes (id, shedule_id, up, class_id) VALUES (23,  	8,		TRUE,			28)
 INSERT into classes (id, shedule_id, up, class_id) VALUES (24,  	8,		FALSE,		24);
 
 -- shedule
-INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 0, null);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 1, null);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 2, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 0, 1);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 1, 1);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 2, 1);
 INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 3, 1);
 INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 4, 2);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 5, null);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 6, null);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 5, 1);
+INSERT into shedule (day_id, time_id, classes_id) VALUES (0, 6, 1);
 INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 0, null);
 INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 1, null);
 INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 2, null);

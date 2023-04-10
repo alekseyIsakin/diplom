@@ -40,7 +40,7 @@ router.get('/table', async (req, res) => {
     }
 
     for (let i in shedule_data.groups) {
-      const index = (ct.is_up ? 0 : 1) + (shedule_data.groups[i].id - 1) * 2 + (ct.time_id) * shedule_data.groups.length * 2 + ct.day_id * shedule_data.times.length * shedule_data.groups.length * 2
+      const index = (ct.is_up ? 0 : 1) + (shedule_data.groups[i].id - 1) * 2 + (ct.time) * shedule_data.groups.length * 2 + ct.day_id * shedule_data.times.length * shedule_data.groups.length * 2
       if (rasp[index]) {
         rasp[index].is_now = true
       }

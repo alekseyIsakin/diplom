@@ -50,7 +50,7 @@ const load_common_date_time = async (callback) => {
 const get_certain_classes = async (day_id, time_id, up, callback) => {
 	try {
 		const res_query = await pool.query(
-			"select group_id, class_id, from_as_minuts, duration from get_class_shedule where day_id = $1 and time_id = $2 and up = $3;", [
+			"select group_id, from_as_minuts, duration from get_class_shedule where day_id = $1 and time_id = $2 and up = $3;", [
 				day_id, time_id, Boolean(up)
 			]
 		);

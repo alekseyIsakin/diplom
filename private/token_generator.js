@@ -2,7 +2,7 @@
 
 require('dotenv').config();
 
-const cur_time = require('./dateTime').setup_cur_time
+const time = require('./dateTime')
 const db = require('./db')
 const shedule_data = require('./db').stored_data
 const { RtcTokenBuilder, RtmTokenBuilder, RtcRole, RtmRole } = require('agora-access-token')
@@ -16,15 +16,16 @@ const role = RtcRole.PUBLISHER;
 
 
 const generate_tokens = () => {
-  const now_time_id = cur_time()
-  const dt = new Date()
-  const day_start = Math.floor(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime() / 1000)
-  const cur_date = Date.now() / 1000
+  const now_time_ids = time.setup_cur_time()
 
   db.get_classes(
-    now_time_id.day_id,
-    Math.max(-1, now_time_id.time_id),
-    now_time_id.is_up, (error, ret) => {
+    now_time_ids.day_id,
+    Math.max(-1, now_time_ids.time),
+    now_time_ids.is_up, (error, ret) => {
+      const dt = new Date()
+      const day_start = Math.floor(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime() / 1000)
+      const cur_date = Date.now() / 1000
+
       console.log(ret)
       let duration = 0
 
@@ -37,20 +38,31 @@ const generate_tokens = () => {
         const tokenA = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channel_name, uid, role, privilegeExpiredTs);
 
         console.log(`${channel_name} ${tokenA}`)
-      }
-      if (duration == 0) { 
-        const next_day_start = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime()
-        if (now_time_id.time_id == -Infinity) {
-          duration = next_day_start + (db.stored_data.times[0].from_as_minuts - 5) * 60 * 1000
-        } 
-        if (now_time_id.time_id != -1) {
-          duration = next_day_start + (db.stored_data.times[now_time_id.time_id + 1].from_as_minuts - 5) * 60 * 1000
 
+      }
+
+      if (duration == 0) {
+        const next_day_start = day_start + 24 * 60 * 60
+        if (now_time_ids.time != time.TOO_SOON && now_time_ids.time != time.TOO_LATE) {
+          let time_id = now_time_ids.time + (now_time_ids.class_is_over ? 1 : 0)
+          if (db.stored_data.times[time_id]) {
+            let now = db.stored_data.times[time_id]
+            duration = day_start * 1000 +
+              (now.from_as_minuts) *
+              60 * 1000
+          } else
+            now_time_ids.time = time.TOO_LATE
         }
-        db.stored_data
+        if (now_time_ids.time == time.TOO_SOON) {
+          duration = day_start * 1000 + (db.stored_data.times[0].from_as_minuts - 5) * 60 * 1000
+        } else if (now_time_ids.time == time.TOO_LATE) {
+          duration = next_day_start * 1000 + (db.stored_data.times[0].from_as_minuts - 5) * 60 * 1000
+        }
+        duration -= time.MINUTS_BETWEEN * 1000 * 60
       }
 
-      setTimeout(() => { console.log(`${duration}`); generate_tokens() }, duration)
+      console.log(`New tokens ready: ${duration} ${new Date(duration)}\n${duration - Date.now()} [${now_time_ids.time}]`)
+      setTimeout(() => { console.log(`${duration}`); generate_tokens() }, duration - Date.now())
     })
 }
 
