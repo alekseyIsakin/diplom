@@ -32,6 +32,8 @@ const setup_cur_time = () => {
       break
     }
   }
+  if (cur_time.time_id == -1)
+    cur_time.time_id = -Infinity
   return cur_time
 }
 

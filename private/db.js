@@ -28,7 +28,7 @@ const load_common_date_time = async (callback) => {
 	}
 	try {
 		const res_query = await pool.query(
-			"select id, from_as_minuts, duration_as_minuts from shedule_time;"
+			"select id, from_as_minuts, duration_as_minuts from shedule_time order by from_as_minuts;"
 		);
 		stored_data.times = res_query.rows
 	} catch (error) {
