@@ -12,7 +12,6 @@ const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/auth');
 const indexRouter = require('./routes/index');
 const token_generator = require('./private/token_generator');
-const { error } = require('console')
 
 
 // const token_generator = require('./private/token_generator');
@@ -61,6 +60,9 @@ app.use(function (req, res, next) {
 	next(null, next);
 });
 
+console.log('123123')
+require('intel').info('---1234124')
 
-
-app.listen(port, () => console.log(`server has been started\nnode version: ${process.version}`))
+app.listen(port, () => { 
+	console.log(`server has been started\nnode version: ${process.version}`) 
+})
