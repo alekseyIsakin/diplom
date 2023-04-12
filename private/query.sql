@@ -97,30 +97,30 @@ INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (
 INSERT into teacher_classes (id, teacher_id, title, cabinet, group_id ) VALUES (27, 10, 'лаб. Прикладные пакеты в экономике','1346', 2);
 --
 -- classes one for day-time-group line
-INSERT into classes (id, shedule_id, up, class_id) VALUES (1,		1,		TRUE,			1);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (2,		1,		FALSE,		2);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (3,		2,		TRUE,			3);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (4,		2,		FALSE,		4);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (5,		3,		TRUE,			5);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (6,		4,		TRUE,			5);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (7,		5,		TRUE,			7);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (8,		6,		TRUE,			3);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (9,		7,		TRUE,			14);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (1,	1,		TRUE,		1);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (2,	1,		FALSE,		2);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (3,	2,		TRUE,		3);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (4,	2,		FALSE,		4);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (5,	3,		TRUE,		5);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (6,	4,		TRUE,		5);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (7,	5,		TRUE,		7);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (8,	6,		TRUE,		3);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (9,	7,		TRUE,		14);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (10,	7,		FALSE,		9);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (11,	8,		TRUE,			14);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (11,	8,		TRUE,		14);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (12,	8,		FALSE,		10);
 
-INSERT into classes (id, shedule_id, up, class_id) VALUES (13,		1,		TRUE,			15);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (13,		1,		TRUE,		15);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (14,		1,		FALSE,		16);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (15,		2,		TRUE,			17);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (15,		2,		TRUE,		17);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (16,		2,		FALSE,		18);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (17,		3,		TRUE,			19);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (18,		4,		TRUE,			19);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (19,		5,		TRUE,			21);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (20,		6,		TRUE,			17);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (21,		7,		TRUE,			28);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (17,		3,		TRUE,		19);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (18,		4,		TRUE,		19);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (19,		5,		TRUE,		21);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (20,		6,		TRUE,		17);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (21,		7,		TRUE,		28);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (22,  	7,		FALSE,		23);
-INSERT into classes (id, shedule_id, up, class_id) VALUES (23,  	8,		TRUE,			28);
+INSERT into classes (id, shedule_id, up, class_id) VALUES (23,  	8,		TRUE,		28);
 INSERT into classes (id, shedule_id, up, class_id) VALUES (24,  	8,		FALSE,		24);
 
 -- shedule

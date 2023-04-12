@@ -1,6 +1,7 @@
 'use strict'
 
 require('dotenv').config();
+const { logger } = require('./logger');
 
 const { Pool } = require('pg')
 const pool = new Pool({
@@ -24,7 +25,7 @@ const load_common_date_time = async (callback) => {
 		);
 		stored_data.days = res_query.rows
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 	}
 	try {
 		const res_query = await pool.query(
@@ -32,7 +33,7 @@ const load_common_date_time = async (callback) => {
 		);
 		stored_data.times = res_query.rows
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 	}
 	try {
 		const res_query = await pool.query(
@@ -40,11 +41,11 @@ const load_common_date_time = async (callback) => {
 		);
 		stored_data.groups = res_query.rows
 	} catch (error) {
-		console.error(error);
+		logger.error(error);
 		callback(error)
 	}
 	callback(null)
-	console.log('db initialized')
+	logger.info('db initialized')
 }
 
 const get_certain_classes = async (day_id, time_id, up, callback) => {
