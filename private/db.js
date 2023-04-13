@@ -1,7 +1,7 @@
 'use strict'
 
 require('dotenv').config();
-const { logger } = require('./logger');
+const logger = require('./logger')(__filename);
 
 const { Pool } = require('pg')
 const pool = new Pool({
@@ -18,6 +18,7 @@ const stored_data = {
 	groups: [],
 }
 
+// Must be called first after the server is started
 const load_common_date_time = async (callback) => {
 	try {
 		const res_query = await pool.query(
@@ -70,7 +71,7 @@ const upload_new_tokens = async (tokens, callback) => {
 		const query_params = []
 		const query_args = []
 
-		for (let i = 0; i< tokens.length; i++){
+		for (let i = 0; i < tokens.length; i++) {
 			query_params.push(`($${i * 3 + 1}, $${i * 3 + 2}, $${i * 3 + 3})`)
 			query_args.push(tokens[i].channel_name)
 			query_args.push(tokens[i].token)
@@ -86,7 +87,18 @@ const upload_new_tokens = async (tokens, callback) => {
 	} catch (error) {
 		await client.query('ROLLBACK')
 		logger.error(error);
+		if (callback !== null) callback(error, null)
+	}
+}
+
+const load_table = async (callback) => {
+	try {
+		const res_query = await pool.query(
+			"select * from get_class_shedule;"
+		);
 		if (callback !== null) callback(null, res_query.rows)
+	} catch (error) {
+		logger.error(error);
 	}
 }
 
@@ -95,6 +107,7 @@ module.exports.init_db = load_common_date_time;
 module.exports.stored_data = stored_data;
 module.exports.get_classes = get_certain_classes;
 module.exports.upload_new_tokens = upload_new_tokens;
+module.exports.load_table = load_table;
 
 
 

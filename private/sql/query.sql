@@ -17,6 +17,16 @@ INSERT into students_group VALUES (2, 'ИСиТ-19','');
 INSERT into students_group VALUES (3, 'МТС-19','');
 -- all users
 INSERT into users VALUES (0, 'a1','','','','***');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
+call add_new_user_as_student('st_1','fn','sn','tn','123');
 INSERT into users VALUES (1, 's1','','','','***');
 INSERT into users VALUES (2, 's2','','','','***');
 INSERT into users VALUES (3, 's3','','','','***');

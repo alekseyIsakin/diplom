@@ -5,13 +5,14 @@ require('dotenv').config();
 const time = require('./dateTime')
 const db = require('./db')
 const { RtcTokenBuilder, RtmTokenBuilder, RtcRole, RtmRole } = require('agora-access-token')
-const { logger } = require('./logger');
+const logger = require('./logger')(__filename);
 
 const appId = process.env.APPID;
 const appCertificate = process.env.APPCERTIFICATE;
 
 const uid = 0;
 const role = RtcRole.PUBLISHER;
+
 
 const generate_tokens = () => {
 	const now_time_ids = time.setup_cur_time()
@@ -25,7 +26,7 @@ const generate_tokens = () => {
 			const cur_date = Date.now() / 1000
 			const tokens = []
 
-			logger.info(`Active channels: ${ret.length}`)
+			logger.info(`Active channels: [ ${ret.length} ]`)
 			let duration = 0
 
 			for (let r in ret) {
@@ -42,9 +43,12 @@ const generate_tokens = () => {
 					channel_name: channel_name
 				})
 
-				logger.info(`Token for: ${channel_name} ${tokenA}`)
+				logger.info(`Token for: [ ${channel_name} ${tokenA} ]`)
 			}
-			db.upload_new_tokens(tokens, null)
+			db.upload_new_tokens(tokens, (error) => {
+				if (!error)
+					logger.info(`tokens have been updated`)
+			})
 
 			if (duration == 0) {
 				const next_day_start = day_start + 24 * 60 * 60
@@ -68,15 +72,15 @@ const generate_tokens = () => {
 			}
 
 			logger.info(`New tokens ready
-	next generation in [${(new Date(duration)).toLocaleString()}];
-	duration: ${duration - Date.now()} 
-	time_id: [${now_time_ids.time}]`)
+	next generation in [ ${(new Date(duration)).toLocaleString()} ];
+	duration: [ ${duration - Date.now()} ]
+	time_id:  [ ${now_time_ids.time} ]`)
 
 			if (duration - Date.now() < 0) {
-				logger.error(`Bad time duration [${duration} - ${Date.now()}]=[${duration - Date.now()}]`)
+				logger.error(`Bad time duration [ ${duration} - ${Date.now()} ]=[ ${duration - Date.now()} ]`)
 				throw new Error('Bad time duration')
 			}
-			setTimeout(() => { logger.info(`${duration}`); generate_tokens() }, duration - Date.now())
+			setTimeout(() => { generate_tokens() }, duration - Date.now())
 		})
 }
 
