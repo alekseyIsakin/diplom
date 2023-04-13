@@ -3,6 +3,7 @@
 DROP VIEW IF EXISTS get_class_shedule;
 --
 -- Drop tables
+DROP TABLE IF EXISTS tokens;
 DROP TABLE IF EXISTS classes;
 DROP TABLE IF EXISTS teacher_classes;
 DROP TABLE IF EXISTS teachers;
@@ -30,6 +31,12 @@ CREATE TABLE students_group(
 	id SERIAL PRIMARY KEY UNIQUE,
 	title VARCHAR(50) NOT NULL,
 	notes Text
+);
+CREATE TABLE tokens (
+	channel_name VARCHAR (50) PRIMARY KEY UNIQUE,
+	token TEXT NOT NULL,
+	group_id INTEGER,
+	FOREIGN KEY (group_id) REFERENCES students_group(id)
 );
 CREATE TABLE students(
 	id INTEGER NOT NULL UNIQUE,

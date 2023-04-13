@@ -63,5 +63,4 @@ app.use(function (req, res, next) {
 
 app.listen(port, () => {
 	logger.info(`server has been started. Node version: ${process.version}`)
-	logger.error(`server has been started. Node version: ${process.version}`)
 })

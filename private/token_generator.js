@@ -13,8 +13,6 @@ const appCertificate = process.env.APPCERTIFICATE;
 const uid = 0;
 const role = RtcRole.PUBLISHER;
 
-
-
 const generate_tokens = () => {
 	const now_time_ids = time.setup_cur_time()
 
@@ -25,6 +23,7 @@ const generate_tokens = () => {
 			const dt = new Date()
 			const day_start = Math.floor(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime() / 1000)
 			const cur_date = Date.now() / 1000
+			const tokens = []
 
 			logger.info(`Active channels: ${ret.length}`)
 			let duration = 0
@@ -37,8 +36,15 @@ const generate_tokens = () => {
 
 				const tokenA = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channel_name, uid, role, privilegeExpiredTs);
 
+				tokens.push({
+					group_id: el.group_id,
+					token: tokenA,
+					channel_name: channel_name
+				})
+
 				logger.info(`Token for: ${channel_name} ${tokenA}`)
 			}
+			db.upload_new_tokens(tokens, null)
 
 			if (duration == 0) {
 				const next_day_start = day_start + 24 * 60 * 60
