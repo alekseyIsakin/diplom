@@ -24,18 +24,19 @@ const load_common_date_time = async (callback) => {
 		const res_query = await pool.query(
 			"select id, title from day_of_week;"
 		);
-		logger.verbose()
+		logger.verbose(`day_of_week info loaded [ ${res_query.rowCount} ]`)
 		stored_data.days = res_query.rows
 	} catch (error) {
-		logger.error(error);
+		logger._error(error);
 	}
 	try {
 		const res_query = await pool.query(
 			"select id, from_as_minuts, duration_as_minuts from shedule_time order by from_as_minuts;"
 		);
+		logger.verbose(`time info loaded [ ${res_query.rowCount} ]`)
 		stored_data.times = res_query.rows
 	} catch (error) {
-		logger.error(error);
+		logger._error(error);
 	}
 	try {
 		const res_query = await pool.query(
@@ -61,8 +62,9 @@ const load_common_date_time = async (callback) => {
 
 			stored_data.facultets[f_id]
 		}
+		logger.verbose(`all groups info loaded [ ${res_query.rowCount} ]`)
 	} catch (error) {
-		logger.error(error);
+		logger._error(error);
 		callback(error)
 	}
 	callback(null)
@@ -77,15 +79,23 @@ const get_certain_classes = async (day_id, time_id, up, callback) => {
 			day_id, time_id, Boolean(up)
 		]
 		);
+		logger.verbose(`selected [ ${res_query.rowCount} ] classes for day [ ${day_id} ], time [ ${time_id} ], up [ ${up} ]`)
 		callback(null, res_query.rows)
 	} catch (error) {
-		logger.error(error);
+		logger._error(error);
 		callback(error)
 	}
 }
 
 const upload_new_tokens = async (tokens, callback) => {
 	const client = await pool.connect()
+
+	if (tokens.length == 0) {
+		logger._info('no tokens provided')
+		if (callback !== null) callback(null, null)
+		return
+	}
+
 	try {
 		await client.query('BEGIN')
 		await client.query(`DELETE FROM tokens`)
@@ -98,16 +108,15 @@ const upload_new_tokens = async (tokens, callback) => {
 			query_args.push(tokens[i].token)
 			query_args.push(tokens[i].group_id)
 		}
-
 		const res_query = await client.query(
 			`INSERT INTO tokens (channel_name, token, group_id) VALUES ` + query_params.join(','),
 			query_args
 		);
 		await client.query('COMMIT')
-		if (callback !== null) callback(null, res_query.rows)
+		if (callback !== null) callback(null, res_query.rowCount)
 	} catch (error) {
 		await client.query('ROLLBACK')
-		logger.error(error);
+		logger._error('upload_new_tokens error: ' + error);
 		if (callback !== null) callback(error, null)
 	}
 }
@@ -121,7 +130,7 @@ const load_table = async (facultet_id, year, callback) => {
 		);
 		if (callback !== null) callback(null, res_query.rows, facultet_id, year)
 	} catch (error) {
-		logger.error(error, null);
+		logger._error(error, null);
 	}
 }
 

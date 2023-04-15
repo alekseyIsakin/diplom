@@ -19,7 +19,7 @@ const generate_tokens = () => {
 
 	db.get_classes(
 		now_time_ids.day_id,
-		Math.max(-1, now_time_ids.time),
+		Math.max(-1, now_time_ids.time_id),
 		now_time_ids.is_up, (error, ret) => {
 			const dt = new Date()
 			const day_start = Math.floor(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).getTime() / 1000)
@@ -45,18 +45,18 @@ const generate_tokens = () => {
 
 				logger.info(`Token for: [ ${channel_name} ${tokenA} ]`)
 			}
-			db.upload_new_tokens(tokens, (error) => {
+			db.upload_new_tokens(tokens, (error, row_cnt) => {
 				if (!error)
-					logger.info(`tokens have been updated`)
+					logger.info(`tokens have been updated [ ${row_cnt} ]`)
 			})
 
 			if (duration == 0) {
 				const next_day_start = day_start + 24 * 60 * 60
 
 				if (now_time_ids.time != time.TOO_SOON && now_time_ids.time != time.TOO_LATE) {
-					let time_id = now_time_ids.time + (now_time_ids.class_is_over ? 1 : 0)
-					if (db.stored_data.times[time_id]) {
-						let now = db.stored_data.times[time_id]
+					// let time_id = now_time_ids.time + (now_time_ids.class_is_over ? 1 : 0)
+					if (db.stored_data.times[now_time_ids.time_id]) {
+						let now = db.stored_data.times[now_time_ids.time_id]
 						duration = day_start * 1000 +
 							(now.from_as_minuts) *
 							60 * 1000
@@ -64,17 +64,17 @@ const generate_tokens = () => {
 						now_time_ids.time = time.TOO_LATE
 				}
 				if (now_time_ids.time == time.TOO_SOON) {
-					duration = day_start * 1000 + (db.stored_data.times[0].from_as_minuts - 5) * 60 * 1000
+					duration = day_start * 1000 + (db.stored_data.times[0].from_as_minuts) * 60 * 1000
 				} else if (now_time_ids.time == time.TOO_LATE) {
-					duration = next_day_start * 1000 + (db.stored_data.times[0].from_as_minuts - 5) * 60 * 1000
+					duration = next_day_start * 1000 + (db.stored_data.times[0].from_as_minuts) * 60 * 1000
 				}
 				duration -= time.MINUTS_BETWEEN * 1000 * 60
 			}
 
-			logger.info(`New tokens ready
+			logger.info(`New tokens ready [ ${tokens.length} ]
 	next generation in [ ${(new Date(duration)).toLocaleString()} ];
 	duration: [ ${duration - Date.now()} ]
-	time_id:  [ ${now_time_ids.time} ]`)
+	time_id:  [ ${now_time_ids.time_id} ]`)
 
 			if (duration - Date.now() < 0) {
 				logger.error(`Bad time duration [ ${duration} - ${Date.now()} ]=[ ${duration - Date.now()} ]`)

@@ -12,7 +12,7 @@ const cookieParser = require('cookie-parser');
 const authRouter = require('./routes/auth');
 const indexRouter = require('./routes/index');
 const token_generator = require('./private/token_generator');
-const  logger  = require('./private/logger')(__filename);
+const logger = require('./private/logger')(__filename);
 
 
 // const token_generator = require('./private/token_generator');
@@ -42,7 +42,7 @@ app.use(session({
 	resave: false, // don't save session if unmodified
 	saveUninitialized: false, // don't create session until something stored
 	store: new FileStore(),
-	cookie: { maxAge: 24*60*60e3 },
+	cookie: { maxAge: 24 * 60 * 60e3 },
 }));
 app.use(passport.authenticate('session'));
 app.use(function (req, res, next) {
@@ -62,5 +62,5 @@ app.use(function (req, res, next) {
 });
 
 app.listen(port, () => {
-	logger.info(`server has been started. Node version: ${process.version}`)
+	logger._debug(`server has been started. Node version: ${process.version}`)
 })

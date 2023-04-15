@@ -5,7 +5,8 @@ const router = express.Router()
 const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 const pool = require('../private/db').pool
 const time = require('../private/dateTime')
-const db = require('../private/db')
+const db = require('../private/db');
+const logger = require('../private/logger');
 
 router.get('/', async (req, res) => {
 	let user = {}
@@ -24,18 +25,18 @@ router.get('/table/:facultet_id/:year', async (req, res) => {
 		let gr_cnt = 0
 		let days_cnt = db.stored_data.days.length
 		let times_cnt = db.stored_data.times.length
-		const offset = {}
+		const offset_gr = {}
 		const gr = db.stored_data.facultets[facultet_id][year]
-		
-		for (let i in gr){
-			offset[i] = gr_cnt
+
+		for (let i in gr) {
+			offset_gr[i] = gr_cnt
 			gr_cnt++
 		}
-		
+
 		rasp.length = days_cnt * times_cnt * gr_cnt * 2
 		for (let row in classes) {
 			const cl = classes[row]
-			const index = (cl.up ? 0 : 1) + offset[cl.group_id] * 2 + Number(cl.time_id - 1) * gr_cnt * 2 + Number(cl.day_id - 1) * times_cnt * gr_cnt * 2
+			const index = (cl.up ? 0 : 1) + offset_gr[cl.group_id] * 2 + Number(cl.time_id - 1) * gr_cnt * 2 + Number(cl.day_id - 1) * times_cnt * gr_cnt * 2
 
 			if (cl.day_id != null) {
 				rasp[index] = {
@@ -47,15 +48,17 @@ router.get('/table/:facultet_id/:year', async (req, res) => {
 			}
 		}
 
-		if (ct.time == time.TOO_LATE) { ct.time = times_cnt - 1 }
+		if (ct.time_id != time.TOO_LATE &&
+			ct.time_id != time.TOO_SOON) {
 
-		for (let i in gr) {
-			const index = (ct.is_up ? 0 : 1) + offset[i] * 2 + (ct.time - 1) * gr_cnt * 2 + (ct.day_id - 1) * times_cnt * gr_cnt * 2
-			if (rasp[index]) {
-				rasp[index].is_now = true
-			}
-			else {
-				rasp[index] = { is_now: true }
+			for (let i in gr) {
+				const index = (ct.is_up ? 0 : 1) + offset_gr[i] * 2 + (ct.time) * gr_cnt * 2 + (ct.day_id - 1) * times_cnt * gr_cnt * 2
+				if (rasp[index]) {
+					rasp[index].is_now = true
+				}
+				else {
+					rasp[index] = { is_now: true }
+				}
 			}
 		}
 

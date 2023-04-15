@@ -15,10 +15,11 @@ Date.prototype.getDayOfWeek = function () {
 
 
 const setup_cur_time = () => {
-  const cur_time = { day_id: -1, time: -1, is_up: false, class_is_over: false }
+
+  const cur_time = { day_id: -1, time: -1, time_id: -1, is_up: false, class_is_over: false }
   const date = new Date();
   const day_of_week = date.getDay()
-  const is_up = date.getWeek() % 2 == 1
+  const is_up = date.getWeek() % 2 == 0
   const now = date.getMinutes() + (date.getHours() * 60)
 
   cur_time.day_id = day_of_week - 1 == -1 ? 6 : day_of_week - 1
@@ -27,19 +28,21 @@ const setup_cur_time = () => {
 
   let start_day = shedule_data.times[0].from_as_minuts
   if (now < start_day - 5) {
-    cur_time.time = TOO_SOON
+      cur_time.time = TOO_SOON
     return cur_time
   }
 
   let prev = shedule_data.times[0]
+  cur_time.time = 0
   for (let t = 1; t <= shedule_data.times.slice(1).length; t++) {
     let time = shedule_data.times[t]
     const is_now =
-      (now + MINUTS_BETWEEN >= prev.from_as_minuts && now - MINUTS_BETWEEN < time.from_as_minuts) ||
-      (now + MINUTS_BETWEEN >= time.from_as_minuts && now - MINUTS_BETWEEN < time.from_as_minuts + time.duration_as_minuts)
+      (now + MINUTS_BETWEEN >= prev.from_as_minuts && now - MINUTS_BETWEEN < time.from_as_minuts) //&&
+      // (now + MINUTS_BETWEEN >= time.from_as_minuts && now - MINUTS_BETWEEN < time.from_as_minuts + time.duration_as_minuts)
     if (is_now) {
       cur_time.class_is_over = now > prev.from_as_minuts + prev.duration_as_minuts
-      cur_time.time = Number(shedule_data.times[t]['id'])
+      cur_time.time_id = Number(shedule_data.times[t-1]['id'])
+      cur_time.time = t-1
       return cur_time
     }
     prev = time
