@@ -21,7 +21,7 @@ require('dotenv').config();
 require('./private/db').init_db((error) => {
 	if (error)
 		return
-	dt.setup_cur_time()
+	// dt.setup_cur_time()
 	token_generator.generate_tokens()
 })
 const port = process.env.PORT

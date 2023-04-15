@@ -1,4 +1,7 @@
 'use strict'
+
+const logger = require('./logger')(__filename);
+
 const shedule_data = require('../private/db').stored_data
 const TOO_SOON = -Infinity
 const TOO_LATE = -1
@@ -16,7 +19,7 @@ Date.prototype.getDayOfWeek = function () {
 
 const setup_cur_time = () => {
 
-  const cur_time = { day_id: -1, time: -1, time_id: -1, is_up: false, class_is_over: false }
+  const cur_time = { day_id: -1, time: -1, time_id: -1, is_up: false }
   const date = new Date();
   const day_of_week = date.getDay()
   const is_up = date.getWeek() % 2 == 0
@@ -28,27 +31,39 @@ const setup_cur_time = () => {
 
   let start_day = shedule_data.times[0].from_as_minuts
   if (now < start_day - 5) {
-      cur_time.time = TOO_SOON
+    cur_time.time = TOO_SOON
+    logger.verbose(`selected too soon time: ${JSON.stringify(cur_time)}`)
     return cur_time
   }
 
-  let prev = shedule_data.times[0]
+  let next = shedule_data.times[1]
+  let is_now = false
   cur_time.time = 0
-  for (let t = 1; t <= shedule_data.times.slice(1).length; t++) {
+  for (let t = 0; t < shedule_data.times.slice(0, -1).length; t++) {
     let time = shedule_data.times[t]
-    const is_now =
-      (now + MINUTS_BETWEEN >= prev.from_as_minuts && now - MINUTS_BETWEEN < time.from_as_minuts) //&&
-      // (now + MINUTS_BETWEEN >= time.from_as_minuts && now - MINUTS_BETWEEN < time.from_as_minuts + time.duration_as_minuts)
+    next = shedule_data.times[t + 1]
+    is_now =
+      (now + MINUTS_BETWEEN >= time.from_as_minuts && now + MINUTS_BETWEEN < next.from_as_minuts)
     if (is_now) {
-      cur_time.class_is_over = now > prev.from_as_minuts + prev.duration_as_minuts
-      cur_time.time_id = Number(shedule_data.times[t-1]['id'])
-      cur_time.time = t-1
+      cur_time.time = t
+      cur_time.time_id = Number(shedule_data.times[t]['id'])
+
+      logger.verbose(`selected time: ${JSON.stringify(cur_time)}`)
       return cur_time
     }
-    prev = time
+  }
+  if (!is_now) {
+    is_now = (now + MINUTS_BETWEEN >= next.from_as_minuts && now - MINUTS_BETWEEN < next.from_as_minuts + next.duration_as_minuts)
+    if (is_now) {
+      cur_time.time = shedule_data.times.length - 1
+      cur_time.time_id = Number(shedule_data.times[cur_time.time]['id'])
+      logger.verbose(`selected last time: ${JSON.stringify(cur_time)}`)
+      return cur_time
+    }
   }
 
   cur_time.time = TOO_LATE
+  logger.verbose(`selected too late time: ${JSON.stringify(cur_time)}`)
   return cur_time
 }
 

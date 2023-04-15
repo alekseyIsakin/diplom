@@ -50,16 +50,16 @@ const generate_tokens = () => {
 					logger.info(`tokens have been updated [ ${row_cnt} ]`)
 			})
 
-			if (duration == 0) {
+			if (duration <= 0) {
 				const next_day_start = day_start + 24 * 60 * 60
 
 				if (now_time_ids.time != time.TOO_SOON && now_time_ids.time != time.TOO_LATE) {
-					// let time_id = now_time_ids.time + (now_time_ids.class_is_over ? 1 : 0)
-					if (db.stored_data.times[now_time_ids.time_id]) {
-						let now = db.stored_data.times[now_time_ids.time_id]
-						duration = day_start * 1000 +
-							(now.from_as_minuts) *
-							60 * 1000
+					let time_id = now_time_ids.time
+					if (db.stored_data.times[time_id]) {
+						let now = db.stored_data.times[time_id]
+						duration = day_start +
+							(now.from_as_minuts + now.duration_as_minuts + 10) * 60
+						duration *= 1000
 					} else
 						now_time_ids.time = time.TOO_LATE
 				}
