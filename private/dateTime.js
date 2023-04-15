@@ -39,7 +39,7 @@ const setup_cur_time = () => {
       (now + MINUTS_BETWEEN >= time.from_as_minuts && now - MINUTS_BETWEEN < time.from_as_minuts + time.duration_as_minuts)
     if (is_now) {
       cur_time.class_is_over = now > prev.from_as_minuts + prev.duration_as_minuts
-      cur_time.time = shedule_data.times[t]['id']
+      cur_time.time = Number(shedule_data.times[t]['id'])
       return cur_time
     }
     prev = time

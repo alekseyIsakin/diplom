@@ -15,7 +15,7 @@ const pool = new Pool({
 const stored_data = {
 	days: [],
 	times: [],
-	groups: [],
+	facultets: [],
 }
 
 // Must be called first after the server is started
@@ -24,6 +24,7 @@ const load_common_date_time = async (callback) => {
 		const res_query = await pool.query(
 			"select id, title from day_of_week;"
 		);
+		logger.verbose()
 		stored_data.days = res_query.rows
 	} catch (error) {
 		logger.error(error);
@@ -38,15 +39,35 @@ const load_common_date_time = async (callback) => {
 	}
 	try {
 		const res_query = await pool.query(
-			"select id, title from students_group where not id = 0; "
+			`select 
+				s.year, 
+				s.id as g_id, 
+				f.id as f_id, 
+				s.title g_title, 
+				f.title f_title 
+				from students_group as s 
+				left join facultets as f on f.id = s.facultet_id;`
 		);
-		stored_data.groups = res_query.rows
+		for (let i = 0; i < res_query.rows.length; i++) {
+			const group = res_query.rows[i]
+			const f_id = group['f_id']
+			if (!stored_data.facultets[f_id])
+				stored_data.facultets[f_id] = {}
+			if (!stored_data.facultets[f_id][group.year])
+				stored_data.facultets[f_id][group.year] = {}
+			stored_data.facultets[f_id][group.year][group.g_id] = {
+				'title': group.g_title
+			}
+
+			stored_data.facultets[f_id]
+		}
 	} catch (error) {
 		logger.error(error);
 		callback(error)
 	}
 	callback(null)
 	logger.info('db initialized')
+
 }
 
 const get_certain_classes = async (day_id, time_id, up, callback) => {
@@ -91,14 +112,16 @@ const upload_new_tokens = async (tokens, callback) => {
 	}
 }
 
-const load_table = async (callback) => {
+const load_table = async (facultet_id, year, callback) => {
 	try {
 		const res_query = await pool.query(
-			"select * from get_class_shedule;"
+			"select * from get_class_shedule where facultet_id=$1 and group_year=$2;", [
+			facultet_id, year
+		]
 		);
-		if (callback !== null) callback(null, res_query.rows)
+		if (callback !== null) callback(null, res_query.rows, facultet_id, year)
 	} catch (error) {
-		logger.error(error);
+		logger.error(error, null);
 	}
 }
 

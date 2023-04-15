@@ -1,3 +1,7 @@
+:root{
+  --text-color: red;
+}
+
 p {
   margin-top: 3px;
   margin-bottom: 3px;
@@ -5,6 +9,7 @@ p {
   margin-right: 3px;
   text-align: center;
   word-break: normal;
+  color: var(--text-color);
 }
 
 

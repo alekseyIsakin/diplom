@@ -1,6 +1,6 @@
-DROP PROCEDURE IF EXISTS add_new_user_as_admin;
-DROP PROCEDURE IF EXISTS add_new_user_as_student;
-DROP PROCEDURE IF EXISTS add_new_user_as_teacher;
+DROP FUNCTION IF EXISTS add_new_user_as_admin;
+DROP FUNCTION IF EXISTS add_new_user_as_teacher;
+DROP FUNCTION IF EXISTS add_new_user_as_student;
 DROP FUNCTION IF EXISTS add_new_user;
 --
 CREATE OR REPLACE FUNCTION add_new_user(
@@ -34,13 +34,13 @@ END;
 $$ LANGUAGE plpgsql;
 --
 --
-CREATE OR REPLACE PROCEDURE add_new_user_as_admin(
+CREATE OR REPLACE FUNCTION add_new_user_as_admin(
 		nick_name TEXT,
 		f_name TEXT,
 		s_name TEXT,
 		t_name TEXT,
 		passw TEXT
-	) LANGUAGE plpgsql AS $$
+	) RETURNS void LANGUAGE plpgsql AS $$
 DECLARE resultId BIGINT;
 BEGIN
 SELECT *
@@ -56,13 +56,13 @@ VALUES (resultId);
 END;
 $$;
 --
-CREATE PROCEDURE add_new_user_as_teacher(
+CREATE FUNCTION add_new_user_as_teacher(
 	nick_name TEXT,
 	f_name TEXT,
 	s_name TEXT,
 	t_name TEXT,
 	passw TEXT
-) LANGUAGE plpgsql AS $$
+) RETURNS void LANGUAGE plpgsql AS $$
 DECLARE resultId BIGINT;
 BEGIN
 SELECT *
@@ -78,14 +78,14 @@ VALUES (resultId);
 END;
 $$;
 --
-CREATE PROCEDURE add_new_user_as_student(
+CREATE FUNCTION add_new_user_as_student(
 	nick_name TEXT,
 	f_name TEXT,
 	s_name TEXT,
 	t_name TEXT,
 	passw TEXT,
-	group_id INTEGER 
-) LANGUAGE plpgsql AS $$
+	group_id BIGINT 
+) RETURNS void LANGUAGE plpgsql AS $$
 DECLARE resultId BIGINT;
 BEGIN
 SELECT *

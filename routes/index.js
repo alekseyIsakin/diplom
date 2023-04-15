@@ -14,14 +14,28 @@ router.get('/', async (req, res) => {
 	res.render('main', { user: user.nick });
 })
 
-router.get('/table', async (req, res) => {
-	db.load_table((error, classes) => {
+router.get('/table/:facultet_id/:year', async (req, res) => {
+	const facultet_id = Number(req.params['facultet_id'])
+	const year = Number(req.params['year'])
+
+	db.load_table(facultet_id, year, (error, classes, facultet_id, year) => {
 		let rasp = []
 		let ct = time.setup_cur_time()
-		rasp.length = db.stored_data.days.length * db.stored_data.times.length * db.stored_data.groups.length * 2
+		let gr_cnt = 0
+		let days_cnt = db.stored_data.days.length
+		let times_cnt = db.stored_data.times.length
+		const offset = {}
+		const gr = db.stored_data.facultets[facultet_id][year]
+		
+		for (let i in gr){
+			offset[i] = gr_cnt
+			gr_cnt++
+		}
+		
+		rasp.length = days_cnt * times_cnt * gr_cnt * 2
 		for (let row in classes) {
 			const cl = classes[row]
-			const index = (cl.up ? 0 : 1) + (cl.group_id - 1) * 2 + (cl.time_id) * db.stored_data.groups.length * 2 + cl.day_id * db.stored_data.times.length * db.stored_data.groups.length * 2
+			const index = (cl.up ? 0 : 1) + offset[cl.group_id] * 2 + Number(cl.time_id - 1) * gr_cnt * 2 + Number(cl.day_id - 1) * times_cnt * gr_cnt * 2
 
 			if (cl.day_id != null) {
 				rasp[index] = {
@@ -33,10 +47,10 @@ router.get('/table', async (req, res) => {
 			}
 		}
 
-		if (ct.time == time.TOO_LATE) { ct.time = db.stored_data.times.length - 1 }
+		if (ct.time == time.TOO_LATE) { ct.time = times_cnt - 1 }
 
-		for (let i in db.stored_data.groups) {
-			const index = (ct.is_up ? 0 : 1) + (db.stored_data.groups[i].id - 1) * 2 + (ct.time) * db.stored_data.groups.length * 2 + ct.day_id * db.stored_data.times.length * db.stored_data.groups.length * 2
+		for (let i in gr) {
+			const index = (ct.is_up ? 0 : 1) + offset[i] * 2 + (ct.time - 1) * gr_cnt * 2 + (ct.day_id - 1) * times_cnt * gr_cnt * 2
 			if (rasp[index]) {
 				rasp[index].is_now = true
 			}
@@ -45,7 +59,7 @@ router.get('/table', async (req, res) => {
 			}
 		}
 
-		res.render('table', { days: db.stored_data.days, time: db.stored_data.times, rasp: rasp, groups: db.stored_data.groups, cur_day: ct.day_id });
+		res.render('table', { days: db.stored_data.days, time: db.stored_data.times, rasp: rasp, groups: gr, cur_day: ct.day_id });
 	})
 })
 router.get('/manage', ensureLogIn('/'), async (req, res) => {

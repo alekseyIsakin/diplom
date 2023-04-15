@@ -11,6 +11,7 @@ DROP TABLE IF EXISTS teachers;
 DROP TABLE IF EXISTS students;
 DROP TABLE IF EXISTS admins;
 DROP TABLE IF EXISTS students_group;
+DROP TABLE IF EXISTS facultets;
 DROP TABLE IF EXISTS shedule;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS shedule_time;
@@ -29,10 +30,18 @@ CREATE TABLE users (
 	thrid_name VARCHAR (50),
 	password TEXT NOT NULL
 );
+CREATE TABLE facultets(
+	id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY UNIQUE,
+	title VARCHAR(50) NOT NULL UNIQUE,
+	notes TEXT
+);
 CREATE TABLE students_group(
 	id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY UNIQUE,
 	title VARCHAR(50) NOT NULL,
-	notes Text
+	notes TEXT,
+	year SMALLINT NOT NULL,
+	facultet_id BIGINT,
+	FOREIGN KEY (facultet_id) REFERENCES facultets(id)
 );
 CREATE TABLE students(
 	id INTEGER NOT NULL UNIQUE,
@@ -83,7 +92,10 @@ CREATE TABLE shedule_time (
 	from_as_minuts SMALLINT,
 	duration_as_minuts SMALLINT
 );
-CREATE TABLE day_of_week (id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY, title VARCHAR(10));
+CREATE TABLE day_of_week (
+	id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+	title VARCHAR(10)
+);
 CREATE TABLE shedule(
 	day_id INTEGER NOT NULL,
 	time_id INTEGER NOT NULL,
@@ -135,6 +147,8 @@ select day_of_week.id as day_id,
 	shedule_time.id as time_id,
 	classes.up as up,
 	students_group.id as group_id,
+	students_group.year as group_year,
+	students_group.facultet_id as facultet_id,
 	shedule_time.duration_as_minuts as duration,
 	classes.id as class_id,
 	day_of_week.title as day,
