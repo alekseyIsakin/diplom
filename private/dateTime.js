@@ -9,11 +9,7 @@ const MINUTS_BETWEEN = 5
 
 Date.prototype.getWeek = function () {
   var onejan = new Date(this.getFullYear(), 0, 1);
-  return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
-}
-Date.prototype.getDayOfWeek = function () {
-  var onejan = new Date(this.getFullYear(), 0, 1);
-  return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+  return Math.ceil((((this - onejan) / 86400000) + onejan.getDay() - 1) / 7);
 }
 
 
@@ -22,10 +18,10 @@ const setup_cur_time = () => {
   const cur_time = { day_id: -1, time: -1, time_id: -1, is_up: false }
   const date = new Date();
   const day_of_week = date.getDay()
-  const is_up = date.getWeek() % 2 == 0
+  const is_up = date.getWeek() % 2 == 1
   const now = date.getMinutes() + (date.getHours() * 60)
 
-  cur_time.day_id = day_of_week - 1 == -1 ? 6 : day_of_week - 1
+  cur_time.day_id = day_of_week == 0 ? 7 : day_of_week
   cur_time.is_up = is_up
   cur_time.time = -1
 

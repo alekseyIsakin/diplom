@@ -26,6 +26,7 @@ const load_common_date_time = async (callback) => {
 		);
 		logger.verbose(`day_of_week info loaded [ ${res_query.rowCount} ]`)
 		stored_data.days = res_query.rows
+		// stored_data.days.forEach( d_id => {d_id.id = Number(d_id.id - 1); return d_id})
 	} catch (error) {
 		logger._error(error);
 	}
