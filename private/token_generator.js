@@ -38,6 +38,7 @@ const generate_tokens = () => {
 				const tokenA = RtcTokenBuilder.buildTokenWithUid(appId, appCertificate, channel_name, uid, role, privilegeExpiredTs);
 
 				tokens.push({
+					class_id: el.class_id,
 					group_id: el.group_id,
 					token: tokenA,
 					channel_name: channel_name
