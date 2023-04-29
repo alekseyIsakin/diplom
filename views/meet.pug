@@ -1,14 +1,17 @@
 doctype html
 html
   link(rel="stylesheet", href="styles/meet.css", type="text/css")
-  script(type="module" src="scripts/AgoraRTC_N-4.17.0.js") 
+  script(type="module" src="scripts/AgoraRTC_N-4.17.0.js")
+  script.
+    const title='#{title}'
+    const channel_name='#{channel_name}'
+    const token='#{token}'
+    const user_id='#{id}'
   script(type="module" src="scripts/main.js") 
   head
     title Render HTML using PUG
   body
-    h1 meet_area
-    input#(type="text", name="channel")
-    input#(type="text", name="id")
+    h1 #{title}
     button#join Join
     button#leave Leave
 

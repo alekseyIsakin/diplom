@@ -44,7 +44,7 @@ const generate_tokens = () => {
 					channel_name: channel_name
 				})
 
-				logger.info(`Token for: [ ${channel_name} ${tokenA} ]`)
+				logger.verbose(`Token for: [ ${channel_name} ${tokenA} ]`)
 			}
 			db.upload_new_tokens(tokens, (error, row_cnt) => {
 				if (!error)

@@ -6,9 +6,10 @@ const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 const pool = require('../private/db').pool
 const time = require('../private/dateTime')
 const db = require('../private/db');
-const logger = require('../private/logger');
+const logger = require('../private/logger')(__filename);
 
 router.get('/', async (req, res) => {
+	console.dir(req.ip)
 	let user = {}
 	if (req.session.passport)
 		user = req.session.passport.user
@@ -65,6 +66,7 @@ router.get('/table/:facultet_id/:year', async (req, res) => {
 		res.render('table', { days: db.stored_data.days, time: db.stored_data.times, rasp: rasp, groups: gr, cur_day: ct.day_id });
 	})
 })
+
 router.get('/manage', ensureLogIn('/'), async (req, res) => {
 	res.render('manage', { nick: JSON.stringify(req.session.passport.user) });
 })
@@ -72,11 +74,20 @@ router.get('/manage', ensureLogIn('/'), async (req, res) => {
 router.get('/meet',
 	ensureLogIn('/'),
 	async (req, res) => {
-		let user = { role: 0 };
+		let user = { group: -1 };
 
 		if (req.session.passport)
-			user = req.session.passport
-		res.render('meet', req.session.passport);
+			user = req.session.passport.user
+
+		db.get_token(user.group, (error, token_info) => {
+			logger.verbose(JSON.stringify(token_info))
+
+			res.render('meet', token_info[0]);
+		})
 	})
+
+router.get('/shedule_editor', (req, res) => {
+	res.render('meet', token_info[0]);
+})
 
 module.exports = router;

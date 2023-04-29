@@ -93,6 +93,15 @@ const get_certain_classes = async (day_id, time_id, up, callback) => {
 const upload_new_tokens = async (tokens, callback) => {
 	const client = await pool.connect()
 
+	try {
+		await client.query('BEGIN')
+		await client.query(`DELETE FROM tokens`)
+		await client.query('COMMIT')
+	}
+	catch {
+		logger._error('drop tokens error: ' + error);
+	}
+
 	if (tokens.length == 0) {
 		logger._info('no tokens provided')
 		if (callback !== null) callback(null, null)
@@ -100,8 +109,9 @@ const upload_new_tokens = async (tokens, callback) => {
 	}
 
 	try {
-		await client.query('BEGIN')
-		await client.query(`DELETE FROM tokens`)
+
+
+
 		const query_params = []
 		const query_args = []
 
@@ -125,10 +135,32 @@ const upload_new_tokens = async (tokens, callback) => {
 	}
 }
 
+const get_token = async (group_id, callback) => {
+	try {
+		const res_query = await pool.query(
+			`select 
+				channel_name, 
+				token, 
+				title, 
+				first_name as f_name, 
+				second_name as s_name, 
+				thrid_name as t_name 
+			from tokens as t
+				left join teacher_classes as tc on t.class_id=tc.id
+				left join users as u on tc.teacher_id=u.id
+				where t.group_id=$1;`,
+			[group_id]
+		);
+		if (callback !== null) callback(null, res_query.rows)
+	} catch (error) {
+		logger._error(error, null);
+	}
+}
+
 const load_table = async (facultet_id, year, callback) => {
 	try {
 		const res_query = await pool.query(
-			"select * from get_class_shedule where facultet_id=$1 and group_year=$2;", [
+			`select * from get_class_shedule where facultet_id=$1 and group_year=$2;`, [
 			facultet_id, year
 		]
 		);
@@ -138,12 +170,14 @@ const load_table = async (facultet_id, year, callback) => {
 	}
 }
 
+
 module.exports.pool = pool;
 module.exports.init_db = load_common_date_time;
 module.exports.stored_data = stored_data;
 module.exports.get_classes = get_certain_classes;
 module.exports.upload_new_tokens = upload_new_tokens;
 module.exports.load_table = load_table;
+module.exports.get_token = get_token;
 
 
 

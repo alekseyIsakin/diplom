@@ -13,6 +13,7 @@ let options =
   // Set the user ID.
   uid: 0,
 };
+console.log(document.cookie)
 
 let channelParameters =
 {
@@ -81,11 +82,15 @@ async function startBasicCall() {
       console.log(user.uid + "has left the channel");
     });
   });
-  window.onload = function () {
+  window.onload = async function () {
+    console.log(channel_name)
+    if (token == '' || channel_name == '') {
+      document.getElementById("join").hidden = false
+    }
     // Listen to the Join button click event.
     document.getElementById("join").onclick = async function () {
       // Join a channel.
-      await agoraEngine.join(options.appId, options.channel, options.token, options.uid);
+      await agoraEngine.join(options.appId, channel_name, token, options.uid);
       // Create a local audio track from the audio sampled by a microphone.
       channelParameters.localAudioTrack = await AgoraRTC.createMicrophoneAudioTrack();
       // Create a local video track from the video captured by a camera.
