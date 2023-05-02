@@ -11,7 +11,7 @@ from teachers as t
 CREATE VIEW get_class_shedule AS
 select day_of_week.id as day_id,
 	shedule_time.id as time_id,
-	classes.up as up,
+	shedule.up as up,
 	students_group.id as group_id,
 	students_group.year as group_year,
 	students_group.facultet_id as facultet_id,
@@ -27,7 +27,7 @@ select day_of_week.id as day_id,
 	classes.cabinet as cabinet,
 	students_group.title as student_group
 from shedule
-	right join classes on shedule.classes_id = classes.shedule_id
+	right join classes on shedule.id = classes.shedule_id
 	right join teacher_classes on classes.class_id = teacher_classes.id
 	right join students_group on teacher_classes.group_id = students_group.id
 	right join users on teacher_classes.teacher_id = users.id
@@ -36,4 +36,4 @@ from shedule
 order by day_of_week.id ASC,
 	shedule_time.from_as_minuts ASC,
 	students_group.title ASC,
-	classes.up DESC;
+	shedule.up DESC;

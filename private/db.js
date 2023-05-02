@@ -109,9 +109,6 @@ const upload_new_tokens = async (tokens, callback) => {
 	}
 
 	try {
-
-
-
 		const query_params = []
 		const query_args = []
 

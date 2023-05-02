@@ -121,73 +121,55 @@ INSERT into teacher_classes ( teacher_id, title, group_id ) VALUES ( 10, 'лаб. П
 INSERT into teacher_classes ( teacher_id, title, group_id ) VALUES ( 10, 'лаб. Прикладные пакеты в экономике', 2);
 --
 -- classes one for day-time-group line
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	1,		TRUE,		1,		'1');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	1,		FALSE,		2,		'2');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	2,		TRUE,		3,		'3');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	2,		FALSE,		4,		'4');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	3,		TRUE,		5,		'5');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	4,		TRUE,		6,		'6');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	5,		TRUE,		7,		'7');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	6,		TRUE,		8,		'8');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	7,		FALSE,		9,		'9');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	7,		TRUE,		10,		'0');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	8,		TRUE,		11,		'1');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	8,		FALSE,		1,		'2');
+DO $$
+DECLARE
+    day bigint;
+begin
+FOR day IN select id as day from day_of_week
+LOOP
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+1,		1,		'1');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+2,		2,		'2');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+3,		3,		'3');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+4,		4,		'4');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+5,		5,		'5');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+6,		6,		'6');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+7,		7,		'7');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+8,		8,		'8');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+9,		9,		'9');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+10,		10,		'10');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+11,		11,		'11');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+12,		1,		'12');
 
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	1,		TRUE,		15,		'1');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	1,		FALSE,		16,		'2');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	2,		TRUE,		17,		'3');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	2,		FALSE,		18,		'4');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	3,		TRUE,		19,		'5');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	4,		TRUE,		19,		'6');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	5,		TRUE,		21,		'7');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	6,		TRUE,		17,		'8');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES (	7,		TRUE,		28,		'9');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES ( 	7,		FALSE,		23,		'0');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES ( 	8,		TRUE,		28,		'1');
-INSERT into classes ( shedule_id, up, class_id, cabinet) VALUES ( 	8,		FALSE,		24,		'2');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+1,		15,		'11');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+2,		16,		'22');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+3,		17,		'33');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+4,		18,		'44');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+5,		19,		'55');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+6,		19,		'66');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+7,		21,		'77');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+8,		17,		'88');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES (	(@day-1)*14+9,		28,		'99');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES ( 	(@day-1)*14+10,		23,		'1100');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES ( 	(@day-1)*14+11,		28,		'1111');
+	INSERT into classes ( shedule_id, class_id, cabinet) VALUES ( 	(@day-1)*14+12,		24,		'1122');
+END LOOP;
+end;
+$$ LANGUAGE plpgsql;
 
 -- shedule
 
-INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 1, 1);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 2, 2);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 3, 3);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 4, 4);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 5, 5);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 6, 6);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (1, 7, 7);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 1, 8);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 2, 9);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 3, 10);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 4, 11);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 5, 1);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 6, 2);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (2, 7, 3);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (3, 1, 4);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (3, 2, 5);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (3, 3, 6);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (3, 4, 7);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (3, 5, 8);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (3, 6, 9);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (3, 7, 10);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (4, 1, 11);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (4, 2, 1);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (4, 3, 2);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (4, 4, 3);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (4, 5, 4);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (4, 6, 5);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (4, 7, 6);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (5, 1, 7);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (5, 2, 8);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (5, 3, 9);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (5, 4, 10);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (5, 5, 11);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (5, 6, 1);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (5, 7, 2);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (6, 1, 3);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (6, 2, 4);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (6, 3, 5);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (6, 4, 6);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (6, 5, 7);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (6, 6, 8);
-INSERT into shedule (day_id, time_id, classes_id) VALUES (6, 7, 9);
+DO $$
+DECLARE
+    day bigint;
+    tm bigint;
+begin
+FOR day IN select id as day from day_of_week
+LOOP
+	FOR tm IN select id as tm from shedule_time
+	LOOP
+		INSERT into shedule (day_id, time_id, up) VALUES (@day, @tm,	TRUE);
+		INSERT into shedule (day_id, time_id, up) VALUES (@day, @tm,	FALSE);
+	END LOOP;
+END LOOP;
+end;
+$$ LANGUAGE plpgsql;

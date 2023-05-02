@@ -86,9 +86,8 @@ CREATE TABLE tokens (
 CREATE TABLE classes (
 	id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY NOT NULL,
 	shedule_id INTEGER NOT NULL,
-	up BOOLEAN NOT NULL,
-	cabinet VARCHAR(50),
 	class_id INTEGER NOT NULL,
+	cabinet VARCHAR(50),
 	FOREIGN KEY (class_id) REFERENCES teacher_classes (id) ON
 	DELETE CASCADE
 );
@@ -102,9 +101,10 @@ CREATE TABLE day_of_week (
 	title VARCHAR(10)
 );
 CREATE TABLE shedule(
+	id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 	day_id INTEGER NOT NULL,
 	time_id INTEGER NOT NULL,
-	classes_id INTEGER,
+	up BOOLEAN NOT NULL,
 	FOREIGN KEY (day_id) REFERENCES day_of_week (id),
 	FOREIGN KEY (time_id) REFERENCES shedule_time (id)
 );
