@@ -6,6 +6,7 @@ const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 const pool = require('../private/db').pool
 const time = require('../private/dateTime')
 const db = require('../private/db');
+const { loggers } = require('winston');
 const logger = require('../private/logger')(__filename);
 
 router.get('/', async (req, res) => {
@@ -86,8 +87,27 @@ router.get('/meet',
 		})
 	})
 
-router.get('/shedule_editor', (req, res) => {
-	res.render('meet', token_info[0]);
-})
+const Roles = {
+	student:'student',
+	teacher:'teacher',
+	admin:'admin',
+}
 
+router.get('/admin_page', (req, res) => {
+	logger.info(`acces to admin page from ${req.ip}`)
+	res.render('admin_page')
+})
+router.get('/admin_page/get_users', (req, res) => {
+	logger.info(`acces to admin page from ${req.ip}`)
+	
+	res.render('admin_page')
+})
+router.get('/admin_page/users', (req, res) => {
+	logger.info(`acces to admin page from ${req.ip}`)
+	res.render('ap_users', Roles)
+})
+router.get('/admin_page/shedule', (req, res) => {
+	logger.info(`acces to admin page from ${req.ip}`)
+	res.render('ap_shedule')
+})
 module.exports = router;
