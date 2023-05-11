@@ -18,6 +18,12 @@ const stored_data = {
 	facultets: [],
 }
 
+const Roles = {
+	student: 'student',
+	teacher: 'teacher',
+	admin: 'admin',
+}
+
 // Must be called first after the server is started
 const load_common_date_time = async (callback) => {
 	try {
@@ -154,6 +160,29 @@ const get_token = async (group_id, callback) => {
 	}
 }
 
+const get_users_list = async (callback) => {
+	try {
+		const res_students = await pool.query(
+			`select * from get_students;`
+		);
+		const res_teachers = await pool.query(
+			`select * from get_teachers;`
+		);
+		const res_admins = await pool.query(
+			`select * from get_admins;`
+		);
+
+		const users = {}
+		users[Roles.student] = res_students.rows
+		users[Roles.teacher] = res_teachers.rows
+		users[Roles.admin] = res_admins.rows
+
+		if (callback !== null) callback(null, users)
+	} catch (error) {
+		logger._error(error, null);
+	}
+}
+
 const load_table = async (facultet_id, year, callback) => {
 	try {
 		const res_query = await pool.query(
@@ -175,6 +204,8 @@ module.exports.get_classes = get_certain_classes;
 module.exports.upload_new_tokens = upload_new_tokens;
 module.exports.load_table = load_table;
 module.exports.get_token = get_token;
+module.exports.get_users_list = get_users_list;
+module.exports.ROLES = Roles;
 
 
 

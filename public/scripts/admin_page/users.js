@@ -20,7 +20,7 @@ const del_user = (nick) => {
 }
 
 const register_new_user = (user, user_appear) => {
-	const users_holder = document.querySelector(`#users`)
+	const users_holder = document.querySelector(`#edited_users`)
 	new_users.push(user)
 	users_holder.appendChild(user_appear)
 }
@@ -29,8 +29,8 @@ const unic_check = (user) => {
 	return !new_users.find((val) => val.nick == user.nick)
 }
 
-
-const create_user_appear = (user) => {
+// on_delete (user)
+const create_user_appear = (user, on_delete) => {
 	const div = document.createElement('div')
 
 	const nick = document.createElement('label')
@@ -49,9 +49,10 @@ const create_user_appear = (user) => {
 	password.textContent = '***'
 	role.textContent = user.role
 	del.textContent = 'DEL'
-	del.addEventListener('click', () => {
-		del_user(user.nick)
-		div.remove()
+
+	del.addEventListener('click', (user) => { 
+		div.remove; 
+		on_delete(user) 
 	})
 
 
@@ -65,11 +66,24 @@ const create_user_appear = (user) => {
 	return div
 }
 
+const fill_loaded_users = (users) => {
+	console.log(users[ROLES.student])
+	console.log(users[ROLES.teacher])
+	console.log(users[ROLES.admin])
+}
+
+const append_existing_student = (s) => {
+	const users_holder = document.querySelector(`#users`)
+
+}
+
 const get_users = async () => {
-	let response = await fetch('/admin_page/get_users')
+	fetch('/admin/get_users')
+		.then(response => response.json())
+		.then(users => fill_loaded_users(users))
 }
 const send_users = async () => {
-	let response = await fetch('/admin_page/new_users', {
+	let response = await fetch('/admin/new_users', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json;charset=utf-8'
@@ -79,14 +93,23 @@ const send_users = async () => {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-	const app_btn = document.querySelector(`#btn_append_user`)
-	app_btn.addEventListener('click', () => {
+	const btn_add = document.querySelector(`#btn_append_user`)
+	const btn_get_users = document.querySelector(`#get_users`)
+	btn_add.addEventListener('click', () => {
 		const user = get_user()
 		if (unic_check(user) == false) {
 			alert('unic check failure')
 			return
 		}
-		const user_appear = create_user_appear(user)
+		const user_appear = create_user_appear(
+			user,
+			(user) => {
+				del_user(user.nick)
+			})
 		register_new_user(user, user_appear)
+	})
+	btn_get_users.addEventListener('click', () => {
+		const users = get_users()
+
 	})
 })

@@ -9,8 +9,11 @@ const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const passport = require('passport');
 const cookieParser = require('cookie-parser');
+
 const authRouter = require('./routes/auth');
 const indexRouter = require('./routes/index');
+const adminRouter = require('./routes/admin_route');
+
 const token_generator = require('./private/token_generator');
 const logger = require('./private/logger')(__filename);
 
@@ -55,6 +58,7 @@ app.use(function (req, res, next) {
 
 app.use('/', authRouter);
 app.use('/', indexRouter);
+app.use('/admin', adminRouter);
 
 app.use(function (req, res, next) {
 	res.sendStatus(404)

@@ -1,4 +1,3 @@
-
 --
 CREATE VIEW get_class_teachers AS
 select u.id,
@@ -30,10 +29,42 @@ from shedule
 	right join classes on shedule.id = classes.shedule_id
 	right join teacher_classes on classes.class_id = teacher_classes.id
 	right join students_group on teacher_classes.group_id = students_group.id
-	right join users on teacher_classes.teacher_id = users.id
+	right join users on teacher_classes.id = users.id
 	right join day_of_week on day_of_week.id = shedule.day_id
 	right join shedule_time ON shedule_time.id = shedule.time_id
 order by day_of_week.id ASC,
 	shedule_time.from_as_minuts ASC,
 	students_group.title ASC,
 	shedule.up DESC;
+--
+--
+--
+CREATE VIEW get_students AS
+select u.id,
+	u.nick,
+	u.first_name as f_name,
+	u.second_name as s_name,
+	u.thrid_name as t_name,
+	s.group_id
+from students as s
+	left join users as u on u.id = s.id;
+--
+--
+CREATE VIEW get_teachers AS
+select u.id,
+	u.nick,
+	u.first_name as f_name,
+	u.second_name as s_name,
+	u.thrid_name as t_name
+from teachers as s
+	left join users as u on u.id = s.id;
+--
+--
+CREATE VIEW get_admins AS
+select u.id,
+	u.nick,
+	u.first_name as f_name,
+	u.second_name as s_name,
+	u.thrid_name as t_name
+from admins as s
+	left join users as u on u.id = s.id;
