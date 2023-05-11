@@ -21,14 +21,14 @@ class db {
 		times: [],
 		facultets: [],
 	}
-	_Roles = {
+	_roles = {
 		student: 'student',
 		teacher: 'teacher',
 		admin: 'admin',
 	}
 
 	get stored_data() { return this._stored_data };
-	get Roles() { return _Roles };
+	get ROLES() { return this._roles };
 
 	// Must be called first after the server is started
 	init_db = async (callback) => {
@@ -78,29 +78,27 @@ class db {
 			}
 			logger.verbose(`all groups info loaded [ ${res_query.rowCount} ]`)
 
-			if (callback !== null) callback(_error)
+			if (callback !== null) callback(null)
 		} catch (error) {
 			logger._error(error);
-			callback(error)
+			if (callback !== null) callback(error)
 		}
 		logger.info('db initialized')
 
 	}
 
 	get_classes = async (day_id, time_id, up, callback) => {
-		let res_query
-		let _error
 		try {
-			res_query = await pool.query(
+			const res_query = await pool.query(
 				"select class_id, group_id, from_as_minuts, duration from get_class_shedule where day_id = $1 and time_id = $2 and up = $3;", [
 				day_id, time_id, Boolean(up)
 			]
 			);
 			logger.verbose(`selected [ ${res_query.rowCount} ] classes for day [ ${day_id} ], time [ ${time_id} ], up [ ${up} ]`)
-			if (callback !== null) callback(_error, res_query.rows)
+			if (callback !== null) callback(null, res_query.rows)
 		} catch (error) {
-			_error = error
 			logger._error(error);
+			if (callback !== null) callback(error, null)
 		}
 	}
 
@@ -165,34 +163,39 @@ class db {
 			if (callback !== null) callback(null, res_query.rows)
 		} catch (error) {
 			logger._error(error, null);
+			if (callback !== null) callback(error, null)
 		}
 	}
 
-	get_users_list = async (role, callback) => {
+	get_users_list = async (role, count, offset, callback) => {
 		try {
 			const users = {}
 
 			switch (role) {
-				case Roles.student:
+				case this._roles.student:
 					const res_students = await pool.query(
-						`select * from get_students;`
+						`select * from get_students limit $1 offset $2;`, [count, offset]
 					);
-					users[Roles.student] = res_students.rows
-				case Roles.teacher:
+					users[this._roles.student] = res_students.rows
+					break
+				case this._roles.teacher:
 					const res_teachers = await pool.query(
-						`select * from get_teachers;`
+						`select * from get_teachers limit $1 offset $2;`, [count, offset]
 					);
-					users[Roles.teacher] = res_teachers.rows
-				case Roles.admin:
+					users[this._roles.teacher] = res_teachers.rows
+					break
+				case this._roles.admin:
 					const res_admins = await pool.query(
-						`select * from get_admins;`
+						`select * from get_admins limit $1 offset $2;`, [count, offset]
 					);
-					users[Roles.admin] = res_admins.rows
+					users[this._roles.admin] = res_admins.rows
+					break
 			}
 
 			if (callback !== null) callback(null, users)
 		} catch (error) {
 			logger._error(error, null);
+			if (callback !== null) callback(error, null)
 		}
 	}
 
@@ -204,6 +207,7 @@ class db {
 			if (callback !== null) callback(null, res_query.rows)
 		} catch (error) {
 			logger._error(error, null);
+			if (callback !== null) callback(error, null)
 		}
 	}
 
@@ -218,6 +222,7 @@ class db {
 			if (callback !== null) callback(null, res_query.rows, facultet_id, year)
 		} catch (error) {
 			logger._error(error, null);
+			if (callback !== null) callback(error, null)
 		}
 	}
 }

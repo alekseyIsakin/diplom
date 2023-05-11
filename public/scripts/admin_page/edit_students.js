@@ -2,6 +2,9 @@
 
 
 const new_users = []
+let loaded_users = []
+let default_offset = 5
+let loaded_users_page = 0
 
 const get_user = () => {
 	const new_user = {}
@@ -10,6 +13,7 @@ const get_user = () => {
 	new_user['s_name'] = document.querySelector(`#s_name`).value
 	new_user['t_name'] = document.querySelector(`#t_name`).value
 	new_user['password'] = document.querySelector(`#password`).value
+	new_user['id'] = -1
 	return new_user
 }
 
@@ -32,6 +36,7 @@ const unic_check = (user) => {
 const create_user_appear = (user) => {
 	const div = document.createElement('div')
 
+	const id = document.createElement('label')
 	const nick = document.createElement('label')
 	const f_name = document.createElement('label')
 	const s_name = document.createElement('label')
@@ -40,6 +45,7 @@ const create_user_appear = (user) => {
 	const del = document.createElement('button')
 	div.id = user.nick
 
+	id.textContent = user.id
 	nick.textContent = user.nick
 	f_name.textContent = user.f_name
 	s_name.textContent = user.s_name
@@ -53,6 +59,7 @@ const create_user_appear = (user) => {
 	})
 
 
+	div.appendChild(id)
 	div.appendChild(nick)
 	div.appendChild(f_name)
 	div.appendChild(s_name)
@@ -73,11 +80,13 @@ const append_existing_student = (s) => {
 
 }
 
-const get_users = async () => {
-	fetch('/admin/get_users/' + ROLES.student)
+const get_users = async (from, to) => {
+	const url = `/admin/get_users/${ROLES.student}/${from}/${to}/`
+	console.log(`[${url}]`)
+	return fetch(url)
 		.then(response => response.json())
-		.then(users => fill_loaded_users(users))
 }
+
 const send_users = async () => {
 	let response = await fetch('/admin/new_users', {
 		method: 'POST',
@@ -90,7 +99,9 @@ const send_users = async () => {
 
 document.addEventListener("DOMContentLoaded", () => {
 	const btn_add = document.querySelector(`#btn_append_user`)
-	const btn_get_users = document.querySelector(`#get_users`)
+	const btn_next_users = document.querySelector(`#users_load_next`)
+	const btn_prev_users = document.querySelector(`#users_load_prev`)
+
 	btn_add.addEventListener('click', () => {
 		const user = get_user()
 		if (unic_check(user) == false) {
@@ -100,8 +111,48 @@ document.addEventListener("DOMContentLoaded", () => {
 		const user_appear = create_user_appear(user)
 		register_new_user(user, user_appear)
 	})
-	btn_get_users.addEventListener('click', () => {
-		const users = get_users()
 
+	btn_next_users.addEventListener('click', () => {
+		const start = loaded_users_page * default_offset
+		const offset = (loaded_users_page + 1) * default_offset
+		loaded_users_page += 1
+
+		get_users(start, offset)
+			.then(users => {
+				loaded_users = users[ROLES.student]
+				if (loaded_users.length > 0) {
+					add_loaded_users(loaded_users)
+				} else {
+					loaded_users_page -= 1
+				}
+				console.log(`page [${loaded_users_page}]`)
+			})
+	})
+
+	btn_prev_users.addEventListener('click', () => {
+		loaded_users_page -= 1
+		const start = (loaded_users_page - 1) * default_offset
+		const offset = (loaded_users_page) * default_offset
+		if (start < 0) {
+			loaded_users_page = 1
+			return
+		}
+
+		get_users(start, offset)
+			.then(users => {
+				loaded_users = users[ROLES.student]
+				add_loaded_users(loaded_users)
+				console.log(`page [${loaded_users_page}]`)
+			})
 	})
 })
+
+const add_loaded_users = (users) => {
+	const user_holder = document.querySelector(`#loaded_users`)
+	user_holder.textContent = ''
+
+	users.forEach(user => {
+		const div = create_user_appear(user)
+		user_holder.appendChild(div)
+	})
+}
