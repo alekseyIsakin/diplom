@@ -16,12 +16,13 @@ const adminRouter = require('./routes/admin_route');
 
 const token_generator = require('./private/token_generator');
 const logger = require('./private/logger')(__filename);
+const db = require('./private/db')
 
 
 // const token_generator = require('./private/token_generator');
 
 require('dotenv').config();
-require('./private/db').init_db((error) => {
+db.init_db((error) => {
 	if (error)
 		return
 	// dt.setup_cur_time()
