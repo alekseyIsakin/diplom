@@ -2,16 +2,14 @@ doctype html
 html
   head
     title Render HTML using PUG
-    script(type="module" src="/scripts/admin_page/users.js")
+    script(type="module" src="/scripts/admin_page/edit_students.js")
     script.
         const ROLES={
-          student:'#{student}',
-          teacher:'#{teacher}',
-          admin:'#{admin}'
+          student:'#{student}'
           }
   body
-    h1 Users
-    a(href="/admin_page") back
+    h1 Students
+    a(href="/admin") back
     div
       div 
         input(type="text", name="nick", placeholder="nick")#nick
@@ -20,19 +18,12 @@ html
         input(type="text", name="t_name", placeholder="t_name")#t_name
         input(type="text", name="password", placeholder="password")#password
       div 
-        input(type="radio", name="role", value=student, checked="true")#rb_student
-        label(for="rb_student")  is_student
-        input(type="radio", name="role", value=teacher)#rb_teacher
-        label(for="rb_teacher")  is_teacher
-        input(type="radio", name="role", value=admin)#rb_admins
-        label(for="rb_admin")  is_admin
-      div 
         input(type="button", value="append")#btn_append_user
     div
       label users 
       div#edited_users
     div
+      input(type="button", value="check")#get_users
       input(type="button", value="commit")#commit
-      input(type="button", value="get all users")#get_users
     div#users
 

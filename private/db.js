@@ -24,6 +24,7 @@ const Roles = {
 	admin: 'admin',
 }
 
+
 // Must be called first after the server is started
 const load_common_date_time = async (callback) => {
 	try {
@@ -160,28 +161,46 @@ const get_token = async (group_id, callback) => {
 	}
 }
 
-const get_users_list = async (callback) => {
+const get_users_list = async (role, callback) => {
 	try {
-		const res_students = await pool.query(
-			`select * from get_students;`
-		);
-		const res_teachers = await pool.query(
-			`select * from get_teachers;`
-		);
-		const res_admins = await pool.query(
-			`select * from get_admins;`
-		);
-
 		const users = {}
-		users[Roles.student] = res_students.rows
-		users[Roles.teacher] = res_teachers.rows
-		users[Roles.admin] = res_admins.rows
+
+		switch (role) {
+			case Roles.student:
+				const res_students = await pool.query(
+					`select * from get_students;`
+				);
+				users[Roles.student] = res_students.rows
+			case Roles.teacher:
+				const res_teachers = await pool.query(
+					`select * from get_teachers;`
+				);
+				users[Roles.teacher] = res_teachers.rows
+			case Roles.admin:
+				const res_admins = await pool.query(
+					`select * from get_admins;`
+				);
+				users[Roles.admin] = res_admins.rows
+		}
+
 
 		if (callback !== null) callback(null, users)
 	} catch (error) {
 		logger._error(error, null);
 	}
 }
+
+const get_groups_list = async (callback) => {
+	try {
+		const res_query = await pool.query(
+			`select id, title, facultet_id, from students_group`
+		);
+		if (callback !== null) callback(null, res_query.rows)
+	} catch (error) {
+		logger._error(error, null);
+	}
+}
+
 
 const load_table = async (facultet_id, year, callback) => {
 	try {

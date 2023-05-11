@@ -1,5 +1,6 @@
 'use strict'
 
+
 const new_users = []
 
 const get_user = () => {
@@ -9,7 +10,6 @@ const get_user = () => {
 	new_user['s_name'] = document.querySelector(`#s_name`).value
 	new_user['t_name'] = document.querySelector(`#t_name`).value
 	new_user['password'] = document.querySelector(`#password`).value
-	new_user['role'] = document.querySelector(`input[name=role]:checked`).value
 	return new_user
 }
 
@@ -29,8 +29,7 @@ const unic_check = (user) => {
 	return !new_users.find((val) => val.nick == user.nick)
 }
 
-// on_delete (user)
-const create_user_appear = (user, on_delete) => {
+const create_user_appear = (user) => {
 	const div = document.createElement('div')
 
 	const nick = document.createElement('label')
@@ -38,7 +37,6 @@ const create_user_appear = (user, on_delete) => {
 	const s_name = document.createElement('label')
 	const t_name = document.createElement('label')
 	const password = document.createElement('label')
-	const role = document.createElement('label')
 	const del = document.createElement('button')
 	div.id = user.nick
 
@@ -47,12 +45,11 @@ const create_user_appear = (user, on_delete) => {
 	s_name.textContent = user.s_name
 	t_name.textContent = user.t_name
 	password.textContent = '***'
-	role.textContent = user.role
 	del.textContent = 'DEL'
 
-	del.addEventListener('click', (user) => { 
-		div.remove; 
-		on_delete(user) 
+	del.addEventListener('click', (event) => {
+		del_user(div.id)
+		div.remove();
 	})
 
 
@@ -61,7 +58,6 @@ const create_user_appear = (user, on_delete) => {
 	div.appendChild(s_name)
 	div.appendChild(t_name)
 	div.appendChild(password)
-	div.appendChild(role)
 	div.appendChild(del)
 	return div
 }
@@ -78,7 +74,7 @@ const append_existing_student = (s) => {
 }
 
 const get_users = async () => {
-	fetch('/admin/get_users')
+	fetch('/admin/get_users/' + ROLES.student)
 		.then(response => response.json())
 		.then(users => fill_loaded_users(users))
 }
@@ -101,11 +97,7 @@ document.addEventListener("DOMContentLoaded", () => {
 			alert('unic check failure')
 			return
 		}
-		const user_appear = create_user_appear(
-			user,
-			(user) => {
-				del_user(user.nick)
-			})
+		const user_appear = create_user_appear(user)
 		register_new_user(user, user_appear)
 	})
 	btn_get_users.addEventListener('click', () => {
