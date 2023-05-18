@@ -1,0 +1,22 @@
+version: '1'
+services:
+  app:
+    build:
+      context: ./app
+    ports:
+      - '81:8000'
+  # pg:
+  #   build:
+  #     context: ./psql
+  #   ports:
+  #   - 5432:5432
+
+  nginx:
+    build: 
+      context: ./nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - app
+  #     - pg
+  

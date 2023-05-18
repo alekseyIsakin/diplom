@@ -32,7 +32,7 @@ class db {
 
 	// Must be called first after the server is started
 	init_db = async (callback) => {
-		let _error
+		let failed = null
 		try {
 			const res_query = await pool.query(
 				"select id, title from day_of_week;"
@@ -41,6 +41,7 @@ class db {
 			this._stored_data.days = res_query.rows
 			// this._stored_data.days.forEach( d_id => {d_id.id = Number(d_id.id - 1); return d_id})
 		} catch (error) {
+			failed = true
 			logger._error(error);
 		}
 		try {
@@ -50,6 +51,7 @@ class db {
 			logger.verbose(`time info loaded [ ${res_query.rowCount} ]`)
 			this._stored_data.times = res_query.rows
 		} catch (error) {
+			failed = true
 			logger._error(error);
 		}
 		try {
@@ -78,13 +80,13 @@ class db {
 			}
 			logger.verbose(`all groups info loaded [ ${res_query.rowCount} ]`)
 
-			if (callback !== null) callback(null)
 		} catch (error) {
+			failed = true
 			logger._error(error);
-			if (callback !== null) callback(error)
 		}
-		logger.info('db initialized')
-
+		if (!failed)
+			logger.info('db initialized')
+		if (callback !== null) callback(failed)
 	}
 
 	get_classes = async (day_id, time_id, up, callback) => {

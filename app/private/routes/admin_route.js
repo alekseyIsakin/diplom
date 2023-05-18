@@ -3,15 +3,13 @@
 const express = require('express')
 const router = express.Router()
 const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
-const pool = require('../private/db').pool
-const time = require('../private/dateTime')
-const db = require('../private/db');
-const logger = require('../private/logger')(__filename);
+const db = require('../db');
+const logger = require('../logger')(__filename);
 
 
 
 const is_trusted_ip = (req, res, next) => {
-	logger.warn(`acces to admin page from ${req.ip}`)
+	logger.warn(`acces to admin page from [ ${req.headers["x-real-ip"]} ]`)
 	next()
 }
 

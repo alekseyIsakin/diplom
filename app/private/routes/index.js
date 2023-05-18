@@ -3,10 +3,9 @@
 const express = require('express')
 const router = express.Router()
 const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
-const pool = require('../private/db').pool
-const time = require('../private/dateTime')
-const db = require('../private/db');
-const logger = require('../private/logger')(__filename);
+const time = require('../dateTime')
+const db = require('../db');
+const logger = require('../logger')(__filename);
 
 router.get('/', async (req, res) => {
 	console.dir(req.ip)

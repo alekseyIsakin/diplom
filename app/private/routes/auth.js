@@ -2,7 +2,7 @@
 const express = require('express')
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
-const { pool } = require('../private/db')
+const { pool } = require('../db')
 const router = express.Router()
 const Roles = { unknown:-1, admin: 1, student: 2, teacher: 3 }
 
