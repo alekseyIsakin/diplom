@@ -1,28 +1,44 @@
 version: '3'
 services:
-  app:
-    build:
-      context: ./app
-    ports:
-      - '81:8000'
-
   pg:
     image: postgres:15
     ports:
-      - 5432:5432
+      - ${_PGPORT}:${_PGPORT}
     environment:
-      POSTGRES_DB: "users"
-      POSTGRES_USER: "postgres"
-      POSTGRES_PASSWORD: "123"
+      POSTGRES_DB: ${_PGDB}
+      POSTGRES_USER: ${_PGUSER}
+      POSTGRES_PASSWORD: ${_PGPASSWORD}
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
       - ./psql/data:/var/lib/postgresql/data
       - ./psql/init_scripts:/docker-entrypoint-initdb.d
+    command: -p ${_PGPORT}
+
+  app:
+    build:
+      context: ./app
+    ports:
+      - '81:${_APP_PORT}'
+      
+    environment:
+      PORT: ${_APP_PORT}
+      # Postgres connection
+      PGDB: ${_PGDB}
+      PGUSER: ${_PGUSER}
+      PGPASSWORD: ${_PGPASSWORD}
+      PGPORT: ${_PGPORT}
+      PGHOST: "pg"
+      # Agora data
+      APPID: ${_APPID}
+      APPCERTIFICATE: ${_APPCERTIFICATE}
+      
+      LOG_LEVEL: "debug"
+    depends_on:
+      - pg
+
 
   pgadmin:
     container_name: pgadmin
-    depends_on:
-      - pg
     image: dpage/pgadmin4
     environment:
       PGADMIN_DEFAULT_EMAIL: info@proglib.io
@@ -30,6 +46,8 @@ services:
     expose:
       - '80'
     restart: always
+    depends_on:
+      - pg
   
   nginx:
     build: 
