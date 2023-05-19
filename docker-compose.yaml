@@ -1,6 +1,7 @@
 version: '3'
 services:
   pg:
+    container_name: pg
     image: postgres:15
     ports:
       - ${_PGPORT}:${_PGPORT}
@@ -15,6 +16,7 @@ services:
     command: -p ${_PGPORT}
 
   app:
+    container_name: app
     build:
       context: ./app
     ports:
@@ -50,6 +52,7 @@ services:
       - pg
   
   nginx:
+    container_name: nginx
     build: 
       context: ./nginx
     ports:
