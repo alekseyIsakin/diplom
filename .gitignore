@@ -135,3 +135,5 @@ dist
 # Project Specific
 sessions/
 .vscode/
+psql/data/*
+psql/debug/*
