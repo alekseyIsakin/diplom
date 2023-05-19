@@ -35,6 +35,7 @@ services:
       APPCERTIFICATE: ${_APPCERTIFICATE}
       
       LOG_LEVEL: "debug"
+    restart: "on-failure:3"
     depends_on:
       - pg
 
