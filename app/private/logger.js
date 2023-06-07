@@ -37,7 +37,7 @@ const logger = (filename) => {
         ],
     });
 
-    if (process.env.LOG_LEVEL == 'debug') {
+    if (process.env.LOG_LEVEL.toUpperCase() == 'DEBUG') {
         logger._debug = (msg) => { logger.debug(msg + '\n>>>\t' + get_debug_info()) }
         logger._info = (msg) => { logger.info(msg + '\n>>>\t' + get_debug_info()) }
         logger._error = (msg) => { logger.error(msg + '\n>>>\t' + get_debug_info()) }

@@ -1,47 +1,31 @@
 'use strict'
+require('dotenv').config();
 
-const dt = require('./private/dateTime')
 const express = require('express')
-const app = express()
 const path = require('path')
-const uuid = require('uuid').v4
+const logger = require('./private/logger')(__filename);
 const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const passport = require('passport');
-const cookieParser = require('cookie-parser');
+const uuid = require('uuid').v4
+// Routs
+const Auth = require('./private/routes/auth');
+const Index = require('./private/routes/index');
+const Admin = require('./private/routes/admin');
+const Teacher = require('./private/routes/teacher');
+const ROUTES = require('./private/routes/ROUTES')
 
-const authRouter = require('./private/routes/auth');
-const indexRouter = require('./private/routes/index');
-const adminRouter = require('./private/routes/admin_route');
-
-const token_generator = require('./private/token_generator');
-const logger = require('./private/logger')(__filename);
-const db = require('./private/db')
-const { exit } = require('process')
-
-
-// const token_generator = require('./private/token_generator');
-
-require('dotenv').config();
-db.init_db((error) => {
-	if (error){
-		logger._error('failed to connect to db. Terminate app')
-		exit()
-	}
-	// dt.setup_cur_time()
-	token_generator.generate_tokens()
-})
-const port = process.env.PORT
+const app = express()
 
 app.set('views', __dirname + '/private/views')
 app.set("view engine", "pug");
 app.enable('trust proxy');
 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
 app.use(session({
 	genid: (req) => {
 		return uuid() // use UUIDs for session IDs
@@ -53,23 +37,19 @@ app.use(session({
 	cookie: { maxAge: 24 * 60 * 60e3 },
 }));
 app.use(passport.authenticate('session'));
-app.use(function (req, res, next) {
-	var msgs = req.session.messages || [];
-	res.locals.messages = msgs;
-	res.locals.hasMessages = !!msgs.length;
-	req.session.messages = [];
-	next();
-});
 
-app.use('/', authRouter);
-app.use('/', indexRouter);
-app.use('/admin', adminRouter);
+app.use(ROUTES.Auth.pathname, Auth);
+app.use(ROUTES.Index.pathname, Index);
+app.use(ROUTES.Index.pathname, Teacher);
+app.use(ROUTES.Admin.pathname, Admin);
 
 app.use(function (req, res, next) {
-	res.sendStatus(404)
+	let x = new URL('shedule', ROUTES.Index).href 
+	res.redirect(new URL('shedule', ROUTES.Index).href )
 	next(null, next);
 });
 
-app.listen(port, () => {
-	logger._debug(`server has been started. Node version: ${process.version}`)
+app.listen(process.env._APP_PORT, () => {
+	logger._info(`server has been started, listen: ${process.env._APP_PORT}`)
+	logger._debug(`Node version: ${process.version}`)
 })
