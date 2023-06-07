@@ -2,16 +2,19 @@ doctype html
 html
   head
     title Render HTML using PUG
+    script(src="https://code.jquery.com/jquery-3.3.1.min.js", integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=", crossorigin="anonymous")
+    script(src="scripts/teacher.js")
   body
     h1=title 
-    form(action="/login/password", method="post")
+    form(action="/login/password", method="post")#submit
       p 
         | title:
-        input(type="date", name="date")
-        | password:
-        input(type="date", name="duration_minuts", min="5")
+        input(type="text", name="title")#title
+        | date:
+        input(type="date", name="date")#date
+        | minuts:
+        input(type="number", name="duration_minuts", min="5", value="90")#duration
         | 
       input(type="submit")
-    script(src="scripts/script.js") 
 
         

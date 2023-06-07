@@ -1,7 +1,8 @@
 const express = require('express')
-const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 const router = express.Router()
 const ROUTES = require('./ROUTES')
+const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
+const logger = require('../logger')(__filename);
 
 
 router.get('/shedule',

@@ -13,6 +13,7 @@ const Auth = require('./private/routes/auth');
 const Index = require('./private/routes/index');
 const Admin = require('./private/routes/admin');
 const Teacher = require('./private/routes/teacher');
+const DB = require('./private/routes/db');
 const ROUTES = require('./private/routes/ROUTES')
 
 const app = express()
@@ -42,14 +43,16 @@ app.use(ROUTES.Auth.pathname, Auth);
 app.use(ROUTES.Index.pathname, Index);
 app.use(ROUTES.Index.pathname, Teacher);
 app.use(ROUTES.Admin.pathname, Admin);
+app.use(ROUTES.DB.pathname, DB);
 
 app.use(function (req, res, next) {
-	let x = new URL('shedule', ROUTES.Index).href 
+	logger._debug(`[${req.url}] not found`, true)
 	res.redirect(new URL('shedule', ROUTES.Index).href )
 	next(null, next);
 });
 
 app.listen(process.env._APP_PORT, () => {
-	logger._info(`server has been started, listen: ${process.env._APP_PORT}`)
-	logger._debug(`Node version: ${process.version}`)
+	logger._info(`server has been started, listen: ${process.env._APP_PORT}`, true)
+	logger._debug(`Node version: ${process.version}`, true)
+	logger._debug(`DEBUG is on`)
 })

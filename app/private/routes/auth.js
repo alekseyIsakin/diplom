@@ -17,6 +17,7 @@ passport.use(new LocalStrategy(
 ))
 
 passport.serializeUser((user, next) => {
+	user.password = '***'
 	next(null, user);
 });
 

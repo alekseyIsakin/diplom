@@ -17,6 +17,11 @@ const format_level = (lvl) => {
         lvl = 'verb'
     return lvl
 }
+const msg_debug_concat = (msg, quiet) => {
+    if (!quiet)
+        msg += '\n>>>\t' + get_debug_info()
+    return msg
+}
 
 const logger = (filename) => {
     filename = path.basename(filename).split('.')[0]
@@ -38,9 +43,9 @@ const logger = (filename) => {
     });
 
     if (process.env.LOG_LEVEL.toUpperCase() == 'DEBUG') {
-        logger._debug = (msg) => { logger.debug(msg + '\n>>>\t' + get_debug_info()) }
-        logger._info = (msg) => { logger.info(msg + '\n>>>\t' + get_debug_info()) }
-        logger._error = (msg) => { logger.error(msg + '\n>>>\t' + get_debug_info()) }
+        logger._debug = (msg, quiet = false) => { logger.debug(msg_debug_concat(msg, quiet)) }
+        logger._info = (msg, quiet = false) => { logger.info(msg_debug_concat(msg, quiet)) }
+        logger._error = (msg, quiet = false) => { logger.error(msg_debug_concat(msg, quiet)) }
     }
     else {
         logger._debug = logger.debug
