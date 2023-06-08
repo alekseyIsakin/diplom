@@ -7,12 +7,17 @@ const logger = require('../logger')(__filename);
 const LocalStrategy = require('passport-local').Strategy;
 const router = express.Router()
 const ROUTES = require('./ROUTES')
+const db = require('../ManagerDB').DataBase
 
 passport.use(new LocalStrategy(
 	{ usernameField: 'nick', passwordField: 'password' },
 	async (nick, password, next) => {
-		let user = false
-		return next(null, { nick, password })
+		db.check_user_password(
+			nick, 
+			password,
+			() => next(false, null),
+			() => next(null, {nick:nick, password:'***'})
+		)
 	}
 ))
 
@@ -33,21 +38,21 @@ router.get('/login', (req, res) => {
 
 router.post('/login/password',
 	(req, res, next) => {
-		logger._debug(`try login [${req.body.nick}][***]`)
+		logger._debug(`try login [${req.body.nick}][***] [${new URL(ROUTES.Auth + 'login').pathname}]`)
 		next()
 	},
 	passport.authenticate('local', {
-		failureRedirect: new URL('/login', ROUTES.Auth).href,
-		successReturnToOrRedirect: new URL('/shedule', ROUTES.Auth).href,
+		failureRedirect: new URL(ROUTES.Auth + 'login').pathname,
+		successReturnToOrRedirect: new URL(ROUTES.Index + 'shedule').pathname,
 		failureMessage: true
 	}),
 )
 
 router.get('/logout', function (req, res, next) {
-	logger._debug(`logout [${'user_name_placeholder'}][***]`)
+	logger._debug(`logout [${req.session.passport.user.nick}][***]`)
 	req.logout(function (err) {
 		if (err) { return next(err); }
-		res.redirect('/');
+		res.redirect(new URL(ROUTES.Auth + 'login').pathname);
 	});
 })
 

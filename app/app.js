@@ -1,5 +1,6 @@
 'use strict'
-require('dotenv').config();
+
+
 
 const express = require('express')
 const path = require('path')
@@ -8,15 +9,20 @@ const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const passport = require('passport');
 const uuid = require('uuid').v4
+
+require('dotenv').config();
 // Routs
 const Auth = require('./private/routes/auth');
 const Index = require('./private/routes/index');
 const Admin = require('./private/routes/admin');
 const Teacher = require('./private/routes/teacher');
-const DB = require('./private/routes/db');
+const Route_DB = require('./private/routes/db');
 const ROUTES = require('./private/routes/ROUTES')
 
 const app = express()
+
+require('./private/ManagerDB')
+require('./private/sessionManager').SessionManager.first_load()
 
 app.set('views', __dirname + '/private/views')
 app.set("view engine", "pug");
@@ -43,7 +49,7 @@ app.use(ROUTES.Auth.pathname, Auth);
 app.use(ROUTES.Index.pathname, Index);
 app.use(ROUTES.Index.pathname, Teacher);
 app.use(ROUTES.Admin.pathname, Admin);
-app.use(ROUTES.DB.pathname, DB);
+app.use(ROUTES.DB.pathname, Route_DB);
 
 app.use(function (req, res, next) {
 	logger._debug(`[${req.url}] not found`, true)

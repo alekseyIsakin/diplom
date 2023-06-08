@@ -7,7 +7,7 @@ const winston = require('winston');
 
 const get_debug_info = () => {
     var stack = new Error().stack,
-        caller = stack.split('\n')[3].trim();
+        caller = stack.split('\n')[4].trim();
 
     return caller;
 }
