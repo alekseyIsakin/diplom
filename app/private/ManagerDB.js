@@ -28,7 +28,6 @@ const make_querry = (query, params, error) => {
 		.query(query, params)
 		.then(
 			(results) => {
-				logger._debug(`selected [${results[0].length}]`, true);
 				return { err: null, results: results[0] }
 			})
 		.catch((err) => {
@@ -106,7 +105,18 @@ class DataBase {
 	}
 	static delete_class(id) { }
 
-	static register_class(error, success, class_id, freq_cron, start, duration_minuts) { logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`) }
+	static register_class(error, success, class_id, freq_cron, start, duration_minuts, once) {
+		logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`)
+		const q = "CALL register_class(?,?,?,?,?);"
+		const v = [class_id, freq_cron, start, duration_minuts, once]
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
+	}
 	static unregister_class(error, success, registered_class_id) {
 		logger._info(`unregister_class ${registered_class_id}`, true)
 		const q = "CALL unregister_class(?);"
@@ -120,17 +130,33 @@ class DataBase {
 			})
 	}
 
-	static save_sesion(group_id, openvidu_session) {
-		DataBase.sessions.push({ group_id: group_id, openvidu_session: openvidu_session })
-		logger._info(`saved sessions ${JSON.stringify(DataBase.sessions)}`, true)
+	static save_sesion(error, success, group_id, openvidu_session) {
+		//DataBase.sessions.push({ group_id: group_id, openvidu_session: openvidu_session })
+		const q = "CALL save_session(?,?);"
+		const v = [group_id, openvidu_session]
+		logger._info(`save sessions ${v}`, true)
+
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
 	}
 	static get_session(group_id) { }
-	static async delete_sesion(group_id) {
-		const session_ind = await DataBase.sessions.findIndex(s => s.group_id == group_id)
-		const deleted = DataBase.sessions[session_ind]
-		DataBase.sessions.splice(session_ind, 1)
-		logger._info(`close session ${JSON.stringify(deleted)}\n\tsaved sessions: ${JSON.stringify(DataBase.sessions)}`, true)
-		return deleted
+	static async delete_sesion(error, success, group_id) {
+		const q = "select delete_session(?) as deleted;"
+		const v = [group_id]
+		logger._info(`close session for group ${JSON.stringify(group_id)}}`, true)
+
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err || value.results.length == 0)
+					error(value.err)
+				else
+					success(value.results)
+			})
 	}
 	static sessions = []
 

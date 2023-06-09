@@ -53,6 +53,6 @@ CALL add_new_class(4, 2, "class [4-2]");
 CALL register_class(1, "0 25 * * * *"	, 0, 1, 1);
 CALL register_class(1, "0 40 * * * *"	, 0, 1, 1);
 CALL register_class(1, "0 25 * * * *"	, 0, 1, 1);
-CALL register_class(1, "15 0/1 * * * *"	, 0, 1, 1);
-CALL register_class(1, "0/30 * * * * *"	, 0, 1, 1);
+CALL register_class(1, "0 0/4 * * * *"	, 0, 1, 0);
+CALL register_class(1, "0 2/4 * * * *"	, 0, 1, 0);
 COMMIT;

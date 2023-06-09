@@ -15,32 +15,46 @@ const OPENVIDU_SECRET = process.env.OPENVIDU_SECRET;
 
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET)
 
-const class_exec = (el) => {
-	logger._debug(`cron execute ${JSON.stringify(el)}`)
+const class_exec = (class_el) => {
+	logger._debug(`cron execute ${JSON.stringify(class_el)}`)
 	openvidu.createSession().then(session => {
-		logger._info(`session created [${session.sessionId}] for [${el.group_id}]`, true)
-		DB.save_sesion(el.group_id, session.sessionId)
+		logger._info(`session created [${session.sessionId}] for [${class_el.group_id}]`, true)
+		DB.save_sesion(
+			(err) => { 
+				logger._error(`cant save session [${JSON.stringify(class_el.id)}][${session.sessionId}] for [${JSON.stringify(class_el.group_id)}]`) 
+				session.close()
+			},
+			() => {
+				logger._debug(`expire in [${class_el.duration_minuts * 60 * 1000}]`, true)
+				setTimeout(
+					class_expire,
+					class_el.duration_minuts * 60 * 1000,
+					class_el)
+			},
+			class_el.group_id,
+			session.sessionId)
 
-		logger._debug(`expire in [${el.duration_minuts * 60 * 1000}]`, true)
-		setTimeout(
-			class_expire,
-			el.duration_minuts * 60 * 1000,
-			el)
+	}).catch(err => {
+		logger._error(`cant create session for [${JSON.stringify(class_el.group_id)}]\n\t${err.message}`)
 	})
 }
 const class_expire = async (class_el) => {
-	const sessionId = await DB.delete_sesion(class_el.group_id)
-	const session = openvidu.activeSessions.find(s => s.sessionId == sessionId.openvidu_session)
-	logger._debug(`close [${JSON.stringify(sessionId)}]`)
+	DB.delete_sesion(
+		(err) => { logger._error(`cant delete session for [${JSON.stringify(class_el.id)}]`) },
+		(res) => {
+			const session = openvidu.activeSessions.find(s => s.sessionId == res[0].deleted)
+			logger._info(`delete session for [${JSON.stringify(class_el.id)}]`)
 
-	if (session !== undefined)
-		session.close()
+			if (session !== undefined)
+				session.close()
 
-	if (class_el.once)
-		DB.unregister_class(
-			(err) => { logger._error(`class mot unregistred [${class_el.id}]\n\t[${err.message}]`, true) },
-			() => { logger._info(`class unregistred [${class_el.id}]`, true) },
-			class_el.id)
+			if (class_el.once)
+				DB.unregister_class(
+					(err) => { logger._error(`cant unregistred class [${class_el.id}]\n\t[${err.message}]`, true) },
+					() => { logger._info(`class unregistred [${class_el.id}]`, true) },
+					class_el.id)
+		},
+		class_el.group_id)
 }
 
 
@@ -71,6 +85,8 @@ class SessionManager {
 					classes => { classes.forEach(el => setup_new_job(el)) })
 
 
+		}).catch(err => {
+			logger._error(`cant fetch sessions\n\t${err.message}`)
 		}).finally(() => {
 			openvidu.activeSessions.forEach(s => s.close())
 		})

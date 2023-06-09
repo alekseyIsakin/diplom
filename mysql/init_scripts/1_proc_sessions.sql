@@ -61,9 +61,40 @@ VALUES
 COMMIT;
 END $$;
 
-CREATE PROCEDURE unregister_class(shedule_id BIGINT
+CREATE PROCEDURE unregister_class(
+	shedule_id BIGINT
 ) BEGIN START TRANSACTION;
 DELETE from shedule where id=shedule_id;
 COMMIT;
 END $$;
 
+
+CREATE PROCEDURE save_session(
+	_group_id BIGINT,
+	_session_token TEXT
+) BEGIN START TRANSACTION;
+INSERT INTO sessions 
+	(
+		group_id,
+		session_token
+	) 
+	VALUES 
+	(
+		_group_id,
+		_session_token
+	);
+COMMIT;
+END $$;
+
+CREATE FUNCTION delete_session(
+	_group_id BIGINT
+) RETURNS VARCHAR(20) DETERMINISTIC
+BEGIN 
+
+DECLARE _session_token VARCHAR(20);
+select session_token INTO _session_token FROM sessions WHERE _group_id=group_id;
+
+DELETE FROM sessions 
+WHERE	group_id=_group_id;
+RETURN (_session_token);
+END $$;

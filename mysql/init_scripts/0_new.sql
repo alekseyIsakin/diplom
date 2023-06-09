@@ -76,7 +76,7 @@ CREATE TABLE shedule(
 
 CREATE TABLE sessions(
   group_id BIGINT UNIQUE,
-  SESSION TEXT,
+  session_token TEXT,
   FOREIGN KEY (group_id) REFERENCES s_groups (id) ON
   DELETE
     RESTRICT
