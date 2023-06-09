@@ -22,40 +22,49 @@ connection.connect(
 			logger._info("Подключение к серверу MySQL успешно установлено");
 	});
 
+const make_querry = (query, params, error) => {
+	return connection
+		.promise()
+		.query(query, params)
+		.then(
+			(results) => {
+				logger._debug(`selected [${results[0].length}]`, true);
+				return { err: null, results: results[0] }
+			})
+		.catch((err) => {
+			logger._error(`error when query:\n\t${err.message}]`, true);
+			return { err: err, results: [] }
+		})
+}
 
 const compare_password = (passw_hash, passw) => {
 	return passw_hash == passw
 }
 
 class DataBase {
-	static check_user_password(user, password, error, success) {
+	static async check_user_password(error, success, user, password) {
 		logger._debug(`check passport of user [${user}]`);
 		const q = "SELECT nick, passw_hash as p from users where nick=?;"
 		const v = [user]
+		const res = make_querry(q, v)
 
-		connection.promise().query(q, v)
-			.then(res => {
-				const results = res[0]
-				if (results.length == 0) {
-					logger._error("Ошибка: " + 'совпадений нет');
-					error(err)
-				}
-				else {
-					if (compare_password(results[0].p, password)) {
-						logger._debug(`${results[0].nick} logged in`, true);
-						success(results)
-					}
-					else {
-						logger._debug(`${results[0].nick} wrong password`, true);
-						error(err)
-					}
-				}
-			})
-			.catch(err => {
-				error(err)
-			});
+		res.then((value) => {
+			logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
+			if (value.results.length <= 0 || value.err) {
+				logger._debug(`unknown user [${user}]`);
+				error(value.err)
+				return
+			}
+			if (compare_password(value.results[0].p, password)) {
+				success()
+				logger._debug(`passport is valid user:[${user}]`);
+			}
+			else {
+				logger._debug(`passport is invalid user:[${user}]`);
+				error(value.err)
+			}
+		})
 	}
-
 	static add_new_student(nick, f_name, t_name, s_name, password) { }
 	static add_new_teacher(nick, f_name, t_name, s_name, password) { }
 	static add_new_admin(nick, f_name, t_name, s_name, password) { }
@@ -84,25 +93,46 @@ class DataBase {
 			{ id: 5, teacher_id: 3, title: "class 3 [t3:g1]", group_id: 1 },
 		]
 	}
-	static get_registered_classes(group_id, teacher_id, from, to) {
-		const r_classes = [
-			{ id: 1, class_id: 1, freq_cron: "0 25 * * * *", start: 1686047400000, duration_min: 5 },
-			{ id: 2, class_id: 2, freq_cron: "0 40 * * * *", start: 1686048300000, duration_min: 5 },
-			{ id: 3, class_id: 3, freq_cron: "0 25 * * * *", start: 1686047400000, duration_min: 5 },
-			{ id: 4, class_id: 4, freq_cron: "0 0/1 * * * *", start: 1686045600000, duration_min: 5 },
-			{ id: 5, class_id: 5, freq_cron: "0/30 * * * * *", start: 1686045600000, duration_min: 5 },
-		]
-		logger._info(`selected [${r_classes.length}] classes`)
-		return r_classes
+	static get_registered_classes(error, success, group_id, teacher_id, from, to) {
+		const q = "SELECT id, start, group_id, duration_minuts, freq_cron, once from get_registered_classes;"
+		const v = []
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
 	}
 	static delete_class(id) { }
 
-	static register_class(class_id, freq_cron, duration_min) { }
-	static unregister_class(class_id) { }
+	static register_class(error, success, class_id, freq_cron, start, duration_minuts) { logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`) }
+	static unregister_class(error, success, registered_class_id) {
+		logger._info(`unregister_class ${registered_class_id}`, true)
+		const q = "CALL unregister_class(?);"
+		const v = [registered_class_id]
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
+	}
 
-	static open_sesion(group_id, openvidu_session) { }
+	static save_sesion(group_id, openvidu_session) {
+		DataBase.sessions.push({ group_id: group_id, openvidu_session: openvidu_session })
+		logger._info(`saved sessions ${JSON.stringify(DataBase.sessions)}`, true)
+	}
 	static get_session(group_id) { }
-	static close_sesion(group_id) { }
+	static async delete_sesion(group_id) {
+		const session_ind = await DataBase.sessions.findIndex(s => s.group_id == group_id)
+		const deleted = DataBase.sessions[session_ind]
+		DataBase.sessions.splice(session_ind, 1)
+		logger._info(`close session ${JSON.stringify(deleted)}\n\tsaved sessions: ${JSON.stringify(DataBase.sessions)}`, true)
+		return deleted
+	}
+	static sessions = []
 
 }
 module.exports = { DataBase }

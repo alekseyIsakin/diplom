@@ -6,8 +6,8 @@ CALL add_student('n0', '', '', '', '123', '');
 CALL add_student('n1', '', '', '', '123', '');
 CALL add_teacher('t0', '', '', '', '123', '');
 CALL add_teacher('t1', '', '', '', '123', '');
-CALL add_student('n2', '', '', '', '123', '');
 CALL add_teacher('t2', '', '', '', '123', '');
+CALL add_student('n2', '', '', '', '123', '');
 CALL add_admin('a0', '', '', '', '123', '');
 CALL add_student('n3', '', '', '', '123', '');
 CALL add_student('n4', '', '', '', '123', '');
@@ -42,4 +42,17 @@ select
 select 
 	(select s.id from students as s left join users on s.id = users.id where nick='n5'),
 	(select id from s_groups where title='IPO-21');
+
+CALL add_new_class(3, 1, "class [3-1]");
+CALL add_new_class(4, 1, "class [4-1]");
+CALL add_new_class(5, 1, "class [5-1]");
+CALL add_new_class(3, 2, "class [3-2]");
+CALL add_new_class(3, 3, "class [3-3]");
+CALL add_new_class(4, 2, "class [4-2]");
+
+CALL register_class(1, "0 25 * * * *"	, 0, 1, 1);
+CALL register_class(1, "0 40 * * * *"	, 0, 1, 1);
+CALL register_class(1, "0 25 * * * *"	, 0, 1, 1);
+CALL register_class(1, "15 0/1 * * * *"	, 0, 1, 1);
+CALL register_class(1, "0/30 * * * * *"	, 0, 1, 1);
 COMMIT;

@@ -65,9 +65,10 @@ CREATE TABLE teacher_classes (
 CREATE TABLE shedule(
   id BIGINT PRIMARY KEY AUTO_INCREMENT,
   class_id BIGINT,
-  start_utc0_ms BIGINT,
-  duration_ms BIGINT,
+  start_utc0_ms BIGINT UNSIGNED,
+  duration_ms SMALLINT  UNSIGNED,
   frequence_cron TEXT,
+  once BOOLEAN,
   FOREIGN KEY (class_id) REFERENCES teacher_classes (id) ON
   DELETE
     CASCADE
