@@ -4,11 +4,11 @@ DELIMITER $$;
 CREATE VIEW get_registered_classes AS
 SELECT
   shedule.id,
-  start_utc0_ms AS start,
+  start_utc_minuts AS start,
   group_id,
-  duration_ms AS duration_minuts,
+  duration_minuts AS duration_minuts,
   frequence_cron AS freq_cron,
-  once
+  week_cnt
 FROM
   shedule
   LEFT JOIN teacher_classes ON class_id = teacher_classes.id;
@@ -33,22 +33,23 @@ VALUES
   (teacher_id, group_id, title);
 COMMIT;
 END $$;
-
-
+--
+--
+--
 CREATE PROCEDURE register_class(
   class_id BIGINT,
   freq_cron VARCHAR(20),
   start_utc BIGINT UNSIGNED,
   duration_minuts SMALLINT UNSIGNED,
-  once TINYINT
+  week_cnt TINYINT
 ) BEGIN START TRANSACTION;
 INSERT INTO
   shedule (
     class_id,
     frequence_cron,
-    start_utc0_ms,
-    duration_ms,
-    once
+    start_utc_minuts,
+    duration_minuts,
+    week_cnt
   )
 VALUES
   (
@@ -56,7 +57,7 @@ VALUES
     freq_cron,
     start_utc,
     duration_minuts,
-    once
+    week_cnt
   );
 COMMIT;
 END $$;
@@ -68,7 +69,19 @@ DELETE from shedule where id=shedule_id;
 COMMIT;
 END $$;
 
-
+CREATE PROCEDURE delay_registered_class(
+	shedule_id BIGINT,
+	new_start_utc BIGINT UNSIGNED
+) BEGIN START TRANSACTION;
+UPDATE shedule
+	SET start_utc_minuts = new_start_utc
+WHERE 
+	id=shedule_id;
+COMMIT;
+END $$;
+--
+--
+--
 CREATE PROCEDURE save_session(
 	_group_id BIGINT,
 	_session_token TEXT

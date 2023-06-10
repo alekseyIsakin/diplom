@@ -15,13 +15,14 @@ const OPENVIDU_SECRET = process.env.OPENVIDU_SECRET;
 
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET)
 
+
 const class_exec = (class_el) => {
 	logger._debug(`cron execute ${JSON.stringify(class_el)}`)
 	openvidu.createSession().then(session => {
 		logger._info(`session created [${session.sessionId}] for [${class_el.group_id}]`, true)
 		DB.save_sesion(
-			(err) => { 
-				logger._error(`cant save session [${JSON.stringify(class_el.id)}][${session.sessionId}] for [${JSON.stringify(class_el.group_id)}]`) 
+			(err) => {
+				logger._error(`cant save session [${JSON.stringify(class_el.id)}][${session.sessionId}] for [${JSON.stringify(class_el.group_id)}]`)
 				session.close()
 			},
 			() => {
@@ -43,16 +44,28 @@ const class_expire = async (class_el) => {
 		(err) => { logger._error(`cant delete session for [${JSON.stringify(class_el.id)}]`) },
 		(res) => {
 			const session = openvidu.activeSessions.find(s => s.sessionId == res[0].deleted)
-			logger._info(`delete session for [${JSON.stringify(class_el.id)}]`)
+			logger._info(`delete session [${JSON.stringify(class_el.id)}]`)
 
 			if (session !== undefined)
 				session.close()
 
-			if (class_el.once)
+			if (class_el.week_cnt == 0)
 				DB.unregister_class(
 					(err) => { logger._error(`cant unregistred class [${class_el.id}]\n\t[${err.message}]`, true) },
 					() => { logger._info(`class unregistred [${class_el.id}]`, true) },
 					class_el.id)
+			else {
+				const now = Date.now()
+				const now_m = Math.floor(now / (60 * 1000))
+				logger._debug(`cur date now [${now}] minuts [${now_m}]`)
+				DB.delay_registered_class_on_week(
+					() => { },
+					() => { },
+					class_el.id,
+					now_m,
+					class_el.week_cnt
+				)
+			}
 		},
 		class_el.group_id)
 }

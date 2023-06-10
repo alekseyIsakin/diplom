@@ -50,9 +50,9 @@ CALL add_new_class(3, 2, "class [3-2]");
 CALL add_new_class(3, 3, "class [3-3]");
 CALL add_new_class(4, 2, "class [4-2]");
 
-CALL register_class(1, "0 25 * * * *"	, 0, 1, 1);
-CALL register_class(1, "0 40 * * * *"	, 0, 1, 1);
-CALL register_class(1, "0 25 * * * *"	, 0, 1, 1);
-CALL register_class(1, "0 0/4 * * * *"	, 0, 1, 0);
-CALL register_class(1, "0 2/4 * * * *"	, 0, 1, 0);
+CALL register_class(1, "0 25 * * * *"	, 0, 1, 0);
+CALL register_class(1, "0 40 * * * *"	, 0, 1, 0);
+CALL register_class(1, "0 25 * * * *"	, 0, 1, 0);
+CALL register_class(1, "0 0/4 * * * *"	, 0, 1, 1);
+CALL register_class(1, "0 2/4 * * * *"	, 0, 1, 1);
 COMMIT;

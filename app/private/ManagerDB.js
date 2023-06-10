@@ -93,7 +93,7 @@ class DataBase {
 		]
 	}
 	static get_registered_classes(error, success, group_id, teacher_id, from, to) {
-		const q = "SELECT id, start, group_id, duration_minuts, freq_cron, once from get_registered_classes;"
+		const q = "SELECT id, start, group_id, duration_minuts, freq_cron, week_cnt from get_registered_classes;"
 		const v = []
 		make_querry(q, v)
 			.then((value) => {
@@ -105,10 +105,10 @@ class DataBase {
 	}
 	static delete_class(id) { }
 
-	static register_class(error, success, class_id, freq_cron, start, duration_minuts, once) {
+	static register_class(error, success, class_id, freq_cron, start, duration_minuts, week_cnt) {
 		logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`)
 		const q = "CALL register_class(?,?,?,?,?);"
-		const v = [class_id, freq_cron, start, duration_minuts, once]
+		const v = [class_id, freq_cron, start, duration_minuts, week_cnt]
 		make_querry(q, v)
 			.then((value) => {
 				if (value.err)
@@ -117,6 +117,20 @@ class DataBase {
 					success(value.results)
 			})
 	}
+	static delay_registered_class_on_week(error, success, class_id, start_utc, week_cnt) {
+		const week = week_cnt * 7 * 24 * 60 
+		const q = "CALL delay_registered_class(?,?);"
+		const v = [class_id, start_utc + week]
+		logger._info(`update class delay ${class_id} on [${start_utc + week}]`)
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
+	}
+
 	static unregister_class(error, success, registered_class_id) {
 		logger._info(`unregister_class ${registered_class_id}`, true)
 		const q = "CALL unregister_class(?);"

@@ -56,4 +56,8 @@ const logger = (filename) => {
     return logger
 }
 module.exports = logger;
+process.on('uncaughtException',
+    err => logger._error(err)
+);
+
 // module.exports = debug_logger;

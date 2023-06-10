@@ -1,0 +1,119 @@
+.week {
+	display: flex;
+	flex-flow: column;
+	font-size: calc(.8vw + 1vh);
+}
+
+.week_media {
+	height: 315vh;
+	width: 100%;
+}
+
+.day {
+	display: flex;
+	flex-flow: row;
+	height: 100%;
+	border: 3px solid black;
+}
+
+.grid {
+	background: repeating-linear-gradient(#ffffff,
+			#ffffff 3.8%,
+			#b0b0b0 4.167%,
+			#b0b0b0 8.334%);
+}
+
+.hours {
+	display: flex;
+	flex-flow: column;
+	width: 60px;
+	border-right: 2px solid black;
+	;
+}
+
+.hours>div {
+	height: 2.084vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.classes {
+	width: calc(100% - 60px);
+	display: flex;
+	flex-flow: row;
+}
+
+.classes_media {
+	height: 50vh;
+}
+
+.el {
+	display: flex;
+	position: relative;
+	width: 100%;
+	overflow: hidden;
+}
+
+.el:hover {
+	overflow: visible;
+}
+
+.el>.info {
+	visibility: collapse;
+}
+
+
+.el_selected {
+	height: 100%;
+}
+
+.el_selected>.info {
+	height: 5px;
+	visibility: visible;
+}
+
+.el_selected>.brief {
+	visibility: hidden;
+	height: 0px;
+}
+
+.el_hidden {
+	max-width: 1%;
+}
+
+.el_hidden>* {
+	visibility: hidden;
+	height: 0px;
+}
+
+.el_hidden>.brief {
+	visibility: hidden;
+	height: 0px;
+}
+
+.el1 {
+	background-color: aqua;
+}
+
+.el2 {
+	background-color: green;
+}
+
+@media (height < 900px) {
+	.week_media {
+		height: 700vh;
+		width: 100%;
+	}
+	.classes_media {
+		font-size: calc(1.6vw + 2vh);
+		height: 100vh;
+	}
+	.hours>div {
+		height: 4.167vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+
+}

@@ -12,10 +12,10 @@ const db = require('../ManagerDB').DataBase
 passport.use(new LocalStrategy(
 	{ usernameField: 'nick', passwordField: 'password' },
 	async (nick, password, next) => {
-		db. success(
+		db.check_user_password(
 			() => next(false, null),
-			() => next(null, {nick:nick, password:'***'}),
-			nick, 
+			() => next(null, { nick: nick, password: '***' }),
+			nick,
 			password
 		)
 	}
