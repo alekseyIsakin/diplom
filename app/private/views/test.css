@@ -53,6 +53,8 @@
 	position: relative;
 	width: 100%;
 	overflow: hidden;
+	transition-property: width, height, top;
+	transition-duration: 700ms;
 }
 
 .el:hover {
@@ -79,7 +81,7 @@
 }
 
 .el_hidden {
-	max-width: 1%;
+	width: 1%;
 }
 
 .el_hidden>* {
