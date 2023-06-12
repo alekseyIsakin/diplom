@@ -4,17 +4,50 @@ html
     title Render HTML using PUG
     script(src="https://code.jquery.com/jquery-3.3.1.min.js", integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=", crossorigin="anonymous")
     script(src="scripts/teacher.js")
+    link(rel="stylesheet" href="css/teacher.css")
   body
-    h1=title 
-    form(action="/login/password", method="post")#submit
-      p 
-        | title:
+    //- - const delay = 15 * 60 * 1000
+    //- - var dt = new Date(Date.now())
+    //- //- - var dt = new Date(Date.now())
+    //- - dt = dt.toISOString().split('.')[0].split(':').slice(0,2).join(':')
+    h1=title
+    div new class
+      form#submit
+        p 
+          | Предмет:
+          br
+          span(type="text", name="title")#class_name
+          br
+          | Группа:
+          br
+          span(type="text", name="title")#group_name
+          br
+          | Дата:
+          br
+          input(type="datetime-local", name="date")#date_time
+          br
+          | Продолжительность:
+          br
+          input(type="number", name="duration_minuts", min="5", value="90")#duration
+          br
+          | Частота:
+          br
+          input.week_cnt(value=0, type="radio", name="week_cnt", checked=true)#week_cnt_once
+          label(for='week_cnt_once') Один раз
+          br
+          input.week_cnt(value=1, type="radio", name="week_cnt")#week_cnt_one
+          label(for='week_cnt_one') Раз в неделю
+          br
+          input.week_cnt(value=2, type="radio", name="week_cnt")#week_cnt_two
+          label(for='week_cnt_two') Раз в две недели
+        input(type="submit")
+    div edit exist
+      form#submit
+        | предмет
         input(type="text", name="title")#title
-        | date:
-        input(type="date", name="date")#date
-        | minuts:
-        input(type="number", name="duration_minuts", min="5", value="90")#duration
-        | 
-      input(type="submit")
+        | группа
+        select(class="group_holder")#group_id_for_new
+      div#class_holder
+
 
         

@@ -41,25 +41,31 @@ const compare_password = (passw_hash, passw) => {
 }
 
 class DataBase {
-	static async check_user_password(error, success, user, password) {
-		logger._debug(`check passport of user [${user}]`);
-		const q = "SELECT nick, passw_hash as p from users where nick=?;"
-		const v = [user]
+	static async check_user_password(error, success, user_nick, password) {
+		logger._debug(`check passport of user [${user_nick}]`);
+		const q = "SELECT id, nick, passw_hash as p, group_id from users left join student_group on users.id=student_id where nick=?;"
+		const v = [user_nick]
 		const res = make_querry(q, v)
 
 		res.then((value) => {
 			logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
 			if (value.results.length <= 0 || value.err) {
-				logger._debug(`unknown user [${user}]`);
+				logger._debug(`unknown user [${user_nick}]`);
 				error(value.err)
 				return
 			}
 			if (compare_password(value.results[0].p, password)) {
-				success()
-				logger._debug(`passport is valid user:[${user}]`);
+				const g_id = []
+				value.results.every(v => g_id.push(v.group_id))
+				success({
+					id: value.results[0].id,
+					nick: value.results[0].nick,
+					group_id: g_id,
+				})
+				logger._debug(`passport is valid user:[${user_nick}]`);
 			}
 			else {
-				logger._debug(`passport is invalid user:[${user}]`);
+				logger._debug(`passport is invalid user:[${user_nick}]`);
 				error(value.err)
 			}
 		})
@@ -78,23 +84,44 @@ class DataBase {
 
 	static add_new_group(title) { }
 	static delete_group(title) { }
+	static get_groups(error, success) {
+		const q = "SELECT id, group_title FROM get_groups;"
+		const v = []
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
+	}
 
 	static add_student_to_group(student_id, group_id) { }
 	static remove_student_from_group(student_id, group_id) { }
 
 	static add_new_class(teacher_id, title, group_id) { }
-	static get_classes(title, teacher_id) {
-		return [
-			{ id: 1, teacher_id: 1, title: "class 1 [t1:g1]", group_id: 1 },
-			{ id: 2, teacher_id: 1, title: "class 2 [t1:g1]", group_id: 1 },
-			{ id: 3, teacher_id: 1, title: "class 3 [t1:g2]", group_id: 2 },
-			{ id: 4, teacher_id: 2, title: "class 3 [t2:g2]", group_id: 2 },
-			{ id: 5, teacher_id: 3, title: "class 3 [t3:g1]", group_id: 1 },
-		]
+	static get_classes(error, success, class_title, teacher_id) {
+		const q = "SELECT teacher_id, class_id, group_id, class_title, group_title FROM get_classes WHERE teacher_id=?" + (class_title === undefined ? ';' : ' and class_title like ?;')
+		const v = [teacher_id, class_title]
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
 	}
-	static get_registered_classes(error, success, group_id, teacher_id, from, to) {
-		const q = "SELECT id, start, group_id, duration_minuts, freq_cron, week_cnt from get_registered_classes;"
-		const v = []
+	static get_registered_classes(error, success, from, to, group_id, teacher_id) {
+		logger._info(`get registered classes for\n\t group:[${group_id}]; from:[${from}]; to[${to}]`)
+		const q = "SELECT id, start, group_id, duration_minuts, freq_cron, week_cnt from get_registered_classes where start>=? and start<=? " +
+			(group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
+			(teacher_id === null ? '' : 'and teacher_id=? ')
+		const v = [from, to]
+
+		if (group_id !== null) 
+			group_id.forEach(el => {v.push(el)}); 
+		if (teacher_id !== null) v.push(teacher_id)
+
 		make_querry(q, v)
 			.then((value) => {
 				if (value.err)
@@ -118,7 +145,7 @@ class DataBase {
 			})
 	}
 	static delay_registered_class_on_week(error, success, class_id, start_utc, week_cnt) {
-		const week = week_cnt * 7 * 24 * 60 
+		const week = week_cnt * 7 * 24 * 60
 		const q = "CALL delay_registered_class(?,?);"
 		const v = [class_id, start_utc + week]
 		logger._info(`update class delay ${class_id} on [${start_utc + week}]`)
@@ -131,6 +158,18 @@ class DataBase {
 			})
 	}
 
+	static clear_sessions(error, success) {
+		logger._info(`clear saved sessions`, true)
+		const q = "delete from sessions"
+		const v = []
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
+	}
 	static unregister_class(error, success, registered_class_id) {
 		logger._info(`unregister_class ${registered_class_id}`, true)
 		const q = "CALL unregister_class(?);"

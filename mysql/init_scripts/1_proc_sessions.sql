@@ -6,21 +6,32 @@ SELECT
   shedule.id,
   start_utc_minuts AS start,
   group_id,
+	teacher_classes.id as teacher_id,
   duration_minuts AS duration_minuts,
   frequence_cron AS freq_cron,
   week_cnt
 FROM
   shedule
-  LEFT JOIN teacher_classes ON class_id = teacher_classes.id;
+  LEFT JOIN teacher_classes ON class_id = teacher_classes.id
+ORDER BY start ASC;
+
+CREATE VIEW get_groups AS
+SELECT
+	id, title as group_title
+FROM
+	s_groups;
 
 CREATE VIEW get_classes AS
 SELECT
-  id,
   teacher_id,
-  title,
-  group_id
+  t.id as class_id,
+  g.id as group_id,
+  t.title as class_title,
+  g.title as group_title
 FROM
-  teacher_classes;
+  teacher_classes as t
+left join s_groups as g on g.id=t.group_id;
+
 
 CREATE PROCEDURE add_new_class(
   teacher_id BIGINT,

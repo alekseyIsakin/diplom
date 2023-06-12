@@ -41,7 +41,7 @@ app.use(session({
 	resave: false, // don't save session if unmodified
 	saveUninitialized: false, // don't create session until something stored
 	store: new FileStore(),
-	cookie: { maxAge: 24 * 60 * 60e3 },
+	cookie: { maxAge: 24 * 60 * 60 * 1000 },
 }));
 app.use(passport.authenticate('session'));
 
@@ -53,7 +53,7 @@ app.use(ROUTES.DB.pathname, Route_DB);
 
 app.use(function (req, res, next) {
 	logger._debug(`[${req.url}] not found`, true)
-	res.redirect(new URL('shedule', ROUTES.Index).href )
+	res.redirect(new URL('shedule', ROUTES.Index).href)
 	next(null, next);
 });
 
@@ -62,3 +62,7 @@ app.listen(process.env._APP_PORT, () => {
 	logger._debug(`Node version: ${process.version}`, true)
 	logger._debug(`DEBUG is on`)
 })
+
+process.on('uncaughtException',
+	err => logger._error(`${JSON.stringify(err.message)}\n\t${err.stack}`)
+);

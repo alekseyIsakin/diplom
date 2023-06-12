@@ -2,7 +2,20 @@ doctype html
 html
   head
     title Render HTML using PUG
+    script(src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous")
+    script(type="text/javascript" src="scripts/shedule.js")
+    link(rel="stylesheet" href="css/shedule.css")
   body
-    h1 hello #{nick}
+    h1 Расписание
+    - var days=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье']
+    div(class='week week_media')
+      - for (d in days)
+        div.day(id=`day${Number(d)+1}`)
+          div.day_name
+            span #{days[d]}
+          div.hours.grid
+            - for (let h=0; h<24; h++)
+              div #{h}
+          div.classes.grid.classes_media
 
-        
+          
