@@ -22,7 +22,7 @@ router.get('/classes',
 		let teacher_id = to_int_or_minus_one(req.query.teacher_id)
 		let title = req.query.class_title
 
-		logger._debug(`list classes for ${req.query.teacher_id}`)
+		logger._debug(`get list classes for ${req.query.teacher_id}`)
 		DB.get_classes(
 			(err) => res.status(502).send(),
 			(result) => res.json(result),
