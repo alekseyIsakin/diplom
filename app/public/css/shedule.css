@@ -77,6 +77,8 @@
 .el>.brief {
 	padding-left: 3px;
 	user-select: none;
+	width: 100%;
+	text-align: center;
 }
 
 .el>.info {
@@ -91,6 +93,7 @@
 
 .el_selected>.info {
 	visibility: visible;
+	padding-left: 4px;
 }
 
 .el_selected>.brief {

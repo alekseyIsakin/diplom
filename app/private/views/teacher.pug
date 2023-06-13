@@ -12,7 +12,7 @@ html
     //- - dt = dt.toISOString().split('.')[0].split(':').slice(0,2).join(':')
     h1=title
     div new class
-      form#submit
+      form.box#submit
         p 
           | Предмет:
           span(type="text", name="title")#class_name
@@ -37,7 +37,12 @@ html
           input.week_cnt(value=2, type="radio", name="week_cnt")#week_cnt_two
           label(for='week_cnt_two') Раз в две недели
         input(type="submit")
-    div edit exist
+    div.box 
+      | edit planned classes
+      div
+        div#registered_class_holder
+      button#unregister_classes Удалить
+    div.box edit exist
       div
         | Предмет
         input(type="text", name="title")#new_class_title

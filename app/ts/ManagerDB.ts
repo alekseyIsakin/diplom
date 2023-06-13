@@ -1,0 +1,387 @@
+'use strict'
+require('dotenv').config();
+
+const mysql = require("mysql2");
+const { loggers } = require('winston');
+const logger = require('./logger')(__filename);
+const bcrypt = require('bcrypt')
+
+
+const connection = mysql.createConnection({
+	host: process.env.MYSQL_HOST,
+	user: process.env.MYSQL_USER,
+	database: process.env.MYSQL_DB,
+	password: process.env.MYSQL_SECRET,
+	port: process.env.MYSQL_PORT
+});
+connection.connect(
+	(error: Error) => {
+		if (error)
+			logger._error(error.message);
+		else
+			logger._info("Подключение к серверу MySQL успешно установлено");
+	});
+
+type ErrorHandler = (error?: Error) => void
+type SuccesHandler<T> = (results: T) => void
+type DBResponse = any[]
+
+type RHandler<T> = { error?: Error, results: T[] }
+
+type CheckPassportR = { id: Number, nick: String, p: String, group_id: Number }
+type CheckPassportS = { id: Number, nick: String, group_id: Number[] }
+
+type addNewClassR = { id: Number, nick: String, p: String, group_id: Number }
+
+type GetGroupsR = { id: Number, group_title: String }
+
+type GetRegisteredClassesParticial = {
+	id: Number,
+	start: Number,
+	duration_minuts: Number,
+	group_id: Number,
+	freq_cron: String,
+	week_cnt: Number
+}
+type GetRegisteredClassesFull = {
+	id: Number,
+	start: Number,
+	duration_minuts: Number,
+	group_id: Number,
+	week_cnt: Number,
+	class_title: string,
+	group_title: string,
+	first_name: string,
+	second_name: string,
+	thrid_name: string
+}
+type GetClassesR = {
+	teacher_id: Number,
+	class_id: Number,
+	group_id: Number,
+	class_title: String,
+	group_title: String
+}
+type RegisterNewClassesR = { id: Number }
+
+function make_query<R, S>(query: String, params?: any[]): Promise<RHandler<R>> {
+	return connection
+		.promise()
+		.query(query, params)
+		.then(
+			(results: DBResponse[]) => {
+				let r: RHandler<R> = {
+					error: undefined,
+					results: results[0]
+				}
+				return r
+			})
+		.catch((error: Error) => {
+			logger._error(`error when query:\n\t${error.message}]`, true);
+			return { error: error, results: [] }
+		})
+}
+
+const compare_password = async (passw_hash: String, passw: String): Promise<boolean> => {
+	return await bcrypt.compare(passw, passw_hash)
+}
+
+export class DataBase {
+	static async check_user_password(
+		error: ErrorHandler,
+		success: SuccesHandler<CheckPassportS>,
+		user_nick: String,
+		password: String) {
+		logger._debug(`check passport of user [${user_nick}]`);
+		const q = "SELECT id, nick, passw_hash as p, group_id from users left join student_group on users.id=student_id where nick=?;"
+		const v = [user_nick]
+
+		make_query<CheckPassportR, CheckPassportS>(q, v)
+			.then((value) => {
+				logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
+				if (value.results.length <= 0 || value.error) {
+					logger._debug(`unknown user [${user_nick}]`);
+					error(value.error)
+					return
+				}
+				compare_password(value.results[0].p, password)
+					.then(r => {
+						if (r) {
+							const g_id: Number[] = []
+							value.results.every(v => g_id.push(v.group_id))
+
+							success({
+								id: value.results[0].id,
+								nick: value.results[0].nick,
+								group_id: g_id,
+							})
+							logger._debug(`passport is valid user:[${user_nick}]`);
+						}
+						else {
+							logger._debug(`passport is invalid user:[${user_nick}]`);
+							error(value.error)
+						}
+					})
+			})
+	}
+	// static add_new_student(nick, f_name, t_name, s_name, password) { }
+	// static add_new_teacher(nick, f_name, t_name, s_name, password) { }
+	// static add_new_admin(nick, f_name, t_name, s_name, password) { }
+
+	// static get_students() { }
+	// static get_teachers() { }
+	// static get_admins() { }
+
+	// static change_role(id, new_role) { }
+
+	// static delete_user(id) { }
+
+	// static add_new_group(title) { }
+	// static delete_group(title) { }
+	static get_groups(
+		error: ErrorHandler,
+		success: SuccesHandler<GetGroupsR[]>) {
+		const q: String = "SELECT id, group_title FROM get_groups;"
+		const v: any[] = []
+		make_query<GetGroupsR, GetGroupsR[]>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(value.results)
+			})
+	}
+
+	// static add_student_to_group(student_id, group_id) { }
+	// static remove_student_from_group(student_id, group_id) { }
+
+	static add_new_class(
+		error: ErrorHandler,
+		success: SuccesHandler<null>,
+		teacher_id: Number,
+		group_id: Number,
+
+		class_title: String) {
+		const q: String = "CALL add_new_class(?,?,?)"
+		const v: any[] = [teacher_id, group_id, class_title]
+		make_query<addNewClassR, null>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(null)
+			})
+	}
+	static get_classes(
+		error: ErrorHandler,
+		success: SuccesHandler<GetClassesR[]>,
+		class_title: String,
+		teacher_id: Number) {
+		const q = "SELECT teacher_id, class_id, group_id, class_title, group_title FROM get_classes WHERE teacher_id=?" + (class_title === undefined ? ';' : ' and class_title like ?;')
+		const v = [teacher_id, class_title]
+		make_query<GetClassesR, GetClassesR[]>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(value.results)
+			})
+	}
+	static get_partial_registered_classes(
+		error: ErrorHandler,
+		success: SuccesHandler<GetRegisteredClassesParticial[]>,
+		from: Number,
+		to: Number,
+		group_id: Number[],
+		teacher_id?: Number) {
+		logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`)
+		const q = `SELECT id, start, group_id, duration_minuts, freq_cron, week_cnt  from get_registered_classes  where start>=? and start<=? ` +
+			(group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
+			(teacher_id === null ? '' : 'and teacher_id=? ')
+		const v: any = [from, to]
+
+		if (group_id.length == 0)
+			group_id.forEach(el => v.push(el));
+		if (teacher_id !== null) v.push(teacher_id)
+
+		make_query<GetRegisteredClassesParticial, GetRegisteredClassesParticial[]>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(value.results)
+			})
+	}
+	static get_full_registered_classes(
+		error: ErrorHandler,
+		success: SuccesHandler<GetRegisteredClassesFull[]>,
+		from: Number,
+		to: Number,
+		group_id: Number[],
+		teacher_id?: Number) {
+		logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`)
+		const q = `SELECT * from get_registered_classes  where start>=? and start<=? ` +
+			(group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
+			(teacher_id === null ? '' : 'and teacher_id=? ')
+		const v: any = [from, to]
+
+		if (group_id != undefined && group_id.length > 0)
+			group_id.forEach(el => v.push(el));
+		if (teacher_id !== null) v.push(teacher_id)
+
+		make_query<GetRegisteredClassesFull, GetRegisteredClassesFull[]>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(value.results)
+			})
+	}
+	// static delete_class(id) { }
+
+	static delete_classes(
+		error: ErrorHandler,
+		success: SuccesHandler<null>,
+		classes_id: number[],
+		teacher_id: number) {
+		logger._info(`delete classes ${classes_id}`)
+		const q = "delete from teacher_classes where teacher_id=? and id in (" + new Array(classes_id.length).fill('?').join() + ")"
+		const v = [teacher_id]
+		classes_id.forEach(el => v.push(el))
+		make_query<null, null>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(null)
+			})
+	}
+
+	static register_class(
+		error: ErrorHandler,
+		success: SuccesHandler<RegisterNewClassesR>,
+		class_id: number,
+		freq_cron: number,
+		start: number,
+		duration_minuts: number,
+		week_cnt: number) {
+		logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`)
+		const q = "select register_class(?,?,?,?,?) as id;"
+		const v = [class_id, freq_cron, start, duration_minuts, week_cnt]
+		make_query<RegisterNewClassesR, RegisterNewClassesR[]>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(value.results[0])
+			})
+	}
+
+	static delay_registered_class_on_week(
+		error: ErrorHandler,
+		success: SuccesHandler<null>,
+		class_id: number,
+		start_utc: number,
+		week_cnt: number) {
+		const week: number = 7 * 24 * 60 * week_cnt
+		const q = "CALL delay_registered_class(?,?);"
+		const v = [class_id, start_utc + week]
+		logger._info(`update class delay ${class_id} on [${start_utc + week}]`)
+		make_query<null, null>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(null)
+			})
+	}
+
+	/** clear all stored sessions from DB 
+	 * @param {ErrorHandler} success
+	 * @param {SuccesHandler<null>} error
+	*/
+	static clear_sessions(
+		error: ErrorHandler,
+		success: SuccesHandler<null>) {
+		logger._info(`clear saved sessions`, true)
+		const q = "delete from sessions"
+		make_query<null, null>(q)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(null)
+			})
+	}
+
+	static unregister_class(
+		error: ErrorHandler,
+		success: SuccesHandler<null>,
+		registered_class_id: Number) {
+		logger._info(`unregister_class ${registered_class_id}`, true)
+		const q = "CALL unregister_class(?);"
+		const v = [registered_class_id]
+		make_query<null, null>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(null)
+			})
+	}
+	static unregister_classes(
+		error: ErrorHandler,
+		success: SuccesHandler<null>,
+		registered_class_id: Number[]) {
+		logger._info(`unregister_class ${registered_class_id}`, true)
+		const q = "delete from shedule where id in (" + new Array(registered_class_id.length).fill('?').join() + ")"
+		const v = registered_class_id
+		make_query<null, null>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(null)
+			})
+	}
+	static save_sesion(
+		error: ErrorHandler,
+		success: SuccesHandler<null>,
+		group_id: Number,
+		openvidu_session: String) {
+		const q: String = "CALL save_session(?,?);"
+		const v: any = [group_id, openvidu_session]
+		logger._info(`save sessions for group: ${v}`, true)
+
+		make_query<null, null>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(null)
+			})
+	}
+
+	// static get_session(group_id) { }
+
+	static delete_sesion(
+		error: ErrorHandler,
+		success: SuccesHandler<string[]>,
+		group_id: Number) {
+		const q = "select delete_session(?) as deleted;"
+		logger._info(`close session [${group_id}]`, true)
+		const v: any[] = [group_id]
+		make_query<string, string[]>(q, v)
+			.then((value) => {
+				if (value.error || value.results.length == 0)
+					error(value.error)
+				else
+					success(value.results)
+			})
+	}
+}
+// for (let i=0; i<10;i++)
+// 	bcrypt.hash('123', 10).then(function (hash: any) {
+// 		logger._info(`password: ${hash}`)
+// 	});
+// module.exports = { DataBase: DataBase }

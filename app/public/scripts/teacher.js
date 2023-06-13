@@ -38,6 +38,9 @@ $(function () {
             data: data,
             success: function (resp) {
                 alert(JSON.stringify(resp));
+                $('#registered_class_holder').empty()
+                fetch_registered_classes(0, 4294967295)
+                    .then(res => res.forEach(load_new_registered_classes))
             },
             error: function (err) {
                 alert('error' + JSON.stringify(err));
@@ -45,6 +48,19 @@ $(function () {
         });
     });
 });
+
+const fetch_registered_classes = (from, to) => {
+    return new Promise((resolve, reject) => {
+        $.ajax({
+            type: 'GET',
+            url: '/db/shedule',
+            data: { group_id: [''], from: from, to: to },
+            headers: { "Content-Type": "application/json" },
+            success: (response) => resolve(response),
+            error: (error) => reject(error)
+        });
+    })
+}
 
 const fetch_groups = () => {
     return new Promise((resolve, reject) => {
@@ -82,6 +98,19 @@ const delete_teacher_class = (classes_id) => {
             });
     })
 }
+const unregister_class = (classes_id) => {
+    return new Promise((resolve, reject) => {
+        $.ajax(
+            {
+                type: 'DELETE',
+                url: '/db/shedule',
+                data: { id: classes_id },
+                success: (response) => resolve(response),
+                error: (error) => reject(error)
+            });
+    })
+}
+
 const push_new_class = (data) => {
     return new Promise((resolve, reject) => {
         $.ajax({
@@ -94,6 +123,48 @@ const push_new_class = (data) => {
     })
 }
 
+const load_new_registered_classes = (el) => {
+    console.log(el)
+    const dt = new Date(Number(el.start) * 60 * 1000)
+
+    const one_class = document.createElement('div')
+    const one_class_holder = document.createElement('div')
+    const class_title = document.createElement('label')
+    const group_title = document.createElement('label')
+    const date_title = document.createElement('label')
+    const duration = document.createElement('label')
+    const del_btn = document.createElement('button')
+
+    class_title.textContent = 'Предмет: ' + el.class_title
+    group_title.textContent = 'Группа: ' + el.group_title
+    date_title.textContent = 'Дата: ' + dt.toLocaleString()
+    duration.textContent = 'Продолжительность: ' + el.duration_minuts + 'мин.'
+
+    del_btn.textContent = 'Пометить для удаления'
+
+    del_btn.setAttribute('type', 'button')
+    del_btn.addEventListener('click', (e) => {
+        if (one_class_holder.classList.contains('class_to_unregister'))
+            del_btn.textContent = 'Пометить для удаления'
+        else
+            del_btn.textContent = 'Вернуть'
+
+        one_class_holder.classList.toggle('class_to_unregister')
+        if (one_class.classList.contains('selected'))
+            one_class.click()
+
+    })
+    one_class.classList.add('one_registered_class')
+    one_class.setAttribute('id', el.id)
+
+    one_class.appendChild(class_title)
+    one_class.appendChild(group_title)
+    one_class.appendChild(date_title)
+    one_class.appendChild(duration)
+    one_class_holder.appendChild(one_class)
+    one_class_holder.appendChild(del_btn)
+    $('#registered_class_holder').append(one_class_holder)
+}
 const load_new_class = (el) => {
     console.log(JSON.stringify(el))
     const one_class_holder = document.createElement('div')
@@ -108,12 +179,12 @@ const load_new_class = (el) => {
 
     del_btn.setAttribute('type', 'button')
     del_btn.addEventListener('click', (e) => {
-        if (one_class_holder.classList.contains('to_delete'))
+        if (one_class_holder.classList.contains('class_to_delete'))
             del_btn.textContent = 'Пометить для удаления'
         else
             del_btn.textContent = 'Вернуть'
 
-        one_class_holder.classList.toggle('to_delete')
+        one_class_holder.classList.toggle('class_to_delete')
         if (one_class.classList.contains('selected'))
             one_class.click()
 
@@ -134,7 +205,7 @@ const load_new_class = (el) => {
         const group_title = $('#group_name')[0]
         const class_name = $('#class_name')[0]
         const is_selected = one_class.classList.contains('selected')
-        const to_delete = one_class_holder.classList.contains('to_delete')
+        const to_delete = one_class_holder.classList.contains('class_to_delete')
 
         if (is_selected || to_delete) {
             $('.one_class').removeClass('selected')
@@ -151,6 +222,7 @@ const load_new_class = (el) => {
 
     $('#class_holder').append(one_class_holder)
 }
+
 
 const create_new_class = () => {
     const data = {
@@ -170,7 +242,23 @@ const create_new_class = () => {
     })
 }
 
-const delete_marked = () => {
+const unregister_marked_classes = () => {
+    const to_delete_ids = []
+
+    $('.class_to_unregister > .one_registered_class')
+        .each(function (el) {
+            to_delete_ids.push($(this)[0].getAttribute('id'))
+        })
+    if (to_delete_ids.length == 0) return
+    unregister_class(to_delete_ids)
+        .then(() => {
+            $('#registered_class_holder').empty()
+            fetch_registered_classes(user_id)
+                .then(res => res.forEach(load_new_registered_classes))
+        })
+        .catch(err => alert('cant unregister classes'))
+}
+const delete_marked_classes = () => {
     const to_delete_ids = []
 
     $('.to_delete > .one_class')
@@ -178,7 +266,7 @@ const delete_marked = () => {
             to_delete_ids.push($(this)[0].getAttribute('class_id'))
         })
     if (to_delete_ids.length == 0) return
-    delete_teacher_class(to_delete_ids)
+    unregister_class(to_delete_ids)
         .then(() => {
             $('#class_holder').empty()
             fetch_teacher_classes(user_id)
@@ -198,18 +286,23 @@ $(function (e) {
             });
 
         })
+    fetch_registered_classes(0, 4294967295)
+        .then(res => res.forEach(load_new_registered_classes))
 
     $('#new_class').on('click', () => {
         create_new_class()
     })
     $('#delete_classes').on('click', () => {
-        delete_marked()
+        delete_marked_classes()
+    })
+    $('#unregister_classes').on('click', () => {
+        unregister_marked_classes()
     })
 
     const delay = 15 * 60 * 1000
     let dt = new Date(Date.now() - (new Date).getTimezoneOffset() * 60 * 1000 + delay)
     dt = dt.toISOString().split('.')[0].split(':').slice(0, 2).join(':')
-    console.log(dt)
+    // console.log(dt)
     // $('#date_time').attr('min', dt)
     $('#date_time').attr('value', dt)
 })

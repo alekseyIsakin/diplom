@@ -3,16 +3,23 @@ DELIMITER $$;
 
 CREATE VIEW get_registered_classes AS
 SELECT
-  shedule.id,
+  s.id,
   start_utc_minuts AS start,
   group_id,
 	teacher_id,
   duration_minuts AS duration_minuts,
   frequence_cron AS freq_cron,
+	t.title as class_title,
+	g.title as group_title,
+	first_name,
+	second_name,
+	thrid_name,
   week_cnt
 FROM
-  shedule
-  LEFT JOIN teacher_classes ON class_id = teacher_classes.id
+  shedule as s
+  LEFT JOIN teacher_classes as t ON s.class_id = t.id
+  LEFT JOIN s_groups as g ON t.group_id = g.id
+  LEFT JOIN users as u ON teacher_id = u.id
 ORDER BY start ASC;
 
 CREATE VIEW get_groups AS
