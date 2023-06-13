@@ -1,4 +1,5 @@
 DROP FUNCTION IF EXISTS check_user_password;
+USE users;
 
 --
 CREATE FUNCTION check_user_password(user_name TEXT, passw TEXT) 

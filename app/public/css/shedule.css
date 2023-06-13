@@ -1,0 +1,152 @@
+.week {
+	display: flex;
+	flex-flow: column;
+	font-size: calc(.7vw + .7vh);
+}
+
+.week_media {
+	height: 315vh;
+	width: 100%;
+}
+
+.day {
+	display: flex;
+	flex-flow: row;
+	height: 100%;
+	border: 3px solid black;
+}
+
+.grid {
+	background: repeating-linear-gradient(#a8a8a8,
+			#a8a8a8 3.8%,
+			#727272 4.167%,
+			#727272 8.334%);
+}
+
+.hours {
+	display: flex;
+	flex-flow: column;
+	width: 60px;
+	border-right: 2px solid black;
+	border-left: 2px solid black;
+}
+
+.hours>div {
+	height: 2.084vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
+
+.classes {
+	width: calc(100% - 60px);
+	display: flex;
+	flex-flow: row;
+}
+
+.day_name {
+	rotate: 90deg;
+	height: 60px;
+	top: 40%;
+	position: relative;
+	width: 24px;
+	transform: translate(-50%, 25%);
+}
+
+.classes_media {
+	height: 50vh;
+}
+
+.el {
+	display: flex;
+	position: relative;
+	width: 100%;
+	max-width: 40vw;
+	overflow: hidden;
+	transition-property: width, height, top;
+	transition-duration: 700ms;
+	border-radius: 7px;
+	box-sizing: border-box;
+	border: 3px #009084 solid;
+}
+
+.el:hover {
+	overflow: visible;
+	height: 50px;
+}
+.el>.brief {
+	padding-left: 3px;
+	user-select: none;
+}
+
+.el>.info {
+	visibility: collapse;
+}
+
+
+.el_selected {
+	height: 100%;
+	max-width: 100%;
+}
+
+.el_selected>.info {
+	visibility: visible;
+}
+
+.el_selected>.brief {
+	visibility: hidden;
+	height: 0px;
+	width: 0px;
+	font-size: 0;
+}
+
+.el_hidden {
+	width: 1%;
+}
+
+.el_hidden>* {
+	visibility: hidden;
+	height: 0px;
+}
+
+.el_hidden>.brief {
+	visibility: hidden;
+	height: 0px;
+}
+
+.el1 {
+	background-color: aqua;
+}
+
+.el2 {
+	background-color: green;
+}
+
+@media (height < 900px) {
+	.week_media {
+		height: 700vh;
+		width: 100%;
+	}
+
+	.classes_media {
+		font-size: calc(1.4vw + 2vh);
+		height: 100vh;
+	}
+
+	.hours>div {
+		height: 4.167vh;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+	}
+}
+
+@media (width < 1200px) {
+	.el_selected {
+		font-size: 5vw;
+	}
+
+	.week {
+		font-size: 2vw;
+	}
+}

@@ -7,7 +7,7 @@ const winston = require('winston');
 
 const get_debug_info = () => {
     var stack = new Error().stack,
-        caller = stack.split('\n')[3].trim();
+        caller = stack.split('\n')[4].trim();
 
     return caller;
 }
@@ -16,6 +16,11 @@ const format_level = (lvl) => {
     if (lvl == 'verbose')
         lvl = 'verb'
     return lvl
+}
+const msg_debug_concat = (msg, quiet) => {
+    if (!quiet)
+        msg += '\n>>>\t' + get_debug_info()
+    return msg
 }
 
 const logger = (filename) => {
@@ -37,10 +42,10 @@ const logger = (filename) => {
         ],
     });
 
-    if (process.env.LOG_LEVEL == 'debug') {
-        logger._debug = (msg) => { logger.debug(msg + '\n>>>\t' + get_debug_info()) }
-        logger._info = (msg) => { logger.info(msg + '\n>>>\t' + get_debug_info()) }
-        logger._error = (msg) => { logger.error(msg + '\n>>>\t' + get_debug_info()) }
+    if (process.env.LOG_LEVEL.toUpperCase() == 'DEBUG') {
+        logger._debug = (msg, quiet = false) => { logger.debug(msg_debug_concat(msg, quiet)) }
+        logger._info = (msg, quiet = false) => { logger.info(msg_debug_concat(msg, quiet)) }
+        logger._error = (msg, quiet = false) => { logger.error(msg_debug_concat(msg, quiet)) }
     }
     else {
         logger._debug = logger.debug
@@ -51,4 +56,6 @@ const logger = (filename) => {
     return logger
 }
 module.exports = logger;
+
+
 // module.exports = debug_logger;

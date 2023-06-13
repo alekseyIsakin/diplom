@@ -1,0 +1,51 @@
+doctype html
+html
+  head
+    title Render HTML using PUG
+    script(src="https://code.jquery.com/jquery-3.3.1.min.js", integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=", crossorigin="anonymous")
+    script(src="scripts/teacher.js")
+    link(rel="stylesheet" href="css/teacher.css")
+  body
+    //- - const delay = 15 * 60 * 1000
+    //- - var dt = new Date(Date.now())
+    //- //- - var dt = new Date(Date.now())
+    //- - dt = dt.toISOString().split('.')[0].split(':').slice(0,2).join(':')
+    h1=title
+    div new class
+      form#submit
+        p 
+          | Предмет:
+          span(type="text", name="title")#class_name
+          br
+          | Группа:
+          span(type="text", name="title")#group_name
+          br
+          | Дата:
+          input(type="datetime-local", name="date")#date_time
+          br
+          | Продолжительность:
+          input(type="number", name="duration_minuts", min="1", value="90")#duration
+          br
+          | Частота:
+          br
+          input.week_cnt(value=0, type="radio", name="week_cnt", checked=true)#week_cnt_once
+          label(for='week_cnt_once') Один раз
+          br
+          input.week_cnt(value=1, type="radio", name="week_cnt")#week_cnt_one
+          label(for='week_cnt_one') Раз в неделю
+          br
+          input.week_cnt(value=2, type="radio", name="week_cnt")#week_cnt_two
+          label(for='week_cnt_two') Раз в две недели
+        input(type="submit")
+    div edit exist
+      div
+        | Предмет
+        input(type="text", name="title")#new_class_title
+        | Группа
+        select(class="group_holder")#group_id_for_new
+        button#new_class Добавить
+      div#class_holder
+      button#delete_classes Удалить
+
+
+        

@@ -1,44 +1,27 @@
+'use strict'
+
 
 const express = require('express')
 const passport = require('passport');
+const logger = require('../logger')(__filename);
 const LocalStrategy = require('passport-local').Strategy;
-const { pool } = require('../db')
 const router = express.Router()
-const Roles = { unknown:-1, admin: 1, student: 2, teacher: 3 }
+const ROUTES = require('./ROUTES')
+const db = require('../ManagerDB').DataBase
 
 passport.use(new LocalStrategy(
 	{ usernameField: 'nick', passwordField: 'password' },
 	async (nick, password, next) => {
-		let user = false
-		try {
-			const res_query = await pool.query(
-				"select * from check_user_password($1, $2), is_teacher(id), is_student(id);",
-				[nick, password]
-			);
-
-			user = {
-				id: Number(res_query.rows[0].id),
-				nick: res_query.rows[0].nick,
-				role: Roles.unknown
-			}
-
-			if (res_query.rows[0].is_teacher) { 
-				user.role = Roles.teacher
-			}
-
-			if (res_query.rows[0].is_student) {
-				const res_query_gr = await pool.query(
-					"select group_id from students as s where id=$1;",
-					[user.id]
-				);
-				user['group'] = res_query_gr.rows[0].group_id
-				user.role = Roles.student
-			}
-
-		} catch (error) {
-			console.log(error)
-		}
-		return next(null, user)
+		db.check_user_password(
+			() => next(false, null),
+			(result) => next(null, {
+				id: result.id,
+				nick: result.nick,
+				group_id: result.group_id
+			}),
+			nick,
+			password
+		)
 	}
 ))
 
@@ -52,22 +35,40 @@ passport.deserializeUser((user, next) => {
 	});
 });
 
+router.get('/', (req, res) => {
+	res.redirect(new URL(ROUTES.Auth + 'login').pathname)
+})
 router.get('/login', (req, res) => {
 	res.render('login');
 })
 
 router.post('/login/password',
+	(req, res, next) => {
+		logger._debug(`try login [${req.body.nick}][***] [${new URL(ROUTES.Auth + 'login').pathname}]`)
+		next()
+	},
 	passport.authenticate('local', {
-		failureRedirect: '/login',
-		successReturnToOrRedirect: '/manage',
+		failureRedirect: new URL(ROUTES.Auth + 'login').pathname,
+		// successReturnToOrRedirect: new URL(ROUTES.Index + 'shedule').pathname,
 		failureMessage: true
 	}),
+	(req, res) => {
+
+		res.cookie('user_id', req.session.passport.user.id, { maxAge: Date.now() + 24 * 60 * 60 * 1000 })
+		res.cookie('group_id',
+			req.session.passport.user.group_id.join('&'),
+			{ maxAge: Date.now() + 24 * 60 * 60 * 1000 })
+		res.redirect(new URL(ROUTES.Index + 'shedule').pathname)
+	}
 )
 
 router.get('/logout', function (req, res, next) {
+	logger._debug(`logout [${req.session.passport.user.nick}][***]`)
+	res.clearCookie('user_id')
+	res.clearCookie('group_id')
 	req.logout(function (err) {
 		if (err) { return next(err); }
-		res.redirect('/');
+		res.redirect(new URL(ROUTES.Auth + 'login').pathname);
 	});
 })
 

@@ -1,0 +1,11 @@
+.selected{
+	background-color: rgb(100, 185, 255);
+}
+
+.to_delete{
+	background-color: brown;
+}
+
+.one_class > *{
+	padding-right: 4px;
+}
