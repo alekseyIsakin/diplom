@@ -99,7 +99,17 @@ class DataBase {
 	static add_student_to_group(student_id, group_id) { }
 	static remove_student_from_group(student_id, group_id) { }
 
-	static add_new_class(teacher_id, title, group_id) { }
+	static add_new_class(error, success, teacher_id, group_id, class_title) {
+		const q = "CALL add_new_class(?,?,?)"
+		const v = [teacher_id, group_id, class_title]
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
+	}
 	static get_classes(error, success, class_title, teacher_id) {
 		const q = "SELECT teacher_id, class_id, group_id, class_title, group_title FROM get_classes WHERE teacher_id=?" + (class_title === undefined ? ';' : ' and class_title like ?;')
 		const v = [teacher_id, class_title]
@@ -112,14 +122,14 @@ class DataBase {
 			})
 	}
 	static get_registered_classes(error, success, from, to, group_id, teacher_id) {
-		logger._info(`get registered classes for\n\t group:[${group_id}]; from:[${from}]; to[${to}]`)
+		logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`)
 		const q = "SELECT id, start, group_id, duration_minuts, freq_cron, week_cnt from get_registered_classes where start>=? and start<=? " +
 			(group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
 			(teacher_id === null ? '' : 'and teacher_id=? ')
 		const v = [from, to]
 
-		if (group_id !== null) 
-			group_id.forEach(el => {v.push(el)}); 
+		if (group_id !== null)
+			group_id.forEach(el => v.push(el));
 		if (teacher_id !== null) v.push(teacher_id)
 
 		make_querry(q, v)
@@ -130,11 +140,24 @@ class DataBase {
 					success(value.results)
 			})
 	}
-	static delete_class(id) { }
+	// static delete_class(id) { }
+	static delete_classes(error, success, classes_id, teacher_id) {
+		logger._info(`delete classes ${classes_id}`)
+		const q = "delete from teacher_classes where teacher_id=? and id in (" + new Array(classes_id.length).fill('?').join() + ")"
+		const v = [teacher_id]
+		classes_id.forEach(el => v.push(el))
+		make_querry(q, v)
+			.then((value) => {
+				if (value.err)
+					error(value.err)
+				else
+					success(value.results)
+			})
+	}
 
 	static register_class(error, success, class_id, freq_cron, start, duration_minuts, week_cnt) {
 		logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`)
-		const q = "CALL register_class(?,?,?,?,?);"
+		const q = "select register_class(?,?,?,?,?) as id;"
 		const v = [class_id, freq_cron, start, duration_minuts, week_cnt]
 		make_querry(q, v)
 			.then((value) => {
@@ -152,7 +175,7 @@ class DataBase {
 		make_querry(q, v)
 			.then((value) => {
 				if (value.err)
-					error(value.err)
+					error(value.e24rr)
 				else
 					success(value.results)
 			})
@@ -187,7 +210,7 @@ class DataBase {
 		//DataBase.sessions.push({ group_id: group_id, openvidu_session: openvidu_session })
 		const q = "CALL save_session(?,?);"
 		const v = [group_id, openvidu_session]
-		logger._info(`save sessions ${v}`, true)
+		logger._info(`save sessions for group: ${v}`, true)
 
 		make_querry(q, v)
 			.then((value) => {
@@ -198,7 +221,7 @@ class DataBase {
 			})
 	}
 	static get_session(group_id) { }
-	static async delete_sesion(error, success, group_id) {
+	static async delete_sesion(error, success, id) {
 		const q = "select delete_session(?) as deleted;"
 		const v = [group_id]
 		logger._info(`close session for group ${JSON.stringify(group_id)}}`, true)
