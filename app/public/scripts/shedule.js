@@ -92,7 +92,6 @@ $(function () {
 	setInterval(update_background, 60 * 1000)
 })
 const update_background = () => {
-	console.log('update time')
 	const date = new Date()
 	const cur_time = Math.abs(100 - (date.getMinutes() + date.getHours() * 60) / 14.40)
 	const r = `linear-gradient(
@@ -143,19 +142,19 @@ const load_shedule = (group_id, teacher_id, from, to) => {
 }
 
 const classes_to_ui = (cls) => {
-	console.log(JSON.stringify(cls))
+	// console.log(JSON.stringify(cls))
 	const dt = new Date((cls.start) * 60 * 1000)
 	const day = get_day(dt)
 	// console.log(JSON.stringify(dt - MONDAY))
 	const time_offset = -MONDAY.getTimezoneOffset()
 
-	console.log(dt)
+	// console.log(dt)
 	if ((dt - MONDAY) < WEEK_DURATION && (dt - MONDAY) > 0) {
 		// total minuts => minuts in cur day => percent
 		const from = (time_offset + cls.start % (24 * 60)) / 14.40
 		const duration = cls.duration_minuts / 14.40
 		const div = document.createElement('div')
-		console.log(from, duration)
+		// console.log(from, duration)
 
 		const brief = document.createElement('span')
 		const info = document.createElement('span')

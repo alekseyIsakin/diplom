@@ -37,7 +37,7 @@ const getMonday = (now) => {
 const class_exec = (class_el) => {
 	logger._debug(`cron execute ${JSON.stringify(class_el)}`)
 	openvidu.createSession().then(session => {
-		logger._info(`session created [${session.sessionId}] for [${class_el.group_id}]`, true)
+		logger._info(`session [${class_el.id}] created [${session.sessionId}] for [${class_el.group_id}]`, true)
 		DB.save_sesion(
 			(err) => {
 				logger._error(`cant save session [${JSON.stringify(class_el.id)}][${session.sessionId}] for [${JSON.stringify(class_el.group_id)}]`)
@@ -76,13 +76,13 @@ const class_expire = async (class_el) => {
 				delay_class_on_week(class_el.id, class_el.start, class_el.week_cnt)
 			}
 		},
-		class_el.group_id)
+		class_el.id)
 }
 
 const delay_class_on_week = (id, start, week_cnt) => {
 	logger._info(`delay class [${id}] on [${week_cnt * 7}] days`)
 	DB.delay_registered_class_on_week(
-		() => { logger._error(`cant delay class [${id}]\n\t[${err.message}]`, true) },
+		(err) => { logger._error(`cant delay class [${id}]\n\t[${err.message}]`, true) },
 		() => { },
 		id,
 		start,
@@ -132,15 +132,14 @@ const setup_new_job = (class_el) => {
 		const job = new CronJob(
 			class_el.freq_cron,
 			() => {
-				const now_m = get_time_in_minuts(Date.now())
-				if (now_m - 5 < class_el.start) return
 				class_exec(class_el)
 				if (class_el.week_cnt == 0) job.stop()
 			},
 			null,
 		)
-		delete class_el.freq_cron
+		logger._info(`setup new cron for [${JSON.stringify( class_el)}]`)
 		job.start()
+		delete class_el.freq_cron
 	} catch (err) {
 		logger._error(`cron execute failed ${err.message} element:\n[${JSON.stringify(class_el)}]`)
 	}

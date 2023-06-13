@@ -15,20 +15,16 @@ html
       form#submit
         p 
           | Предмет:
-          br
           span(type="text", name="title")#class_name
           br
           | Группа:
-          br
           span(type="text", name="title")#group_name
           br
           | Дата:
-          br
           input(type="datetime-local", name="date")#date_time
           br
           | Продолжительность:
-          br
-          input(type="number", name="duration_minuts", min="5", value="90")#duration
+          input(type="number", name="duration_minuts", min="1", value="90")#duration
           br
           | Частота:
           br
@@ -42,12 +38,14 @@ html
           label(for='week_cnt_two') Раз в две недели
         input(type="submit")
     div edit exist
-      form#submit
-        | предмет
-        input(type="text", name="title")#title
-        | группа
+      div
+        | Предмет
+        input(type="text", name="title")#new_class_title
+        | Группа
         select(class="group_holder")#group_id_for_new
+        button#new_class Добавить
       div#class_holder
+      button#delete_classes Удалить
 
 
         

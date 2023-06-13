@@ -6,7 +6,7 @@ SELECT
   shedule.id,
   start_utc_minuts AS start,
   group_id,
-	teacher_classes.id as teacher_id,
+	teacher_id,
   duration_minuts AS duration_minuts,
   frequence_cron AS freq_cron,
   week_cnt
@@ -47,30 +47,32 @@ END $$;
 --
 --
 --
-CREATE PROCEDURE register_class(
+CREATE FUNCTION register_class(
   class_id BIGINT,
   freq_cron VARCHAR(20),
   start_utc BIGINT UNSIGNED,
   duration_minuts SMALLINT UNSIGNED,
   week_cnt TINYINT
-) BEGIN START TRANSACTION;
-INSERT INTO
-  shedule (
-    class_id,
-    frequence_cron,
-    start_utc_minuts,
-    duration_minuts,
-    week_cnt
-  )
-VALUES
-  (
-    class_id,
-    freq_cron,
-    start_utc,
-    duration_minuts,
-    week_cnt
-  );
-COMMIT;
+) RETURNS BIGINT UNSIGNED
+DETERMINISTIC
+BEGIN
+	INSERT INTO
+		shedule (
+			class_id,
+			frequence_cron,
+			start_utc_minuts,
+			duration_minuts,
+			week_cnt
+		)
+	VALUES
+		(
+			class_id,
+			freq_cron,
+			start_utc,
+			duration_minuts,
+			week_cnt
+		);
+	RETURN LAST_INSERT_ID();
 END $$;
 
 CREATE PROCEDURE unregister_class(
