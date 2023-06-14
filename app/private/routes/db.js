@@ -26,7 +26,7 @@ router.get('/classes',
 
 		logger._debug(`get list classes for ${req.query.teacher_id}`)
 		DataBase.get_classes(
-			(err) => res.status(502).send(),
+			(err) => res.status(500).send(),
 			(result) => res.json(result),
 			title,
 			teacher_id)
@@ -45,7 +45,7 @@ router.delete('/classes',
 		DataBase.delete_classes(
 			(err) => {
 				logger._error(`cant delete classes [${err.message}]`)
-				res.status(502).send()
+				res.status(500).send()
 			},
 			() => { res.status(200).send() },
 			trusted_id,
@@ -63,7 +63,7 @@ router.post('/classes',
 		DataBase.add_new_class(
 			(err) => {
 				logger._error(`cant add  new class. ${err.msg}`)
-				res.status(502).send()
+				res.status(500).send()
 			},
 			() => { res.status(200).send() },
 			teacher_id,
@@ -76,7 +76,7 @@ router.get('/groups',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
 	(req, res) => {
 		DataBase.get_groups(
-			(err) => res.status(502).send(),
+			(err) => res.status(500).send(),
 			(result) => res.json(result)
 		)
 
@@ -88,7 +88,7 @@ router.delete('/shedule',
 		logger._info(`request for delete ${JSON.stringify(req.body.id)}`)
 		DataBase.unregister_classes(
 			(err) => {
-				res.status(502).send()
+				res.status(500).send()
 				logger._error(`request failed ${err.message}`)
 			},
 			() => {
@@ -111,12 +111,16 @@ router.post('/shedule',
 		DataBase.check_register_ccollision(
 			(err) => {
 				logger._error(`failed check collision`)
-				res.status(502).send()
+				res.status(500).send()
 			},
 			(result) => {
-				logger._debug(`send [${result.length}] classes`)
+				logger._debug(`collisions [${result}]`)
+				if (!result) {
+					res.status(412).send('collision error') 
+					return
+				}
 				DataBase.register_class(
-					(err) => { res.status(502).send('error') },
+					(err) => { res.status(500).send('error') },
 					(result) => {
 						res.status(200).send('complete')
 						r.id = result.id
@@ -130,7 +134,7 @@ router.post('/shedule',
 				)
 				// res.status(200).json(result)
 			},
-			r.start, r.duration, r.class_id, r.week_cnt)
+			r.start, r.duration, r.group_id, r.week_cnt)
 
 
 		logger._debug(`new registered class [${JSON.stringify(r)}]`)
@@ -165,7 +169,7 @@ router.get('/shedule', (req, res) => {
 	DataBase.get_full_registered_classes(
 		(err) => {
 			logger._error(`get shedule failed\n\t group:[${group_id}]; from:[${from}]; to[${to}]`)
-			res.status(502).send()
+			res.status(500).send()
 		},
 		(result) => {
 			logger._debug(`send [${result.length}] classes`)

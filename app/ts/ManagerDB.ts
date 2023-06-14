@@ -34,6 +34,7 @@ type CheckPassportS = { id: number, nick: String, group_id: number[] }
 type addNewClassR = { id: number, nick: String, p: String, group_id: number }
 
 type GetGroupsR = { id: number, group_title: String }
+type CheckRegisterCollision = { collisions: number }
 
 type GetRegisteredClassesParticial = {
 	id: number,
@@ -64,7 +65,7 @@ type GetClassesR = {
 }
 type RegisterNewClassesR = { id: number }
 
-function make_query<R, S>(query: String, params?: any[]): Promise<RHandler<R>> {
+function make_query<R>(query: String, params?: any[]): Promise<RHandler<R>> {
 	return connection
 		.promise()
 		.query(query, params)
@@ -96,7 +97,7 @@ export class DataBase {
 		const q = "SELECT id, nick, passw_hash as p, group_id from users left join student_group on users.id=student_id where nick=?;"
 		const v = [user_nick]
 
-		make_query<CheckPassportR, CheckPassportS>(q, v)
+		make_query<CheckPassportR>(q, v)
 			.then((value) => {
 				logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
 				if (value.results.length <= 0 || value.error) {
@@ -143,7 +144,7 @@ export class DataBase {
 		success: SuccesHandler<GetGroupsR[]>) {
 		const q: String = "SELECT id, group_title FROM get_groups;"
 		const v: any[] = []
-		make_query<GetGroupsR, GetGroupsR[]>(q, v)
+		make_query<GetGroupsR>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -164,7 +165,7 @@ export class DataBase {
 		class_title: String) {
 		const q: String = "CALL add_new_class(?,?,?)"
 		const v: any[] = [teacher_id, group_id, class_title]
-		make_query<addNewClassR, null>(q, v)
+		make_query<addNewClassR>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -179,7 +180,7 @@ export class DataBase {
 		teacher_id: number) {
 		const q = "SELECT teacher_id, class_id, group_id, class_title, group_title FROM get_classes WHERE teacher_id=?" + (class_title === undefined ? ';' : ' and class_title like ?;')
 		const v = [teacher_id, class_title]
-		make_query<GetClassesR, GetClassesR[]>(q, v)
+		make_query<GetClassesR>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -188,6 +189,7 @@ export class DataBase {
 			})
 	}
 /**
+ * succes return 'true' when no collision detected
  * 
  * @param error 
  * @param success 
@@ -198,20 +200,20 @@ export class DataBase {
  */
 	static check_register_ccollision(
 		error: ErrorHandler,
-		success: SuccesHandler<number[]>,
+		success: SuccesHandler<boolean>,
 		from: number,
 		duration: number,
 		class_id: number,
 		week_cnt: number
 	) {
-		const q = "SELECT check_collision(?,?,?,?)"
+		const q = "SELECT check_collision(?,?,?,?) as collisions"
 		const v = [from, duration, week_cnt, class_id]
-		make_query<number, number[]>(q, v)
+		make_query<CheckRegisterCollision>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
 				else
-					success(value.results)
+					success(value.results[0].collisions == 0)
 			})
 	}
 
@@ -232,7 +234,7 @@ export class DataBase {
 			group_id.forEach(el => v.push(el));
 		if (teacher_id !== null) v.push(teacher_id)
 
-		make_query<GetRegisteredClassesParticial, GetRegisteredClassesParticial[]>(q, v)
+		make_query<GetRegisteredClassesParticial>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -257,7 +259,7 @@ export class DataBase {
 			group_id.forEach(el => v.push(el));
 		if (teacher_id !== null) v.push(teacher_id)
 
-		make_query<GetRegisteredClassesFull, GetRegisteredClassesFull[]>(q, v)
+		make_query<GetRegisteredClassesFull>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -276,7 +278,7 @@ export class DataBase {
 		const q = "delete from teacher_classes where teacher_id=? and id in (" + new Array(classes_id.length).fill('?').join() + ")"
 		const v = [teacher_id]
 		classes_id.forEach(el => v.push(el))
-		make_query<null, null>(q, v)
+		make_query<null>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -296,7 +298,7 @@ export class DataBase {
 		logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`)
 		const q = "select register_class(?,?,?,?,?) as id;"
 		const v = [class_id, freq_cron, start, duration_minuts, week_cnt]
-		make_query<RegisterNewClassesR, RegisterNewClassesR[]>(q, v)
+		make_query<RegisterNewClassesR>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -315,7 +317,7 @@ export class DataBase {
 		const q = "CALL delay_registered_class(?,?);"
 		const v = [class_id, start_utc + week]
 		logger._info(`update class delay ${class_id} on [${start_utc + week}]`)
-		make_query<null, null>(q, v)
+		make_query<null>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -333,7 +335,7 @@ export class DataBase {
 		success: SuccesHandler<null>) {
 		logger._info(`clear saved sessions`, true)
 		const q = "delete from sessions"
-		make_query<null, null>(q)
+		make_query<null>(q)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -349,7 +351,7 @@ export class DataBase {
 		logger._info(`unregister_class ${registered_class_id}`, true)
 		const q = "CALL unregister_class(?);"
 		const v = [registered_class_id]
-		make_query<null, null>(q, v)
+		make_query<null>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -364,7 +366,7 @@ export class DataBase {
 		logger._info(`unregister_class ${registered_class_id}`, true)
 		const q = "delete from shedule where id in (" + new Array(registered_class_id.length).fill('?').join() + ")"
 		const v = registered_class_id
-		make_query<null, null>(q, v)
+		make_query<null>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -381,7 +383,7 @@ export class DataBase {
 		const v: any = [group_id, openvidu_session]
 		logger._info(`save sessions for group: ${v}`, true)
 
-		make_query<null, null>(q, v)
+		make_query<null>(q, v)
 			.then((value) => {
 				if (value.error)
 					error(value.error)
@@ -399,7 +401,7 @@ export class DataBase {
 		const q = "select delete_session(?) as deleted;"
 		logger._info(`close session [${group_id}]`, true)
 		const v: any[] = [group_id]
-		make_query<string, string[]>(q, v)
+		make_query<string>(q, v)
 			.then((value) => {
 				if (value.error || value.results.length == 0)
 					error(value.error)

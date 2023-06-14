@@ -45,6 +45,7 @@ export declare class DataBase {
     static add_new_class(error: ErrorHandler, success: SuccesHandler<null>, teacher_id: number, group_id: number, class_title: String): void;
     static get_classes(error: ErrorHandler, success: SuccesHandler<GetClassesR[]>, class_title: String, teacher_id: number): void;
     /**
+     * succes return 'true' when no collision detected
      *
      * @param error
      * @param success
@@ -53,7 +54,7 @@ export declare class DataBase {
      * @param group_id
      * @param week_cnt
      */
-    static check_register_ccollision(error: ErrorHandler, success: SuccesHandler<number[]>, from: number, duration: number, class_id: number, week_cnt: number): void;
+    static check_register_ccollision(error: ErrorHandler, success: SuccesHandler<boolean>, from: number, duration: number, class_id: number, week_cnt: number): void;
     static get_partial_registered_classes(error: ErrorHandler, success: SuccesHandler<GetRegisteredClassesParticial[]>, from: number, to: number, group_id: number[], teacher_id?: number): void;
     static get_full_registered_classes(error: ErrorHandler, success: SuccesHandler<GetRegisteredClassesFull[]>, from: number, to: number, group_id: number[], teacher_id?: number): void;
     static delete_classes(error: ErrorHandler, success: SuccesHandler<null>, classes_id: number[], teacher_id: number): void;

@@ -62,7 +62,6 @@
 	position: relative;
 	width: 100%;
 	max-width: 40vw;
-	overflow: hidden;
 	transition-property: width, height, top;
 	transition-duration: 700ms;
 	border-radius: 7px;
@@ -74,11 +73,23 @@
 	overflow: visible;
 	height: 50px;
 }
+
 .el>.brief {
+	padding-top: 1px;
+	padding-bottom: 2px;
 	padding-left: 3px;
+	padding-right: 5px;
 	user-select: none;
 	width: 100%;
 	text-align: center;
+	width: fit-content;
+	left: 50%;
+	transform: translate(-50%, 0%);
+	background: aqua;
+	position: absolute;
+	border: 3px solid #009084;
+	border-radius: 3px;
+	box-sizing: border-box;
 }
 
 .el>.info {

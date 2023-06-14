@@ -127,6 +127,7 @@ class DataBase {
         });
     }
     /**
+     * succes return 'true' when no collision detected
      *
      * @param error
      * @param success
@@ -136,14 +137,14 @@ class DataBase {
      * @param week_cnt
      */
     static check_register_ccollision(error, success, from, duration, class_id, week_cnt) {
-        const q = "SELECT check_collision(?,?,?,?)";
+        const q = "SELECT check_collision(?,?,?,?) as collisions";
         const v = [from, duration, week_cnt, class_id];
         make_query(q, v)
             .then((value) => {
             if (value.error)
                 error(value.error);
             else
-                success(value.results);
+                success(value.results[0].collisions == 0);
         });
     }
     static get_partial_registered_classes(error, success, from, to, group_id, teacher_id) {
