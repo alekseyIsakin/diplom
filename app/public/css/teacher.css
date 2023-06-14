@@ -1,11 +1,17 @@
-.selected{
+.selected {
 	background-color: rgb(100, 185, 255);
 }
 
-.to_delete{
+.class_to_delete,
+.class_to_unregister {
 	background-color: brown;
 }
 
-.one_class > *{
+.one_class>*,
+.one_registered_class>* {
 	padding-right: 4px;
+}
+
+.box {
+	border: 2px solid black;
 }

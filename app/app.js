@@ -9,7 +9,6 @@ const session = require('express-session')
 const FileStore = require('session-file-store')(session)
 const passport = require('passport');
 const uuid = require('uuid').v4
-
 require('dotenv').config();
 // Routs
 const Auth = require('./private/routes/auth');
@@ -57,7 +56,7 @@ app.use(function (req, res, next) {
 	next(null, next);
 });
 
-app.listen(process.env._APP_PORT, () => {
+app.listen(process.env._APP_PORT, async () => {
 	logger._info(`server has been started, listen: ${process.env._APP_PORT}`, true)
 	logger._debug(`Node version: ${process.version}`, true)
 	logger._debug(`DEBUG is on`)

@@ -4,7 +4,7 @@ const { json } = require('body-parser');
 
 require('dotenv').config();
 
-const DB = require('./ManagerDB').DataBase
+const { DataBase } = require('./ManagerDB')
 const logger = require('./logger')(__filename);
 const OpenVidu = require("openvidu-node-client").OpenVidu;
 const CronJob = require('cron').CronJob;
@@ -14,6 +14,7 @@ const OPENVIDU_URL = process.env.OPENVIDU_URL;
 const OPENVIDU_SECRET = process.env.OPENVIDU_SECRET;
 
 const openvidu = new OpenVidu(OPENVIDU_URL, OPENVIDU_SECRET)
+const job_list = { length: 0 }
 
 
 const get_time_in_minuts = (dt) => {
@@ -38,7 +39,7 @@ const class_exec = (class_el) => {
 	logger._debug(`cron execute ${JSON.stringify(class_el)}`)
 	openvidu.createSession().then(session => {
 		logger._info(`session [${class_el.id}] created [${session.sessionId}] for [${class_el.group_id}]`, true)
-		DB.save_sesion(
+		DataBase.save_sesion(
 			(err) => {
 				logger._error(`cant save session [${JSON.stringify(class_el.id)}][${session.sessionId}] for [${JSON.stringify(class_el.group_id)}]`)
 				session.close()
@@ -59,29 +60,32 @@ const class_exec = (class_el) => {
 }
 
 const class_expire = async (class_el) => {
-	DB.delete_sesion(
+	DataBase.delete_sesion(
 		(err) => { logger._error(`cant delete session for [${JSON.stringify(class_el.id)}]`) },
 		(res) => {
 			const session = openvidu.activeSessions.find(s => s.sessionId == res[0].deleted)
-			logger._info(`delete session [${JSON.stringify(class_el.id)}]`)
+			logger._info(`delete session [${JSON.stringify(class_el.id)}][${JSON.stringify(res)}]`)
 
 			if (session !== undefined)
 				session.close()
 
-			if (class_el.week_cnt == 0)
+			if (class_el.week_cnt == 0) {
 				unregister_class(class_el.id)
+				job_list.length -= 1
+				delete job_list[String(class_el.id)]
+			}
 			else {
 				const now_m = get_time_in_minuts(Date.now())
 				logger._debug(`cur date now [${Date.now()}] minuts [${now_m}]`)
 				delay_class_on_week(class_el.id, class_el.start, class_el.week_cnt)
 			}
 		},
-		class_el.id)
+		Number(class_el.group_id))
 }
 
 const delay_class_on_week = (id, start, week_cnt) => {
 	logger._info(`delay class [${id}] on [${week_cnt * 7}] days`)
-	DB.delay_registered_class_on_week(
+	DataBase.delay_registered_class_on_week(
 		(err) => { logger._error(`cant delay class [${id}]\n\t[${err.message}]`, true) },
 		() => { },
 		id,
@@ -91,12 +95,11 @@ const delay_class_on_week = (id, start, week_cnt) => {
 }
 
 const unregister_class = (id) => {
-	DB.unregister_class(
+	DataBase.unregister_class(
 		(err) => { logger._error(`cant unregistred class [${id}]\n\t[${err.message}]`, true) },
 		() => { logger._info(`class unregistred [${id}]`, true) },
 		id)
 }
-
 const setup_new_job = (class_el) => {
 	logger._info(`load ${JSON.stringify(class_el)}`, true)
 	const now_m = get_time_in_minuts(Date.now())
@@ -137,7 +140,10 @@ const setup_new_job = (class_el) => {
 			},
 			null,
 		)
-		logger._info(`setup new cron for [${JSON.stringify( class_el)}]`)
+		job_list[String(class_el.id)] = job
+		job_list.length += 1
+		logger._info(`setup new cron for [${JSON.stringify(class_el)}]`)
+		logger._info(`count running jobs: [${job_list.length}]`)
 		job.start()
 		delete class_el.freq_cron
 	} catch (err) {
@@ -147,15 +153,14 @@ const setup_new_job = (class_el) => {
 
 class SessionManager {
 	static first_load() {
-		DB.clear_sessions(() => { }, () => { })
+		DataBase.clear_sessions((error) => { }, () => { })
 		openvidu.fetch().then(v => {
-			const m = getMonday(Date.now())
-			DB
-				.get_registered_classes(
+			DataBase
+				.get_partial_registered_classes(
 					err => { logger._error(`get register classes ${err.message}`) },
-					classes => { 
+					classes => {
 						logger._info(`loaded ${classes.length} registered classes`)
-						classes.forEach(el => setup_new_job(el)) 
+						classes.forEach(el => setup_new_job(el))
 					},
 					0,
 					4294967295,
@@ -168,6 +173,14 @@ class SessionManager {
 		}).finally(() => {
 			openvidu.activeSessions.forEach(s => s.close())
 		})
+	}
+	static delete_job(shedule_id) {
+		const job = job_list[String(shedule_id)]
+		logger._info(`stop cron job [${shedule_id}]`)
+
+		if (job !== undefined)
+			job.stop()
+		delete job_list[String(shedule_id)]
 	}
 	static new_registered_class(class_el) {
 		setup_new_job(class_el)

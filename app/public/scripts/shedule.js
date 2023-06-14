@@ -155,9 +155,15 @@ const classes_to_ui = (cls) => {
 		const duration = cls.duration_minuts / 14.40
 		const div = document.createElement('div')
 		// console.log(from, duration)
+		const teacher = `${cls.second_name} ${cls.first_name[0]}. ${cls.thrid_name[0]}.`
 
 		const brief = document.createElement('span')
-		const info = document.createElement('span')
+		const info = document.createElement('div')
+		const info_class = document.createElement('p')
+		const info_teacher = document.createElement('p')
+		const info_start = document.createElement('p')
+		const info_duration = document.createElement('p')
+		const info_group = document.createElement('p')
 
 		div.setAttribute('top', from + '%')
 		div.setAttribute('height', duration + '%')
@@ -167,9 +173,21 @@ const classes_to_ui = (cls) => {
 
 		brief.className = 'brief'
 		info.className = 'info'
+		console.log(group_id)
 
-		brief.textContent = "some brief content some brief content some brief content some brief content some brief content some brief content some brief content some brief content some brief content some brief content some brief content some brief content some brief content "
-		info.textContent = " some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text some extendet info text"
+		brief.textContent = `${ group_id.length == 0 ? cls.group_title : teacher} | ${cls.class_title}`
+
+		info_class.textContent = `Предмет: ${cls.class_title}\n`
+		info_teacher.textContent = `Преподаватель: ${teacher}\n`
+		info_start.textContent = `Начало: ${dt.toLocaleString()}\n`
+		info_duration.textContent = `Продолжительность: ${cls.duration_minuts} мин\n`
+		info_group.textContent = `Группа: ${cls.group_title}\n`
+
+		info.appendChild(info_class)
+		info.appendChild(info_teacher)
+		info.appendChild(info_start)
+		info.appendChild(info_duration)
+		info.appendChild(info_group)
 
 		div.appendChild(info)
 		div.appendChild(brief)

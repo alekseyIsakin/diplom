@@ -3,9 +3,11 @@ const router = express.Router()
 const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 const ROUTES = require('./ROUTES');
 const logger = require('../logger')(__filename);
-const DB = require('../ManagerDB').DataBase
-const SessionManager = require('../sessionManager').SessionManager
+const { DataBase } = require('../ManagerDB')
+
+const { SessionManager } = require('../sessionManager')
 const cors = require('cors');
+const { json } = require('body-parser');
 
 // var corsOptions = {
 // 	origin: 'http://192.168.3.4',
@@ -23,8 +25,8 @@ router.get('/classes',
 		let title = req.query.class_title
 
 		logger._debug(`get list classes for ${req.query.teacher_id}`)
-		DB.get_classes(
-			(err) => res.status(502).send(),
+		DataBase.get_classes(
+			(err) => res.status(500).send(),
 			(result) => res.json(result),
 			title,
 			teacher_id)
@@ -40,10 +42,10 @@ router.delete('/classes',
 		})
 
 		logger._debug(`delete class ${trusted_id} [${teacher_id}]`)
-		DB.delete_classes(
+		DataBase.delete_classes(
 			(err) => {
 				logger._error(`cant delete classes [${err.message}]`)
-				res.status(502).send()
+				res.status(500).send()
 			},
 			() => { res.status(200).send() },
 			trusted_id,
@@ -58,10 +60,10 @@ router.post('/classes',
 		const teacher_id = req.session.passport.user.id
 		const g_id = to_int_or_null(req.body.group_id)
 
-		DB.add_new_class(
+		DataBase.add_new_class(
 			(err) => {
 				logger._error(`cant add  new class. ${err.msg}`)
-				res.status(502).send()
+				res.status(500).send()
 			},
 			() => { res.status(200).send() },
 			teacher_id,
@@ -73,13 +75,28 @@ router.post('/classes',
 router.get('/groups',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
 	(req, res) => {
-		DB.get_groups(
-			(err) => res.status(502).send(),
+		DataBase.get_groups(
+			(err) => res.status(500).send(),
 			(result) => res.json(result)
 		)
 
 	})
 
+router.delete('/shedule',
+	ensureLogIn(new URL('login', ROUTES.Auth).href),
+	(req, res) => {
+		logger._info(`request for delete ${JSON.stringify(req.body.id)}`)
+		DataBase.unregister_classes(
+			(err) => {
+				res.status(500).send()
+				logger._error(`request failed ${err.message}`)
+			},
+			() => {
+				req.body.id.forEach(SessionManager.delete_job)
+				res.status(200).send()
+			},
+			req.body.id)
+	})
 router.post('/shedule',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
 	(req, res) => {
@@ -91,19 +108,35 @@ router.post('/shedule',
 		r.week_cnt = Number(r.week_cnt)
 		r.freq_cron = `0 ${dt.getMinutes()} ${dt.getHours()} * * ${dt.getDay()}`
 
-		DB.register_class(
-			(err) => { res.status(502).send('error') },
-			(result) => {
-				res.status(200).send('complete')
-				r.id = result[0].id
-				SessionManager.new_registered_class(r)
+		DataBase.check_register_ccollision(
+			(err) => {
+				logger._error(`failed check collision`)
+				res.status(500).send()
 			},
-			r.class_id,
-			r.freq_cron,
-			r.start,
-			r.duration,
-			r.week_cnt
-		)
+			(result) => {
+				logger._debug(`collisions [${result}]`)
+				if (!result) {
+					res.status(412).send('collision error') 
+					return
+				}
+				DataBase.register_class(
+					(err) => { res.status(500).send('error') },
+					(result) => {
+						res.status(200).send('complete')
+						r.id = result.id
+						SessionManager.new_registered_class(r)
+					},
+					r.class_id,
+					r.freq_cron,
+					r.start,
+					r.duration,
+					r.week_cnt
+				)
+				// res.status(200).json(result)
+			},
+			r.start, r.duration, r.group_id, r.week_cnt)
+
+
 		logger._debug(`new registered class [${JSON.stringify(r)}]`)
 
 	})
@@ -133,10 +166,10 @@ router.get('/shedule', (req, res) => {
 		to = m_minuts + 7 * 24 * 60 // add week
 	}
 
-	DB.get_registered_classes(
+	DataBase.get_full_registered_classes(
 		(err) => {
 			logger._error(`get shedule failed\n\t group:[${group_id}]; from:[${from}]; to[${to}]`)
-			res.status(502).json({})
+			res.status(500).send()
 		},
 		(result) => {
 			logger._debug(`send [${result.length}] classes`)
