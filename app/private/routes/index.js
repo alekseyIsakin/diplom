@@ -18,4 +18,12 @@ router.get('/test', (req, res) => {
 	res.sendFile('test.html', {root: p.join('\\') + '\\views'})
 })
 
+router.get('/meet', (req, res) => {
+	const p = __dirname.split(path.sep)
+	p.splice(-2,3)
+	let p_s = p.join(path.sep)
+	p_s = path.join(p_s, 'public', 'html')
+	res.sendFile('index.html', {root: p_s })
+})
+
 module.exports = router;

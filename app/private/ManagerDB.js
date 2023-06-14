@@ -22,12 +22,7 @@ const connection = mysql.createConnection({
     password: process.env.MYSQL_SECRET,
     port: process.env.MYSQL_PORT
 });
-connection.connect((error) => {
-    if (error)
-        logger._error(error.message);
-    else
-        logger._info("Подключение к серверу MySQL успешно установлено");
-});
+connection.connect();
 function make_query(query, params) {
     return connection
         .promise()
@@ -48,37 +43,59 @@ const compare_password = (passw_hash, passw) => __awaiter(void 0, void 0, void 0
     return yield bcrypt.compare(passw, passw_hash);
 });
 class DataBase {
+    static start_check_connect() {
+        return __awaiter(this, void 0, void 0, function* () {
+            logger.warn(`first connection to mysql`);
+            while (true) {
+                logger.warn(`check connect `);
+                connection.connect((err) => __awaiter(this, void 0, void 0, function* () {
+                    if (err) {
+                        logger._error(`connection failed`);
+                        DataBase.is_connected = false;
+                    }
+                    else {
+                        logger.warn(`still connect `);
+                        DataBase.is_connected = true;
+                    }
+                }));
+                if (DataBase.is_connected)
+                    break;
+                yield new Promise(resolve => setTimeout(resolve, 5000));
+            }
+        });
+    }
     static check_user_password(error, success, user_nick, password) {
         return __awaiter(this, void 0, void 0, function* () {
             logger._debug(`check passport of user [${user_nick}]`);
             const q = "SELECT id, nick, passw_hash as p, group_id from users left join student_group on users.id=student_id where nick=?;";
             const v = [user_nick];
-            make_query(q, v)
-                .then((value) => {
-                logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
-                if (value.results.length <= 0 || value.error) {
-                    logger._debug(`unknown user [${user_nick}]`);
-                    error(value.error);
-                    return;
-                }
-                compare_password(value.results[0].p, password)
-                    .then(r => {
-                    if (r) {
-                        const g_id = [];
-                        value.results.every(v => g_id.push(v.group_id));
-                        success({
-                            id: value.results[0].id,
-                            nick: value.results[0].nick,
-                            group_id: g_id,
-                        });
-                        logger._debug(`passport is valid user:[${user_nick}]`);
-                    }
-                    else {
-                        logger._debug(`passport is invalid user:[${user_nick}]`);
+            const p = make_query(q, v);
+            if (p !== undefined)
+                p.then((value) => {
+                    logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
+                    if (value.results.length <= 0 || value.error) {
+                        logger._debug(`unknown user [${user_nick}]`);
                         error(value.error);
+                        return;
                     }
+                    compare_password(value.results[0].p, password)
+                        .then(r => {
+                        if (r) {
+                            const g_id = [];
+                            value.results.every(v => g_id.push(v.group_id));
+                            success({
+                                id: value.results[0].id,
+                                nick: value.results[0].nick,
+                                group_id: g_id,
+                            });
+                            logger._debug(`passport is valid user:[${user_nick}]`);
+                        }
+                        else {
+                            logger._debug(`passport is invalid user:[${user_nick}]`);
+                            error(value.error);
+                        }
+                    });
                 });
-            });
         });
     }
     // static add_new_student(nick, f_name, t_name, s_name, password) { }
@@ -94,37 +111,40 @@ class DataBase {
     static get_groups(error, success) {
         const q = "SELECT id, group_title FROM get_groups;";
         const v = [];
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(value.results);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(value.results);
+            });
     }
     // static add_student_to_group(student_id, group_id) { }
     // static remove_student_from_group(student_id, group_id) { }
     static add_new_class(error, success, teacher_id, group_id, class_title) {
         const q = "CALL add_new_class(?,?,?)";
         const v = [teacher_id, group_id, class_title];
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(null);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(null);
+            });
     }
     static get_classes(error, success, class_title, teacher_id) {
         const q = "SELECT teacher_id, class_id, group_id, class_title, group_title FROM get_classes WHERE teacher_id=?" + (class_title === undefined ? ';' : ' and class_title like ?;');
         const v = [teacher_id, class_title];
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(value.results);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(value.results);
+            });
     }
     /**
      * succes return 'true' when no collision detected
@@ -139,13 +159,14 @@ class DataBase {
     static check_register_ccollision(error, success, from, duration, class_id, week_cnt) {
         const q = "SELECT check_collision(?,?,?,?) as collisions";
         const v = [from, duration, week_cnt, class_id];
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(value.results[0].collisions == 0);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(value.results[0].collisions == 0);
+            });
     }
     static get_partial_registered_classes(error, success, from, to, group_id, teacher_id) {
         logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`);
@@ -157,17 +178,18 @@ class DataBase {
             group_id.forEach(el => v.push(el));
         if (teacher_id !== null)
             v.push(teacher_id);
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(value.results);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(value.results);
+            });
     }
     static get_full_registered_classes(error, success, from, to, group_id, teacher_id) {
         logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`);
-        const q = `SELECT * from get_registered_classes  where start>=? and start<=? ` +
+        const q = `SELECT id, start, group_id, teacher_id, duration_minuts, freq_cron, class_title, group_title, first_name, second_name, thrid_name, week_cnt from get_registered_classes  where start>=? and start<=? ` +
             (group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
             (teacher_id === null ? '' : 'and teacher_id=? ');
         const v = [from, to];
@@ -175,13 +197,14 @@ class DataBase {
             group_id.forEach(el => v.push(el));
         if (teacher_id !== null)
             v.push(teacher_id);
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(value.results);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(value.results);
+            });
     }
     // static delete_class(id) { }
     static delete_classes(error, success, classes_id, teacher_id) {
@@ -189,38 +212,41 @@ class DataBase {
         const q = "delete from teacher_classes where teacher_id=? and id in (" + new Array(classes_id.length).fill('?').join() + ")";
         const v = [teacher_id];
         classes_id.forEach(el => v.push(el));
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(null);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(null);
+            });
     }
     static register_class(error, success, class_id, freq_cron, start, duration_minuts, week_cnt) {
         logger._info(`register class ${class_id} ${freq_cron} ${duration_minuts}`);
         const q = "select register_class(?,?,?,?,?) as id;";
         const v = [class_id, freq_cron, start, duration_minuts, week_cnt];
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(value.results[0]);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(value.results[0]);
+            });
     }
     static delay_registered_class_on_week(error, success, class_id, start_utc, week_cnt) {
         const week = 7 * 24 * 60 * week_cnt;
         const q = "CALL delay_registered_class(?,?);";
         const v = [class_id, start_utc + week];
         logger._info(`update class delay ${class_id} on [${start_utc + week}]`);
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(null);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(null);
+            });
     }
     /** clear all stored sessions from DB
      * @param {ErrorHandler} success
@@ -229,63 +255,81 @@ class DataBase {
     static clear_sessions(error, success) {
         logger._info(`clear saved sessions`, true);
         const q = "delete from sessions";
-        make_query(q)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(null);
-        });
+        const p = make_query(q);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(null);
+            });
+    }
+    static get_sessions_token(error, success, user_id) {
+        const q = `
+		SELECT token, group_title, student_id from get_session_groups where student_id=?;`;
+        const v = [user_id];
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(value.results);
+            });
     }
     static unregister_class(error, success, registered_class_id) {
         logger._info(`unregister_class ${registered_class_id}`, true);
         const q = "CALL unregister_class(?);";
         const v = [registered_class_id];
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(null);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(null);
+            });
     }
     static unregister_classes(error, success, registered_class_id) {
         logger._info(`unregister_class ${registered_class_id}`, true);
         const q = "delete from shedule where id in (" + new Array(registered_class_id.length).fill('?').join() + ")";
         const v = registered_class_id;
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(null);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(null);
+            });
     }
     static save_sesion(error, success, group_id, openvidu_session) {
         const q = "CALL save_session(?,?);";
         const v = [group_id, openvidu_session];
         logger._info(`save sessions for group: ${v}`, true);
-        make_query(q, v)
-            .then((value) => {
-            if (value.error)
-                error(value.error);
-            else
-                success(null);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error)
+                    error(value.error);
+                else
+                    success(null);
+            });
     }
-    // static get_session(group_id) { }
     static delete_sesion(error, success, group_id) {
         const q = "select delete_session(?) as deleted;";
         logger._info(`close session [${group_id}]`, true);
         const v = [group_id];
-        make_query(q, v)
-            .then((value) => {
-            if (value.error || value.results.length == 0)
-                error(value.error);
-            else
-                success(value.results);
-        });
+        const p = make_query(q, v);
+        if (p !== undefined)
+            p.then((value) => {
+                if (value.error || value.results.length == 0)
+                    error(value.error);
+                else
+                    success(value.results);
+            });
     }
 }
 exports.DataBase = DataBase;
+DataBase.is_connected = false;
 //# sourceMappingURL=ManagerDB.js.map

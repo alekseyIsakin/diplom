@@ -5,7 +5,7 @@ DELIMITER $$;
 CREATE VIEW get_registered_classes AS
 SELECT
 	s.id,
-	start_utc_minuts AS START,
+	start_utc_minuts AS start,
 	group_id,
 	teacher_id,
 	duration_minuts AS duration_minuts,
@@ -68,13 +68,14 @@ CREATE FUNCTION register_class(
 	duration_minuts SMALLINT UNSIGNED,
 	week_cnt TINYINT
 ) RETURNS BIGINT UNSIGNED DETERMINISTIC BEGIN
-	shedule (
-		class_id,
-		frequence_cron,
-		start_utc_minuts,
-		duration_minuts,
-		week_cnt
-	)
+	INSERT INTO
+		shedule (
+			class_id,
+			frequence_cron,
+			start_utc_minuts,
+			duration_minuts,
+			week_cnt
+		)
 	VALUES
 		(
 			class_id,
@@ -151,10 +152,11 @@ WHERE
 RETURN (_session_token);
 
 END $$;
+
 --
 --
 --
-DROP FUNCTION CHECK_COLLISION $$ CREATE FUNCTION check_collision(
+CREATE FUNCTION check_collision(
 	check_start BIGINT UNSIGNED,
 	check_duration SMALLINT UNSIGNED,
 	check_week_cnt TINYINT,
@@ -213,4 +215,4 @@ END IF;
 
 RETURN @cnt;
 
-END $$
+END $$;
