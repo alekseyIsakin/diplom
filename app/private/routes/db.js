@@ -108,19 +108,31 @@ router.post('/shedule',
 		r.week_cnt = Number(r.week_cnt)
 		r.freq_cron = `0 ${dt.getMinutes()} ${dt.getHours()} * * ${dt.getDay()}`
 
-		DataBase.register_class(
-			(err) => { res.status(502).send('error') },
-			(result) => {
-				res.status(200).send('complete')
-				r.id = result.id
-				SessionManager.new_registered_class(r)
+		DataBase.check_register_ccollision(
+			(err) => {
+				logger._error(`failed check collision`)
+				res.status(502).send()
 			},
-			r.class_id,
-			r.freq_cron,
-			r.start,
-			r.duration,
-			r.week_cnt
-		)
+			(result) => {
+				logger._debug(`send [${result.length}] classes`)
+				DataBase.register_class(
+					(err) => { res.status(502).send('error') },
+					(result) => {
+						res.status(200).send('complete')
+						r.id = result.id
+						SessionManager.new_registered_class(r)
+					},
+					r.class_id,
+					r.freq_cron,
+					r.start,
+					r.duration,
+					r.week_cnt
+				)
+				// res.status(200).json(result)
+			},
+			r.start, r.duration, r.class_id, r.week_cnt)
+
+
 		logger._debug(`new registered class [${JSON.stringify(r)}]`)
 
 	})

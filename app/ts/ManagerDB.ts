@@ -28,27 +28,27 @@ type DBResponse = any[]
 
 type RHandler<T> = { error?: Error, results: T[] }
 
-type CheckPassportR = { id: Number, nick: String, p: String, group_id: Number }
-type CheckPassportS = { id: Number, nick: String, group_id: Number[] }
+type CheckPassportR = { id: number, nick: String, p: String, group_id: number }
+type CheckPassportS = { id: number, nick: String, group_id: number[] }
 
-type addNewClassR = { id: Number, nick: String, p: String, group_id: Number }
+type addNewClassR = { id: number, nick: String, p: String, group_id: number }
 
-type GetGroupsR = { id: Number, group_title: String }
+type GetGroupsR = { id: number, group_title: String }
 
 type GetRegisteredClassesParticial = {
-	id: Number,
-	start: Number,
-	duration_minuts: Number,
-	group_id: Number,
+	id: number,
+	start: number,
+	duration_minuts: number,
+	group_id: number,
 	freq_cron: String,
-	week_cnt: Number
+	week_cnt: number
 }
 type GetRegisteredClassesFull = {
-	id: Number,
-	start: Number,
-	duration_minuts: Number,
-	group_id: Number,
-	week_cnt: Number,
+	id: number,
+	start: number,
+	duration_minuts: number,
+	group_id: number,
+	week_cnt: number,
 	class_title: string,
 	group_title: string,
 	first_name: string,
@@ -56,13 +56,13 @@ type GetRegisteredClassesFull = {
 	thrid_name: string
 }
 type GetClassesR = {
-	teacher_id: Number,
-	class_id: Number,
-	group_id: Number,
+	teacher_id: number,
+	class_id: number,
+	group_id: number,
 	class_title: String,
 	group_title: String
 }
-type RegisterNewClassesR = { id: Number }
+type RegisterNewClassesR = { id: number }
 
 function make_query<R, S>(query: String, params?: any[]): Promise<RHandler<R>> {
 	return connection
@@ -107,7 +107,7 @@ export class DataBase {
 				compare_password(value.results[0].p, password)
 					.then(r => {
 						if (r) {
-							const g_id: Number[] = []
+							const g_id: number[] = []
 							value.results.every(v => g_id.push(v.group_id))
 
 							success({
@@ -158,8 +158,8 @@ export class DataBase {
 	static add_new_class(
 		error: ErrorHandler,
 		success: SuccesHandler<null>,
-		teacher_id: Number,
-		group_id: Number,
+		teacher_id: number,
+		group_id: number,
 
 		class_title: String) {
 		const q: String = "CALL add_new_class(?,?,?)"
@@ -176,7 +176,7 @@ export class DataBase {
 		error: ErrorHandler,
 		success: SuccesHandler<GetClassesR[]>,
 		class_title: String,
-		teacher_id: Number) {
+		teacher_id: number) {
 		const q = "SELECT teacher_id, class_id, group_id, class_title, group_title FROM get_classes WHERE teacher_id=?" + (class_title === undefined ? ';' : ' and class_title like ?;')
 		const v = [teacher_id, class_title]
 		make_query<GetClassesR, GetClassesR[]>(q, v)
@@ -187,13 +187,41 @@ export class DataBase {
 					success(value.results)
 			})
 	}
+/**
+ * 
+ * @param error 
+ * @param success 
+ * @param from 
+ * @param duration 
+ * @param group_id 
+ * @param week_cnt 
+ */
+	static check_register_ccollision(
+		error: ErrorHandler,
+		success: SuccesHandler<number[]>,
+		from: number,
+		duration: number,
+		class_id: number,
+		week_cnt: number
+	) {
+		const q = "SELECT check_collision(?,?,?,?)"
+		const v = [from, duration, week_cnt, class_id]
+		make_query<number, number[]>(q, v)
+			.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(value.results)
+			})
+	}
+
 	static get_partial_registered_classes(
 		error: ErrorHandler,
 		success: SuccesHandler<GetRegisteredClassesParticial[]>,
-		from: Number,
-		to: Number,
-		group_id: Number[],
-		teacher_id?: Number) {
+		from: number,
+		to: number,
+		group_id: number[],
+		teacher_id?: number) {
 		logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`)
 		const q = `SELECT id, start, group_id, duration_minuts, freq_cron, week_cnt  from get_registered_classes  where start>=? and start<=? ` +
 			(group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
@@ -215,10 +243,10 @@ export class DataBase {
 	static get_full_registered_classes(
 		error: ErrorHandler,
 		success: SuccesHandler<GetRegisteredClassesFull[]>,
-		from: Number,
-		to: Number,
-		group_id: Number[],
-		teacher_id?: Number) {
+		from: number,
+		to: number,
+		group_id: number[],
+		teacher_id?: number) {
 		logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`)
 		const q = `SELECT * from get_registered_classes  where start>=? and start<=? ` +
 			(group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
@@ -317,7 +345,7 @@ export class DataBase {
 	static unregister_class(
 		error: ErrorHandler,
 		success: SuccesHandler<null>,
-		registered_class_id: Number) {
+		registered_class_id: number) {
 		logger._info(`unregister_class ${registered_class_id}`, true)
 		const q = "CALL unregister_class(?);"
 		const v = [registered_class_id]
@@ -332,7 +360,7 @@ export class DataBase {
 	static unregister_classes(
 		error: ErrorHandler,
 		success: SuccesHandler<null>,
-		registered_class_id: Number[]) {
+		registered_class_id: number[]) {
 		logger._info(`unregister_class ${registered_class_id}`, true)
 		const q = "delete from shedule where id in (" + new Array(registered_class_id.length).fill('?').join() + ")"
 		const v = registered_class_id
@@ -347,7 +375,7 @@ export class DataBase {
 	static save_sesion(
 		error: ErrorHandler,
 		success: SuccesHandler<null>,
-		group_id: Number,
+		group_id: number,
 		openvidu_session: String) {
 		const q: String = "CALL save_session(?,?);"
 		const v: any = [group_id, openvidu_session]
@@ -367,7 +395,7 @@ export class DataBase {
 	static delete_sesion(
 		error: ErrorHandler,
 		success: SuccesHandler<string[]>,
-		group_id: Number) {
+		group_id: number) {
 		const q = "select delete_session(?) as deleted;"
 		logger._info(`close session [${group_id}]`, true)
 		const v: any[] = [group_id]

@@ -63,7 +63,6 @@ CREATE FUNCTION register_class(
 ) RETURNS BIGINT UNSIGNED
 DETERMINISTIC
 BEGIN
-	INSERT INTO
 		shedule (
 			class_id,
 			frequence_cron,
@@ -131,3 +130,35 @@ DELETE FROM sessions
 WHERE	group_id=_group_id;
 RETURN (_session_token);
 END $$;
+
+DROP FUNCTION CHECK_COLLISION$$
+CREATE FUNCTION check_collision(
+  check_start BIGINT UNSIGNED,
+  check_duration SMALLINT UNSIGNED,
+  check_week_cnt TINYINT,
+  c_id BIGINT UNSIGNED
+) RETURNS INTEGER
+DETERMINISTIC
+BEGIN
+	DECLARE abs_check_start BIGINT UNSIGNED;
+	DECLARE abs_check_week_cnt BIGINT UNSIGNED DEFAULT 1;
+	DECLARE week INTEGER;
+	IF check_week_cnt=0 THEN SET abs_check_week_cnt=1;
+	END IF;
+	SET week=(10080*abs_check_week_cnt);
+	SET abs_check_start=mod(check_start,week);
+	INSERT INTO debug (msg) VALUES (CONCAT('abs start: ', abs_check_start));
+	INSERT INTO debug (msg) VALUES (CONCAT('abs start_utc_minuts: ', mod(start_utc_minuts, week)))
+	SELECT 
+		count(*) INTO @cnt,
+	FROM 
+		shedule 
+	WHERE 
+		class_id=c_id and (	
+			abs_check_start >= mod(start_utc_minuts, week) and
+			abs_check_start <= mod(start_utc_minuts, week + duration_minuts) 
+		or 
+			abs_check_start+check_duration >= mod(start_utc_minuts, week) and 
+			abs_check_start+check_duration <= mod(start_utc_minuts, week) + duration_minuts);
+	RETURN @cnt;
+END $$

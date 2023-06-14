@@ -126,6 +126,26 @@ class DataBase {
                 success(value.results);
         });
     }
+    /**
+     *
+     * @param error
+     * @param success
+     * @param from
+     * @param duration
+     * @param group_id
+     * @param week_cnt
+     */
+    static check_register_ccollision(error, success, from, duration, class_id, week_cnt) {
+        const q = "SELECT check_collision(?,?,?,?)";
+        const v = [from, duration, week_cnt, class_id];
+        make_query(q, v)
+            .then((value) => {
+            if (value.error)
+                error(value.error);
+            else
+                success(value.results);
+        });
+    }
     static get_partial_registered_classes(error, success, from, to, group_id, teacher_id) {
         logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`);
         const q = `SELECT id, start, group_id, duration_minuts, freq_cron, week_cnt  from get_registered_classes  where start>=? and start<=? ` +
