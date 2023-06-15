@@ -20,11 +20,62 @@ router.get('/shedule/users/:user_id',
 			}, user_id
 		)
 	})
-router.post('/sessions/:token/connections',
+router.post('/sessions/:session_id/connections',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
 	async (req, res) => {
-		const token = await SessionManager.createConnection(req.params.token)
-		res.send(token)
+		const user_id = Number(req.session.passport.user.id)
+		const session_id = req.params.session_id
+
+		SessionManager.createConnection(req.params.session_id)
+			.then(v => {
+				logger._info(`session token connection [${session_id}]`)
+				
+				if (v === undefined) res.status(404).send()
+				else res.send(v.token)
+			}).catch(async e => {
+				if (e.message != '404') { logger._error(e.message); res.status(502).send(); return }
+
+				DataBase.get_sessions_token(
+					() => { res.send(404) },
+					async (result) => {
+						await SessionManager.fetchSesions()
+
+						if (result.some(el => el.token == session_id)) {
+							let session = SessionManager.getExistedSession(session_id)
+							if (!session) {
+								session = await SessionManager.reopenSesion(session_id)
+							}
+							const connection = await session.createConnection()
+							res.status(200).send(connection.token)
+						} else { es.send(404) }
+					},
+					user_id)
+			})
+	}
+)
+router.get('/sessions/:token',
+	ensureLogIn(new URL('login', ROUTES.Auth).href),
+	async (req, res) => {
+		const user_id = Number(req.session.passport.user.id)
+		const session_id = req.params.token
+
+		SessionManager.fetchSesions()
+		DataBase.get_sessions_token(
+			() => {
+				res.send(404)
+			},
+			async (result) => {
+				await SessionManager.fetchSesions()
+
+				if (result.some(el => el.token == session_id)) {
+					let session = SessionManager.getExistedSession(session_id)
+					if (!session) {
+						session = await SessionManager.reopenSesion(session_id)
+					}
+					res.status(200).send(session_id)
+				}
+			},
+			user_id)
 	}
 )
 module.exports = router;

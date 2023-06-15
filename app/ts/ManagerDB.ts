@@ -30,7 +30,7 @@ type addNewClassR = { id: number, nick: String, p: String, group_id: number }
 type GetGroupsR = { id: number, group_title: String }
 type CheckRegisterCollision = { collisions: number }
 type GetSessionsTokenR = {
-	tiken: String,
+	token: String,
 	group_title: String,
 	student_id: number
 }

@@ -10,7 +10,7 @@ type GetGroupsR = {
     group_title: String;
 };
 type GetSessionsTokenR = {
-    tiken: String;
+    token: String;
     group_title: String;
     student_id: number;
 };

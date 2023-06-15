@@ -10,7 +10,7 @@ SELECT
 FROM
 	student_group AS sg
 	LEFT JOIN sessions AS s ON sg.group_id = s.group_id
-	LEFT JOIN s_groups AS g ON g.id = sg.group_id
+	LEFT JOIN s_groups AS g ON g.id = sg.group_id;
 
 CREATE VIEW get_registered_classes AS
 SELECT

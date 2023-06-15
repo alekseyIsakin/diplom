@@ -37,8 +37,10 @@ const getMonday = (now) => {
 
 const class_exec = (class_el) => {
 	logger._debug(`cron execute ${JSON.stringify(class_el)}`)
-	openvidu.createSession().then(session => {
+	openvidu.createSession().then(async session => {
 		logger._info(`session [${class_el.id}] created [${session.sessionId}] for [${class_el.group_id}]`, true)
+
+
 		DataBase.save_sesion(
 			(err) => {
 				logger._error(`cant save session [${JSON.stringify(class_el.id)}][${session.sessionId}] for [${JSON.stringify(class_el.group_id)}]`)
@@ -109,6 +111,7 @@ const setup_new_job = (class_el) => {
 
 	if (now_m > class_el.start && now_m < class_el.start + class_el.duration_minuts) {
 		class_exec(class_el)
+		job_list[String(class_el.id)] = {}
 		if (class_el.week_cnt == 0) return
 	}
 	if (now_m > class_el.start + class_el.duration_minuts) {
@@ -127,7 +130,6 @@ const setup_new_job = (class_el) => {
 				class_el.id,
 				class_el.start,
 				week_delay)
-
 		}
 	}
 
@@ -140,7 +142,7 @@ const setup_new_job = (class_el) => {
 			},
 			null,
 		)
-		job_list[String(class_el.id)] = job
+		job_list[String(class_el.id)]['job'] = job
 		job_list.length += 1
 		logger._info(`setup new cron for [${JSON.stringify(class_el)}]`)
 		logger._info(`count running jobs: [${job_list.length}]`)
@@ -154,7 +156,7 @@ const setup_new_job = (class_el) => {
 class SessionManager {
 	static first_load() {
 		DataBase.clear_sessions((error) => { }, () => { })
-		openvidu.fetch().then(v => {
+		SessionManager.fetchSesions().then(v => {
 			DataBase
 				.get_partial_registered_classes(
 					err => { logger._error(`get register classes ${err.message}`) },
@@ -175,7 +177,7 @@ class SessionManager {
 		})
 	}
 	static delete_job(shedule_id) {
-		const job = job_list[String(shedule_id)]
+		const job = job_list[String(shedule_id)]['job']
 		logger._info(`stop cron job [${shedule_id}]`)
 
 		if (job !== undefined)
@@ -185,16 +187,29 @@ class SessionManager {
 	static new_registered_class(class_el) {
 		setup_new_job(class_el)
 	}
-	static async createConnection(session_id) {
+	static getExistedSession(session_id) {
+		const session = openvidu.activeSessions.find(s => s.sessionId == session_id)
+		return session
+	}
+	static fetchSesions() {
+		return openvidu.fetch()
+	}
+	static reopenSesion(session_id) {
+		logger._info(`reopen session [${session_id}]`)
+		const sessionP = {
+			customSessionId: session_id
+		}
+		return openvidu.createSession(sessionP)
+	}
+	static async createConnection(session_id, subscriber) {
 		const session = openvidu.activeSessions.find(s => s.sessionId == session_id)
 
-		if (session === undefined) return 
+		if (session === undefined) return
 		const connectionProperties = {
-		  role: "PUBLISHER",
-		  data: "user_data"
+			role: subscriber ? "SUBSCRIBER" : "PUBLISHER",
+			data: "user_data"
 		}
-		const connection = await session.createConnection(connectionProperties);
-		return connection.token
+		return session.createConnection(connectionProperties);
 	}
 }
 
