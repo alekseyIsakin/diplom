@@ -142,7 +142,7 @@ function getToken(user_id, check = true) {
             .then(
                 sessionId => {
                     if (sessionId.length > 0)
-                        createToken(sessionId[0].token)
+                        return createToken(sessionId[0].token)
                 },
                 error => {
                     console.warn(error)
