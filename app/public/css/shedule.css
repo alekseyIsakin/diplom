@@ -1,7 +1,11 @@
+html{
+	font-family: 'Times New Roman', Times, serif;
+}
+
 .week {
 	display: flex;
 	flex-flow: column;
-	font-size: calc(.7vw + .7vh);
+	width: fit-content;
 }
 
 .week_media {
@@ -26,9 +30,10 @@
 .hours {
 	display: flex;
 	flex-flow: column;
-	width: 60px;
+	min-width: 60px;
 	border-right: 2px solid black;
 	border-left: 2px solid black;
+	font-weight: 550;
 }
 
 .hours>div {
@@ -42,6 +47,8 @@
 	width: calc(100% - 60px);
 	display: flex;
 	flex-flow: row;
+	/* overflow-y: hidden;
+	overflow-x: auto; */
 }
 
 .day_name {
@@ -49,8 +56,6 @@
 	height: 60px;
 	top: 40%;
 	position: relative;
-	width: 24px;
-	transform: translate(-50%, 25%);
 }
 
 .classes_media {
@@ -61,7 +66,8 @@
 	display: flex;
 	position: relative;
 	width: 100%;
-	max-width: 40vw;
+	max-width: 20vw;
+	min-width: 20vw;
 	transition-property: width, height, top;
 	transition-duration: 700ms;
 	border-radius: 7px;
@@ -74,7 +80,7 @@
 	height: 50px;
 }
 
-.el>.brief {
+.brief {
 	padding-top: 1px;
 	padding-bottom: 2px;
 	padding-left: 3px;
@@ -90,6 +96,11 @@
 	border: 3px solid #009084;
 	border-radius: 3px;
 	box-sizing: border-box;
+}
+
+.brief p {
+	margin: 0px;
+	margin-bottom: 2px;
 }
 
 .el>.info {
@@ -116,6 +127,7 @@
 
 .el_hidden {
 	width: 1%;
+	max-width: 1%;
 }
 
 .el_hidden>* {
@@ -136,31 +148,36 @@
 	background-color: green;
 }
 
-@media (height < 900px) {
-	.week_media {
-		height: 700vh;
-		width: 100%;
-	}
-
-	.classes_media {
-		font-size: calc(1.4vw + 2vh);
-		height: 100vh;
-	}
-
-	.hours>div {
-		height: 4.167vh;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-	}
-}
-
-@media (width < 1200px) {
-	.el_selected {
-		font-size: 5vw;
+@media (orientation: landscape) {
+	.day_name {
+		width: 24px;
+		transform: translate(-50%, 25%);
 	}
 
 	.week {
-		font-size: 2vw;
+		font-size: 22px;
+		/* font-size: 2vw; */
 	}
+/* 
+	.classes_no_selected::after {
+		min-width: 72.2vw;
+		content: ' ';
+	} */
+}
+
+@media (orientation: portrait) {
+	.day_name {
+		width: 40px;
+		transform: translate(-50%, 10%);
+	}
+
+	.week {
+		font-size: 36px;
+		/* font-size: 2vw; */
+	}
+
+	/* .classes_no_selected::after {
+		min-width: 67vw;
+		content: ' ';
+	} */
 }

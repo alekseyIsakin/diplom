@@ -44,7 +44,7 @@ const WEEK_DURATION = 7 * 24 * 60 * 60 * 1000
 const MONDAY_START_MINUTS = Math.floor(MONDAY.getTime() / (60 * 1000))
 
 // var APPLICATION_SERVER_URL = "https://w0m0site.freemyip.com/";
-var APPLICATION_SERVER_URL = "http://192.168.3.4:8000/";
+// var APPLICATION_SERVER_URL = "http://192.168.3.4:8000/";
 
 
 $(function () {
@@ -71,8 +71,10 @@ $(function () {
 				if (cur_element.classList.contains('el_selected')) {
 					cur_element.classList.remove('el_selected')
 					$(`#${day_id} .el`).removeClass('el_hidden')
+					$(`#${day_id} .classes`).addClass('classes_no_selected')
 					show_shedule_in_day(day_id)
 				} else {
+					$(`#${day_id} .classes`).removeClass('classes_no_selected')
 					$(`#${day_id} .el`).addClass('el_hidden')
 					$(`#${day_id} .el`).removeClass('el_selected')
 					$(`#${day_id} .el`).removeAttr('style')
@@ -132,7 +134,7 @@ const load_shedule = (group_id, teacher_id, from, to) => {
 	return new Promise((resolve, reject) => {
 		$.ajax({
 			type: 'GET',
-			url: APPLICATION_SERVER_URL + 'db/shedule',
+			url: '/db/shedule',
 			data: { group_id: group_id, from: from, to: to },
 			headers: { "Content-Type": "application/json" },
 			success: (response) => resolve(response),
@@ -151,31 +153,35 @@ const classes_to_ui = (cls) => {
 	// console.log(dt)
 	if ((dt - MONDAY) < WEEK_DURATION && (dt - MONDAY) > 0) {
 		// total minuts => minuts in cur day => percent
-		const from = (time_offset + cls.start % (24 * 60)) / 14.40
+		const from = ((time_offset + cls.start) % (24 * 60)) / 14.40
 		const duration = cls.duration_minuts / 14.40
 		const div = document.createElement('div')
 		// console.log(from, duration)
 		const teacher = `${cls.second_name} ${cls.first_name[0]}. ${cls.thrid_name[0]}.`
 
-		const brief = document.createElement('span')
+		const brief = document.createElement('div')
+		const brief1 = document.createElement('p')
+		const brief2 = document.createElement('p')
 		const info = document.createElement('div')
 		const info_class = document.createElement('p')
 		const info_teacher = document.createElement('p')
 		const info_start = document.createElement('p')
 		const info_duration = document.createElement('p')
 		const info_group = document.createElement('p')
+		const empty_el = document.createElement('div')
 
 		div.setAttribute('top', from + '%')
 		div.setAttribute('height', duration + '%')
 
 		div.classList.add('el')
 		div.classList.add('el1')
-
+		empty_el.className= 'empty_el'
 		brief.className = 'brief'
 		info.className = 'info'
 		console.log(group_id)
 
-		brief.textContent = `${ group_id.length == 0 ? cls.group_title : teacher} | ${cls.class_title}`
+		brief1.textContent = `${ group_id.length == 0 ? cls.group_title : teacher}`
+		brief2.textContent = `${cls.class_title}`
 
 		info_class.textContent = `Предмет: ${cls.class_title}\n`
 		info_teacher.textContent = `Преподаватель: ${teacher}\n`
@@ -189,9 +195,12 @@ const classes_to_ui = (cls) => {
 		info.appendChild(info_duration)
 		info.appendChild(info_group)
 
+		brief.appendChild(brief1)
+		brief.appendChild(brief2)
 		div.appendChild(info)
 		div.appendChild(brief)
 
-		$(`#day${day} .classes`).append(div)
+		$(`#day${day} .classes`).append(div)		
 	}
 }
+

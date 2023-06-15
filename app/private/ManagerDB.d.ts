@@ -9,6 +9,11 @@ type GetGroupsR = {
     id: number;
     group_title: String;
 };
+type GetSessionsTokenR = {
+    tiken: String;
+    group_title: String;
+    student_id: number;
+};
 type GetRegisteredClassesParticial = {
     id: number;
     start: number;
@@ -40,6 +45,8 @@ type RegisterNewClassesR = {
     id: number;
 };
 export declare class DataBase {
+    static is_connected: boolean;
+    static start_check_connect(): Promise<void>;
     static check_user_password(error: ErrorHandler, success: SuccesHandler<CheckPassportS>, user_nick: String, password: String): Promise<void>;
     static get_groups(error: ErrorHandler, success: SuccesHandler<GetGroupsR[]>): void;
     static add_new_class(error: ErrorHandler, success: SuccesHandler<null>, teacher_id: number, group_id: number, class_title: String): void;
@@ -65,6 +72,7 @@ export declare class DataBase {
      * @param {SuccesHandler<null>} error
     */
     static clear_sessions(error: ErrorHandler, success: SuccesHandler<null>): void;
+    static get_sessions_token(error: ErrorHandler, success: SuccesHandler<GetSessionsTokenR[]>, user_id: number): void;
     static unregister_class(error: ErrorHandler, success: SuccesHandler<null>, registered_class_id: number): void;
     static unregister_classes(error: ErrorHandler, success: SuccesHandler<null>, registered_class_id: number[]): void;
     static save_sesion(error: ErrorHandler, success: SuccesHandler<null>, group_id: number, openvidu_session: String): void;

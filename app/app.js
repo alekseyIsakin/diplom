@@ -1,5 +1,6 @@
 'use strict'
 
+require('dotenv').config();
 
 
 const express = require('express')
@@ -16,11 +17,14 @@ const Index = require('./private/routes/index');
 const Admin = require('./private/routes/admin');
 const Teacher = require('./private/routes/teacher');
 const Route_DB = require('./private/routes/db');
+const Route_API = require('./private/routes/api');
+
 const ROUTES = require('./private/routes/ROUTES')
 
 const app = express()
 
-require('./private/ManagerDB')
+const { DataBase } = require('./private/ManagerDB')
+DataBase.start_check_connect()
 require('./private/sessionManager').SessionManager.first_load()
 
 app.set('views', __dirname + '/private/views')
@@ -43,12 +47,12 @@ app.use(session({
 	cookie: { maxAge: 24 * 60 * 60 * 1000 },
 }));
 app.use(passport.authenticate('session'));
-
 app.use(ROUTES.Auth.pathname, Auth);
 app.use(ROUTES.Index.pathname, Index);
 app.use(ROUTES.Index.pathname, Teacher);
 app.use(ROUTES.Admin.pathname, Admin);
 app.use(ROUTES.DB.pathname, Route_DB);
+app.use(ROUTES.API.pathname, Route_API);
 
 app.use(function (req, res, next) {
 	logger._debug(`[${req.url}] not found`, true)

@@ -185,6 +185,17 @@ class SessionManager {
 	static new_registered_class(class_el) {
 		setup_new_job(class_el)
 	}
+	static async createConnection(session_id) {
+		const session = openvidu.activeSessions.find(s => s.sessionId == session_id)
+
+		if (session === undefined) return 
+		const connectionProperties = {
+		  role: "PUBLISHER",
+		  data: "user_data"
+		}
+		const connection = await session.createConnection(connectionProperties);
+		return connection.token
+	}
 }
 
 module.exports = { SessionManager }

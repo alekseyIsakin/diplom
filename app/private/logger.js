@@ -1,8 +1,5 @@
 'use strict'
-
-require('dotenv').config();
 const path = require('path')
-
 const winston = require('winston');
 
 const get_debug_info = () => {

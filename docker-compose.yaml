@@ -1,63 +1,34 @@
 version: '3'
 services:
-  pg:
-    container_name: pg
-    image: postgres:15
-    ports:
-      - ${_PGPORT}:${_PGPORT}
-    environment:
-      POSTGRES_DB: ${_PGDB}
-      POSTGRES_USER: ${_PGUSER}
-      POSTGRES_PASSWORD: ${_PGPASSWORD}
-      PGDATA: "/var/lib/postgresql/data/pgdata"
-    volumes:
-      - ./psql/data:/var/lib/postgresql/data
-      - ./psql/init_scripts:/docker-entrypoint-initdb.d
-    command: -p ${_PGPORT}
-
   app:
     container_name: app
     build:
       context: ./app
     ports:
-      - '81:${_APP_PORT}'
-      
+      - '5442:5442'
     environment:
-      PORT: ${_APP_PORT}
-      # Postgres connection
-      PGDB: ${_PGDB}
-      PGUSER: ${_PGUSER}
-      PGPASSWORD: ${_PGPASSWORD}
-      PGPORT: ${_PGPORT}
-      PGHOST: "pg"
-      # Agora data
-      APPID: ${_APPID}
-      APPCERTIFICATE: ${_APPCERTIFICATE}
-      
-      LOG_LEVEL: "debug"
-    restart: "on-failure:3"
+      _APP_PORT: 5442
+      LOG_LEVEL: 'debug'
+      HOST: 'http://192.168.3.4:5442/'
+      # Mysql connection
+      MYSQL_USER: 'root'
+      MYSQL_DB: 'users'
+      MYSQL_SECRET: '123'
+      MYSQL_PORT: 3306
+      MYSQL_HOST: 'mysql'
+      # OPENVIDU
+      OPENVIDU_URL: 'https://w0m0site.freemyip.com'
+      OPENVIDU_SECRET: 'secret_11'
+    # restart: "on-failure:3"
     depends_on:
-      - pg
-
-
-  pgadmin:
-    container_name: pgadmin
-    image: dpage/pgadmin4
+      - mysql
+  mysql:
+    container_name: mysql
+    image: mysql
     environment:
-      PGADMIN_DEFAULT_EMAIL: info@proglib.io
-      PGADMIN_DEFAULT_PASSWORD: qwertyuiop
-    expose:
-      - '80'
-    restart: always
-    depends_on:
-      - pg
-  
-  nginx:
-    container_name: nginx
-    build: 
-      context: ./nginx
+      MYSQL_ROOT_PASSWORD: 123
+    volumes:
+      - ./mysql/mysql-data:/var/lib/mysql
+      - ./mysql/init_scripts/:/docker-entrypoint-initdb.d/
     ports:
-      - '80:80'
-    depends_on:
-      - app
-      - pg
+     - "3306:3306"
