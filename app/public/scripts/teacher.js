@@ -261,7 +261,7 @@ const unregister_marked_classes = () => {
 const delete_marked_classes = () => {
     const to_delete_ids = []
 
-    $('.to_delete > .one_class')
+    $('.class_to_delete > .one_class')
         .each(function (el) {
             to_delete_ids.push($(this)[0].getAttribute('class_id'))
         })
