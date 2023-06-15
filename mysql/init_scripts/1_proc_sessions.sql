@@ -2,17 +2,17 @@ USE users;
 
 DELIMITER $$;
 
-create view get_session_student_groups as
+CREATE VIEW get_session_student_groups AS
 SELECT
-	session_token as token,
-	g.title as group_title,
-	sg.student_id as student_id
+	session_token AS token,
+	g.title AS group_title,
+	sg.student_id AS student_id
 FROM
 	student_group AS sg
 	LEFT JOIN sessions AS s ON sg.group_id = s.group_id
 	LEFT JOIN s_groups AS g ON g.id = sg.group_id;
 
-create view get_session_teacher_groups as
+CREATE VIEW get_session_teacher_groups AS
 SELECT
 	session_token AS token,
 	gt.title AS group_title,
@@ -22,29 +22,45 @@ FROM
 	LEFT JOIN teacher_classes AS tc ON tc.id = ss.class_id
 	LEFT JOIN s_groups AS gt ON tc.group_id = gt.id;
 
-DROP FUNCTION get_session_token$$ 
-CREATE FUNCTION get_session_token(user_id bigint UNSIGNED) 
-returns text DETERMINISTIC BEGIN
-DECLARE is_teacher tinyint DEFAULT 0;
-DECLARE session_id text DEFAULT '';
+CREATE FUNCTION get_session_token(user_id bigint UNSIGNED) returns text DETERMINISTIC BEGIN
+	DECLARE
+		is_teacher tinyint DEFAULT 0;
 
-SELECT COUNT(*) 
-INTO is_teacher
-FROM teachers
-WHERE id = user_id; 
-IF is_teacher = 0 
-	THEN
-		select token 
-		into session_id
-		from get_session_student_groups where student_id=user_id limit 1;
-	ELSE
-		select token 
-		INTO session_id
-		from get_session_teacher_groups where teacher_id=user_id limit 1;
+DECLARE
+	session_id text DEFAULT '';
+
+SELECT
+	COUNT(*) INTO is_teacher
+FROM
+	teachers
+WHERE
+	id = user_id;
+
+IF is_teacher = 0 THEN
+SELECT
+	token INTO session_id
+FROM
+	get_session_student_groups
+WHERE
+	student_id = user_id
+LIMIT
+	1;
+
+ELSE
+SELECT
+	token INTO session_id
+FROM
+	get_session_teacher_groups
+WHERE
+	teacher_id = user_id
+LIMIT
+	1;
+
 END IF;
-RETURN session_id;
-END $$
 
+RETURN session_id;
+
+END $$;
 CREATE VIEW get_registered_classes AS
 SELECT
 	s.id,
@@ -164,7 +180,11 @@ END $$;
 --
 --
 --
-CREATE PROCEDURE save_session(_class_id BIGINT, _group_id BIGINT, _session_token TEXT) BEGIN
+CREATE PROCEDURE save_session(
+	_class_id BIGINT,
+	_group_id BIGINT,
+	_session_token TEXT
+) BEGIN
 	START TRANSACTION;
 
 INSERT INTO
@@ -195,7 +215,6 @@ WHERE
 RETURN (_session_token);
 
 END $$;
-
 
 --
 --
