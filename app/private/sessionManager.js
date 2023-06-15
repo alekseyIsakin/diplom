@@ -53,6 +53,7 @@ const class_exec = (class_el) => {
 					class_el.duration_minuts * 60 * 1000,
 					class_el)
 			},
+			class_el.id,
 			class_el.group_id,
 			session.sessionId)
 

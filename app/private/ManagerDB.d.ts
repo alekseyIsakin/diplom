@@ -72,10 +72,10 @@ export declare class DataBase {
      * @param {SuccesHandler<null>} error
     */
     static clear_sessions(error: ErrorHandler, success: SuccesHandler<null>): void;
-    static get_sessions_token(error: ErrorHandler, success: SuccesHandler<GetSessionsTokenR[]>, user_id: number): void;
+    static get_sessions_token(error: ErrorHandler, success: SuccesHandler<GetSessionsTokenR[]>, teacher_id: number): void;
     static unregister_class(error: ErrorHandler, success: SuccesHandler<null>, registered_class_id: number): void;
     static unregister_classes(error: ErrorHandler, success: SuccesHandler<null>, registered_class_id: number[]): void;
-    static save_sesion(error: ErrorHandler, success: SuccesHandler<null>, group_id: number, openvidu_session: String): void;
+    static save_sesion(error: ErrorHandler, success: SuccesHandler<null>, id: number, group_id: number, openvidu_session: String): void;
     static delete_sesion(error: ErrorHandler, success: SuccesHandler<string[]>, group_id: number): void;
 }
 export {};

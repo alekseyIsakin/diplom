@@ -377,19 +377,20 @@ export class DataBase {
 	static get_sessions_token(
 		error: ErrorHandler,
 		success: SuccesHandler<GetSessionsTokenR[]>,
-		user_id: number) {
-		const q: String = `
-		SELECT token, group_title, student_id from get_session_groups where student_id=?;`
-		const v: any[] = [user_id]
-		const p = make_query<GetSessionsTokenR>(q, v)
-		if (p !== undefined)
-			p.then((value) => {
-				if (value.error)
-					error(value.error)
-				else
-					success(value.results)
-			})
+		teacher_id: number) {
+			const q: String = `
+			SELECT get_session_token(?) as token;`
+			const v: any[] = [teacher_id]
+			const p = make_query<GetSessionsTokenR>(q, v)
+			if (p !== undefined)
+				p.then((value) => {
+					if (value.error)
+						error(value.error)
+					else
+						success(value.results)
+				})
 	}
+
 
 	static unregister_class(
 		error: ErrorHandler,
@@ -426,10 +427,11 @@ export class DataBase {
 	static save_sesion(
 		error: ErrorHandler,
 		success: SuccesHandler<null>,
+		id: number,
 		group_id: number,
 		openvidu_session: String) {
-		const q: String = "CALL save_session(?,?);"
-		const v: any = [group_id, openvidu_session]
+		const q: String = "CALL save_session(?,?,?);"
+		const v: any = [id, group_id, openvidu_session]
 		logger._info(`save sessions for group: ${v}`, true)
 
 		const p = make_query<null>(q, v)

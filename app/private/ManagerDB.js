@@ -264,10 +264,10 @@ class DataBase {
                     success(null);
             });
     }
-    static get_sessions_token(error, success, user_id) {
+    static get_sessions_token(error, success, teacher_id) {
         const q = `
-		SELECT token, group_title, student_id from get_session_groups where student_id=?;`;
-        const v = [user_id];
+			SELECT get_session_token(?) as token;`;
+        const v = [teacher_id];
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
@@ -303,9 +303,9 @@ class DataBase {
                     success(null);
             });
     }
-    static save_sesion(error, success, group_id, openvidu_session) {
-        const q = "CALL save_session(?,?);";
-        const v = [group_id, openvidu_session];
+    static save_sesion(error, success, id, group_id, openvidu_session) {
+        const q = "CALL save_session(?,?,?);";
+        const v = [id, group_id, openvidu_session];
         logger._info(`save sessions for group: ${v}`, true);
         const p = make_query(q, v);
         if (p !== undefined)

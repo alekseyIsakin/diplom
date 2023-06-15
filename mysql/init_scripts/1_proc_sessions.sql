@@ -2,7 +2,7 @@ USE users;
 
 DELIMITER $$;
 
-create view get_session_groups as
+create view get_session_student_groups as
 SELECT
 	session_token as token,
 	g.title as group_title,
@@ -11,6 +11,39 @@ FROM
 	student_group AS sg
 	LEFT JOIN sessions AS s ON sg.group_id = s.group_id
 	LEFT JOIN s_groups AS g ON g.id = sg.group_id;
+
+create view get_session_teacher_groups as
+SELECT
+	session_token AS token,
+	gt.title AS group_title,
+	tc.teacher_id AS teacher_id
+FROM
+	sessions ss
+	LEFT JOIN teacher_classes AS tc ON tc.id = ss.class_id
+	LEFT JOIN s_groups AS gt ON tc.group_id = gt.id;
+
+DROP FUNCTION get_session_token$$ 
+CREATE FUNCTION get_session_token(user_id bigint UNSIGNED) 
+returns text DETERMINISTIC BEGIN
+DECLARE is_teacher tinyint DEFAULT 0;
+DECLARE session_id text DEFAULT '';
+
+SELECT COUNT(*) 
+INTO is_teacher
+FROM teachers
+WHERE id = user_id; 
+IF is_teacher = 0 
+	THEN
+		select token 
+		into session_id
+		from get_session_student_groups where student_id=user_id limit 1;
+	ELSE
+		select token 
+		INTO session_id
+		from get_session_teacher_groups where teacher_id=user_id limit 1;
+END IF;
+RETURN session_id;
+END $$
 
 CREATE VIEW get_registered_classes AS
 SELECT
@@ -131,13 +164,13 @@ END $$;
 --
 --
 --
-CREATE PROCEDURE save_session(_group_id BIGINT, _session_token TEXT) BEGIN
+CREATE PROCEDURE save_session(_class_id BIGINT, _group_id BIGINT, _session_token TEXT) BEGIN
 	START TRANSACTION;
 
 INSERT INTO
-	sessions (group_id, session_token)
+	sessions (class_id, group_id, session_token)
 VALUES
-	(_group_id, _session_token);
+	(_class_id, _group_id, _session_token);
 
 COMMIT;
 
