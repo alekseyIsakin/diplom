@@ -2,6 +2,16 @@ USE users;
 
 DELIMITER $$;
 
+create view get_session_groups as
+SELECT
+	session_token as token,
+	g.title as group_title,
+	sg.student_id as student_id
+FROM
+	student_group AS sg
+	LEFT JOIN sessions AS s ON sg.group_id = s.group_id
+	LEFT JOIN s_groups AS g ON g.id = sg.group_id
+
 CREATE VIEW get_registered_classes AS
 SELECT
 	s.id,
@@ -152,6 +162,7 @@ WHERE
 RETURN (_session_token);
 
 END $$;
+
 
 --
 --
