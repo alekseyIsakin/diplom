@@ -48,7 +48,7 @@ export declare class DataBase {
     static is_connected: boolean;
     static start_check_connect(): Promise<void>;
     static check_user_password(error: ErrorHandler, success: SuccesHandler<CheckPassportS>, user_nick: String, password: String): Promise<void>;
-    static get_groups(error: ErrorHandler, success: SuccesHandler<GetGroupsR[]>): void;
+    static get_groups(error: ErrorHandler, success: SuccesHandler<GetGroupsR[]>, group_ids?: number[]): void;
     static add_new_class(error: ErrorHandler, success: SuccesHandler<null>, teacher_id: number, group_id: number, class_title: String): void;
     static get_classes(error: ErrorHandler, success: SuccesHandler<GetClassesR[]>, class_title: String, teacher_id: number): void;
     /**

@@ -17,6 +17,19 @@ const { json } = require('body-parser');
 // }
 
 
+const is_teacher = (req, res, next) => {
+	const group_cnt = req.session
+		.passport
+		.user
+		.group_id
+		.every(g_id => g_id == null)
+
+	if (group_cnt)
+		next()
+	else
+		res.status(403).send('access denied')
+}
+
 
 router.get('/classes',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
@@ -33,6 +46,7 @@ router.get('/classes',
 	})
 router.delete('/classes',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
+	is_teacher,
 	(req, res) => {
 		const teacher_id = req.session.passport.user.id
 		const trusted_id = []
@@ -55,6 +69,7 @@ router.delete('/classes',
 
 router.post('/classes',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
+	is_teacher,
 	(req, res) => {
 		logger._debug(`add class ${req.body.class_title} [${req.body.group_id}]`)
 		const teacher_id = req.session.passport.user.id
@@ -84,8 +99,9 @@ router.get('/groups',
 
 router.delete('/shedule',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
+	is_teacher,
 	(req, res) => {
-		logger._info(`request for delete ${JSON.stringify(req.body.id)}`)
+			logger._info(`request for delete ${JSON.stringify(req.body.id)}`)
 		DataBase.unregister_classes(
 			(err) => {
 				res.status(500).send()
@@ -99,6 +115,7 @@ router.delete('/shedule',
 	})
 router.post('/shedule',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
+	is_teacher,
 	(req, res) => {
 		const r = req.body
 		const dt = new Date(Number(r.start) * 60 * 1000)
@@ -116,7 +133,7 @@ router.post('/shedule',
 			(result) => {
 				logger._debug(`collisions [${result}]`)
 				if (!result) {
-					res.status(412).send('collision error') 
+					res.status(412).send('collision error')
 					return
 				}
 				DataBase.register_class(

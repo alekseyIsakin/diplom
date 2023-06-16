@@ -161,9 +161,19 @@ export class DataBase {
 	// static delete_group(title) { }
 	static get_groups(
 		error: ErrorHandler,
-		success: SuccesHandler<GetGroupsR[]>) {
-		const q: String = "SELECT id, group_title FROM get_groups;"
+		success: SuccesHandler<GetGroupsR[]>,
+		group_ids?: number[]) {
+		const q: String = `SELECT id, group_title FROM get_groups ${
+			group_ids === undefined ?
+			';' :
+			'where id in (' + new Array(group_ids?.length).fill('?').join() + ')'
+		}`
+			
+
 		const v: any[] = []
+		if (group_ids !== undefined)
+			for (let i = 0; i < group_ids.length; i++)
+				v.push(group_ids[i])
 		const p = make_query<GetGroupsR>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
@@ -378,17 +388,17 @@ export class DataBase {
 		error: ErrorHandler,
 		success: SuccesHandler<GetSessionsTokenR[]>,
 		teacher_id: number) {
-			const q: String = `
+		const q: String = `
 			SELECT get_session_token(?) as token;`
-			const v: any[] = [teacher_id]
-			const p = make_query<GetSessionsTokenR>(q, v)
-			if (p !== undefined)
-				p.then((value) => {
-					if (value.error)
-						error(value.error)
-					else
-						success(value.results)
-				})
+		const v: any[] = [teacher_id]
+		const p = make_query<GetSessionsTokenR>(q, v)
+		if (p !== undefined)
+			p.then((value) => {
+				if (value.error)
+					error(value.error)
+				else
+					success(value.results)
+			})
 	}
 
 

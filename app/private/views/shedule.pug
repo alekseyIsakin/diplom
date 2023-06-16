@@ -2,14 +2,16 @@ doctype html
 
 html
   head
-    title Render HTML using PUG
+    title Раписание
     script(src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous")
     script(type="text/javascript" src="scripts/shedule.js")
     link(rel="stylesheet" href="css/shedule.css")
     link(rel="stylesheet" href="css/header.css")
   body
     div#top_ribbon
-      h1 Расписание
+      -
+      -var r = Groups.length > 0 ? 'для групп: ' + Groups.join(', ') : ''
+      h1 Расписание #{r} 
       a#logout(href='/auth/logout', draggable="false")
         div
 

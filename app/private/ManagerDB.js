@@ -108,9 +108,14 @@ class DataBase {
     // static delete_user(id) { }
     // static add_new_group(title) { }
     // static delete_group(title) { }
-    static get_groups(error, success) {
-        const q = "SELECT id, group_title FROM get_groups;";
+    static get_groups(error, success, group_ids) {
+        const q = `SELECT id, group_title FROM get_groups ${group_ids === undefined ?
+            ';' :
+            'where id in (' + new Array(group_ids === null || group_ids === void 0 ? void 0 : group_ids.length).fill('?').join() + ')'}`;
         const v = [];
+        if (group_ids !== undefined)
+            for (let i = 0; i < group_ids.length; i++)
+                v.push(group_ids[i]);
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {

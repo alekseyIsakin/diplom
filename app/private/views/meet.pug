@@ -1,0 +1,17 @@
+doctype html
+html
+	head
+    	title Встреча
+		link(rel="shortcut icon" href="favicon.ico" type="image/x-icon")>
+		script( src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous")
+    	script(src="scripts/app.js")
+    	script(src="scripts/openvidu-webcomponent-2.27.0.js")
+    	link(rel="stylesheet" href="css/openvidu-webcomponent-2.27.0.css")
+    	link(rel="stylesheet" href="css/app.css")
+	body
+		div#main(style="text-align: center;")
+		h1 Открытые встречи
+		form(onsubmit="joinSession(); return false" style="padding: 80px; margin: auto")
+			p
+				input(type="submit" value="JOIN")
+	    openvidu-webcomponent(style="height: 100%;")

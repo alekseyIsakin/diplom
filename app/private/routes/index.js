@@ -4,28 +4,37 @@ const ROUTES = require('./ROUTES')
 const ensureLogIn = require('connect-ensure-login').ensureLoggedIn;
 const logger = require('../logger')(__filename);
 const path = require('path')
+const { DataBase } = require('../ManagerDB')
 
 
 router.get('/shedule',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
 	async (req, res) => {
-		res.render('shedule', { nick: JSON.stringify(req.session.passport.user) });
+		const groups = req.session.passport.user.group_id
+		DataBase.get_groups(
+			() => {
+				res.render('shedule', { Groups: ['internal error'] });
+			},
+			(result) => {
+				res.render('shedule', {
+					Groups:
+						result.map(v => v.group_title)
+				});
+			},
+			groups
+		)
 	})
 
-router.get('/test', (req, res) => {
-	const p = __dirname.split('\\')
-	p.splice(-1, 1)
-	res.sendFile('test.html', { root: p.join('\\') + '\\views' })
-})
+// router.get('/test', (req, res) => {
+// 	const p = __dirname.split('\\')
+// 	p.splice(-1, 1)
+// 	res.sendFile('test.html', { root: p.join('\\') + '\\views' })
+// })
 
 router.get('/meet',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
 	(req, res) => {
-		const p = __dirname.split(path.sep)
-		p.splice(-2, 3)
-		let p_s = p.join(path.sep)
-		p_s = path.join(p_s, 'public', 'html')
-		res.sendFile('index.html', { root: p_s })
+		res.render('meet')
 	})
 
 module.exports = router;
