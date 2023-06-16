@@ -143,6 +143,7 @@ const setup_new_job = (class_el) => {
 			},
 			null,
 		)
+		job_list[String(class_el.id)] = {}
 		job_list[String(class_el.id)]['job'] = job
 		job_list.length += 1
 		logger._info(`setup new cron for [${JSON.stringify(class_el)}]`)

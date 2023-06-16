@@ -12,7 +12,7 @@ router.get('/shedule/users/:user_id',
 	ensureLogIn(new URL('login', ROUTES.Auth).href),
 	async (req, res) => {
 		const user_id = Number(req.params.user_id)
-		const user_groups = Number(req.params.user_id)
+		logger._debug(`get /shedule/users/ ${user_id}`)
 
 		DataBase.get_sessions_token(
 			(err) => { res.status(500).send() },

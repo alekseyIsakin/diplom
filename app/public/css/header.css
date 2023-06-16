@@ -1,0 +1,57 @@
+:root{
+	--ribbon-height: ;
+}
+
+#top_ribbon {
+	width: auto;
+	height: 48px;
+	height: var(--ribbon-height);
+	position: sticky;
+	top: 0px;
+	background: rgb(200, 190, 193);
+	border: black 3px solid;
+	padding-left: 25px;
+	z-index: 25;
+	display: flex;
+	align-items: center;
+	flex-flow: row;
+	justify-content: space-between;
+}
+
+#top_ribbon>h1 {
+	margin: 0px;
+	display: flex;
+}
+
+#logout{
+	
+}
+#logout {
+	width: var(--ribbon-height);
+	height: var(--ribbon-height);
+	display: flex;
+	background-image: url('/media/logout_small.png');
+	background-size: cover;
+}
+
+#logout:active {
+	background-image: url('/media/logout_small_p.png');
+}
+
+
+@media (orientation: landscape) {
+	:root{
+		--ribbon-height: 48px;
+	}
+}
+
+@media (orientation: portrait) {
+	:root{
+		--ribbon-height: 64px;
+	}
+}
+@media (min-width: 1200px){
+	:root{
+		--ribbon-height: 64px;
+	}
+}
