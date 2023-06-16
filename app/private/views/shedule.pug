@@ -8,12 +8,8 @@ html
     link(rel="stylesheet" href="css/shedule.css")
     link(rel="stylesheet" href="css/header.css")
   body
-    div#top_ribbon
-      -
-      -var r = Groups.length > 0 ? 'для групп: ' + Groups.join(', ') : ''
-      h1 Расписание #{r} 
-      a#logout(href='/auth/logout', draggable="false")
-        div
+    -var header_title= 'Расписание'
+    include header.pug
 
     - var days=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье']
     div(class='week week_media')

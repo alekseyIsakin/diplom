@@ -7,10 +7,15 @@ html
 		script(src="scripts/app.js")
 		script(src="scripts/openvidu-webcomponent-2.27.0.js")
 		link(rel="stylesheet" href="css/openvidu-webcomponent-2.27.0.css")
+		link(rel="stylesheet" href="css/header.css")
 		link(rel="stylesheet" href="css/app.css")
 	body
+		-var header_title= 'Личный кабинет'
+		-var Groups=[]
+		include header.pug
 		div#main(style="text-align: center;")
 			h1 Открытые встречи
 			div#open_groups
 			//- button(onclick="joinSession(); return false" style="padding: 80px; margin: auto")
-		openvidu-webcomponent(style="height: 100%;")
+		div(style="height: 100%;")
+			openvidu-webcomponent(style="display: block;height: 100%;")

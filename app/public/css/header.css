@@ -1,4 +1,4 @@
-:root{
+:root {
 	--ribbon-height: ;
 }
 
@@ -23,15 +23,38 @@
 	display: flex;
 }
 
-#logout{
-	
+#links {
+	display: flex;
+	flex-flow: row;
 }
+
+#account,
+#shedule,
+#meeting,
 #logout {
 	width: var(--ribbon-height);
 	height: var(--ribbon-height);
 	display: flex;
-	background-image: url('/media/logout_small.png');
+
 	background-size: cover;
+}
+
+#shedule {
+	background-image: url('/media/calendar.png');
+}
+
+#account {
+	background-image: url('/media/account.png');
+}
+
+#meeting {
+	background-image: url('/media/meeting.png');
+}
+
+#logout {
+	margin-left: var(--ribbon-height);
+	;
+	background-image: url('/media/logout_small.png');
 }
 
 #logout:active {
@@ -40,18 +63,19 @@
 
 
 @media (orientation: landscape) {
-	:root{
+	:root {
 		--ribbon-height: 48px;
 	}
 }
 
 @media (orientation: portrait) {
-	:root{
+	:root {
 		--ribbon-height: 64px;
 	}
 }
-@media (min-width: 1200px){
-	:root{
+
+@media (min-width: 1200px) {
+	:root {
 		--ribbon-height: 64px;
 	}
 }

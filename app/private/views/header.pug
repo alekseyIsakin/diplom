@@ -1,0 +1,9 @@
+div#top_ribbon
+	-var r = Groups.length > 0 ? 'для групп: ' + Groups.join(', ') : ''
+	h1 #{header_title} #{r} 
+	div#links
+		a#shedule(href='/shedule', draggable="false")
+		-if(Groups.length == 0)
+			a#account(href='/teacher', draggable="false")
+		a#meeting(href='/meet', draggable="false")
+		a#logout(href='/auth/logout', draggable="false")
