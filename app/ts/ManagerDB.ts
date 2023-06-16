@@ -32,7 +32,8 @@ type CheckRegisterCollision = { collisions: number }
 type GetSessionsTokenR = {
 	token: String,
 	group_title: String,
-	student_id: number
+	user_id: number
+	is_teacher: number
 }
 
 type GetRegisteredClassesParticial = {
@@ -163,12 +164,11 @@ export class DataBase {
 		error: ErrorHandler,
 		success: SuccesHandler<GetGroupsR[]>,
 		group_ids?: number[]) {
-		const q: String = `SELECT id, group_title FROM get_groups ${
-			group_ids === undefined ?
+		const q: String = `SELECT id, group_title FROM get_groups ${group_ids === undefined ?
 			';' :
 			'where id in (' + new Array(group_ids?.length).fill('?').join() + ')'
-		}`
-			
+			}`
+
 
 		const v: any[] = []
 		if (group_ids !== undefined)
@@ -387,18 +387,55 @@ export class DataBase {
 	static get_sessions_token(
 		error: ErrorHandler,
 		success: SuccesHandler<GetSessionsTokenR[]>,
-		teacher_id: number) {
+		user_id: number) {
+
 		const q: String = `
-			SELECT get_session_token(?) as token;`
-		const v: any[] = [teacher_id]
+			SELECT count(*) as is_teacher from teachers where id=?;`
+		const v: any[] = [user_id]
 		const p = make_query<GetSessionsTokenR>(q, v)
-		if (p !== undefined)
-			p.then((value) => {
-				if (value.error)
-					error(value.error)
-				else
-					success(value.results)
+		p?.then((value) => {
+			if (value.error) {
+				error(value.error)
+				return
+			}
+			let p: Promise<RHandler<GetSessionsTokenR>> | undefined
+
+			if (value.results[0].is_teacher == 0)
+				p = DataBase.get_sessions_token_for_students(error, success, user_id)
+			else
+				p = DataBase.get_sessions_token_for_teacher(error, success, user_id)
+
+			p?.then(res => {
+				logger._debug(JSON.stringify(res))
+				if (res.error)
+					error(res.error)
+				else{
+					success(res.results)
+				}
+			}).catch(err => {
+				logger._debug(JSON.stringify(err))
 			})
+		})
+	}
+
+	static get_sessions_token_for_teacher(error: ErrorHandler,
+		success: SuccesHandler<GetSessionsTokenR[]>,
+		user_id: number) {
+
+		const q: String = `
+			SELECT * from get_session_teacher_groups where user_id=?;`
+		const v: any[] = [user_id]
+		return make_query<GetSessionsTokenR>(q, v)
+	}
+
+	static get_sessions_token_for_students(error: ErrorHandler,
+		success: SuccesHandler<GetSessionsTokenR[]>,
+		user_id: number) {
+
+		const q: String = `
+			SELECT * from get_session_student_groups where user_id=?;`
+		const v: any[] = [user_id]
+		return make_query<GetSessionsTokenR>(q, v)
 	}
 
 

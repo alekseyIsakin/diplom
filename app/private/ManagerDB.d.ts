@@ -1,5 +1,9 @@
 type ErrorHandler = (error?: Error) => void;
 type SuccesHandler<T> = (results: T) => void;
+type RHandler<T> = {
+    error?: Error;
+    results: T[];
+};
 type CheckPassportS = {
     id: number;
     nick: String;
@@ -12,7 +16,8 @@ type GetGroupsR = {
 type GetSessionsTokenR = {
     token: String;
     group_title: String;
-    student_id: number;
+    user_id: number;
+    is_teacher: number;
 };
 type GetRegisteredClassesParticial = {
     id: number;
@@ -72,7 +77,9 @@ export declare class DataBase {
      * @param {SuccesHandler<null>} error
     */
     static clear_sessions(error: ErrorHandler, success: SuccesHandler<null>): void;
-    static get_sessions_token(error: ErrorHandler, success: SuccesHandler<GetSessionsTokenR[]>, teacher_id: number): void;
+    static get_sessions_token(error: ErrorHandler, success: SuccesHandler<GetSessionsTokenR[]>, user_id: number): void;
+    static get_sessions_token_for_teacher(error: ErrorHandler, success: SuccesHandler<GetSessionsTokenR[]>, user_id: number): Promise<RHandler<GetSessionsTokenR>> | undefined;
+    static get_sessions_token_for_students(error: ErrorHandler, success: SuccesHandler<GetSessionsTokenR[]>, user_id: number): Promise<RHandler<GetSessionsTokenR>> | undefined;
     static unregister_class(error: ErrorHandler, success: SuccesHandler<null>, registered_class_id: number): void;
     static unregister_classes(error: ErrorHandler, success: SuccesHandler<null>, registered_class_id: number[]): void;
     static save_sesion(error: ErrorHandler, success: SuccesHandler<null>, id: number, group_id: number, openvidu_session: String): void;

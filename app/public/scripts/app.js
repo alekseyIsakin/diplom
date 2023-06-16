@@ -24,9 +24,16 @@ class CurSession {
 
 const cur_session = new CurSession()
 
+const setup_join_btn = (tokens) => {
+    const btn = document.createElement('button')
+    btn.title = tokens
+}
+
 $(document).ready(async () => {
     var webComponent = document.querySelector('openvidu-webcomponent');
     var form = document.getElementById('main');
+    checkSession(user_id).then(v =>
+        console.log(v))
 
     webComponent.addEventListener('onSessionCreated', (event) => {
         var session = event.detail;

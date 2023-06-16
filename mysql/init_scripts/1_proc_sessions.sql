@@ -1,12 +1,11 @@
 USE users;
 
 DELIMITER $$;
-
 CREATE VIEW get_session_student_groups AS
 SELECT
 	session_token AS token,
 	g.title AS group_title,
-	sg.student_id AS student_id
+	sg.student_id AS user_id
 FROM
 	student_group AS sg
 	LEFT JOIN sessions AS s ON sg.group_id = s.group_id
@@ -14,13 +13,14 @@ FROM
 
 CREATE VIEW get_session_teacher_groups AS
 SELECT
-	session_token AS token,
-	gt.title AS group_title,
-	tc.teacher_id AS teacher_id
+ss.session_token as token,
+g.title as group_title,
+tc.teacher_id as user_id
 FROM
 	sessions ss
-	LEFT JOIN teacher_classes AS tc ON tc.id = ss.class_id
-	LEFT JOIN s_groups AS gt ON tc.group_id = gt.id;
+	LEFT JOIN shedule AS sh ON sh.id = ss.class_id
+	LEFT JOIN teacher_classes AS tc ON tc.id = sh.class_id
+	LEFT JOIN s_groups AS g ON tc.group_id = g.id;
 
 CREATE FUNCTION get_session_token(user_id bigint UNSIGNED) returns text DETERMINISTIC BEGIN
 	DECLARE

@@ -269,18 +269,43 @@ class DataBase {
                     success(null);
             });
     }
-    static get_sessions_token(error, success, teacher_id) {
+    static get_sessions_token(error, success, user_id) {
         const q = `
-			SELECT get_session_token(?) as token;`;
-        const v = [teacher_id];
+			SELECT count(*) as is_teacher from teachers where id=?;`;
+        const v = [user_id];
         const p = make_query(q, v);
-        if (p !== undefined)
-            p.then((value) => {
-                if (value.error)
-                    error(value.error);
+        p === null || p === void 0 ? void 0 : p.then((value) => {
+            if (value.error) {
+                error(value.error);
+                return;
+            }
+            let p;
+            if (value.results[0].is_teacher == 0)
+                p = DataBase.get_sessions_token_for_students(error, success, user_id);
+            else
+                p = DataBase.get_sessions_token_for_teacher(error, success, user_id);
+            p === null || p === void 0 ? void 0 : p.then(res => {
+                logger._debug(JSON.stringify(res));
+                if (res.error)
+                    error(res.error);
                 else
-                    success(value.results);
+                    success(res.results);
+            }).catch(err => {
+                logger._debug(JSON.stringify(err));
             });
+        });
+    }
+    static get_sessions_token_for_teacher(error, success, user_id) {
+        const q = `
+			SELECT * from get_session_teacher_groups where user_id=?;`;
+        const v = [user_id];
+        return make_query(q, v);
+    }
+    static get_sessions_token_for_students(error, success, user_id) {
+        const q = `
+			SELECT * from get_session_student_groups where user_id=?;`;
+        const v = [user_id];
+        return make_query(q, v);
     }
     static unregister_class(error, success, registered_class_id) {
         logger._info(`unregister_class ${registered_class_id}`, true);
