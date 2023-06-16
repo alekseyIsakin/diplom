@@ -1,12 +1,12 @@
 let tmp = -1
 document.cookie.split(';')
-	.some((el, index) => {
-		const v = el.split('=')
-		if (v[0].endsWith('user_id')) {
-			tmp = Number(v[1])
-			return true
-		}
-	})
+    .some((el, index) => {
+        const v = el.split('=')
+        if (v[0].endsWith('user_id')) {
+            tmp = Number(v[1])
+            return true
+        }
+    })
 const user_id = tmp;
 
 class CurSession {
@@ -24,16 +24,32 @@ class CurSession {
 
 const cur_session = new CurSession()
 
-const setup_join_btn = (tokens) => {
+const setup_join_btn = (token_info) => {
     const btn = document.createElement('button')
-    btn.title = tokens
+    btn.textContent = token_info.group_title
+
+    if (token_info.token !== null) {
+
+        btn.addEventListener('click', async (e) => {
+            var promiseResults = await Promise.all(
+                [
+                    createToken(token_info.token),
+                    createToken(token_info.token)
+                ])
+            console.log(promiseResults)
+            joinSession(promiseResults)
+
+        })
+    } else {
+        btn.disabled = true
+    }
+    $('#open_groups').append(btn)
 }
 
 $(document).ready(async () => {
     var webComponent = document.querySelector('openvidu-webcomponent');
     var form = document.getElementById('main');
-    checkSession(user_id).then(v =>
-        console.log(v))
+    checkSession(user_id).then(v => v.forEach(t => setup_join_btn(t)))
 
     webComponent.addEventListener('onSessionCreated', (event) => {
         var session = event.detail;
@@ -78,20 +94,18 @@ $(document).ready(async () => {
 
 });
 
-async function joinSession() {
-    // Requesting tokens
-    var promiseResults = await Promise.all([getToken(user_id), getToken(user_id)]);
-    var tokens = { webcam: promiseResults[0], screen: promiseResults[1] };
+async function joinSession(new_tokens) {
 
     //Getting the webcomponent element
     var webComponent = document.querySelector('openvidu-webcomponent');
+    var tokens = { webcam: new_tokens[0], screen: new_tokens[1] };
 
     hideForm();
 
     // Displaying webcomponent
     webComponent.style.display = 'block';
 
-    // webComponent.participantName = participantName;
+    webComponent.participantName = 'i can change it';
 
     // You can see the UI parameters documentation here
     // https://docs.openvidu.io/en/stable/api/openvidu-angular/components/OpenviduWebComponentComponent.html#inputs
@@ -155,11 +169,6 @@ function getToken(user_id, check = true) {
                     console.warn(error)
                     return getToken(mySessionId, check = false)
                 });
-    // else
-    //     return createSession(mySessionId)
-    //         .then(
-    //             sessionId => createToken(sessionId),
-    //             error => console.warn(error));
 }
 
 // function createSession(sessionId) {

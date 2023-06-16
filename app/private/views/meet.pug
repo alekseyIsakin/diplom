@@ -10,8 +10,7 @@ html
 		link(rel="stylesheet" href="css/app.css")
 	body
 		div#main(style="text-align: center;")
-		h1 Открытые встречи
-		form(onsubmit="joinSession(); return false" style="padding: 80px; margin: auto")
-			p
-				input(type="submit" value="JOIN")
+			h1 Открытые встречи
+			div#open_groups
+			//- button(onclick="joinSession(); return false" style="padding: 80px; margin: auto")
 		openvidu-webcomponent(style="height: 100%;")
