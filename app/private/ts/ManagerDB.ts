@@ -1,20 +1,22 @@
 'use strict'
 require('dotenv').config();
 
-const mysql = require("mysql2");
-const { loggers } = require('winston');
+// const { mysql } = require("mysql2");
+
+const mysql = require("mysql2")
 const logger = require('./logger')(__filename);
 const bcrypt = require('bcrypt')
 
 
-const connection = mysql.createConnection({
+const create_connection = () => mysql.createConnection({
 	host: process.env.MYSQL_HOST,
 	user: process.env.MYSQL_USER,
 	database: process.env.MYSQL_DB,
 	password: process.env.MYSQL_SECRET,
-	port: process.env.MYSQL_PORT
+	port: Number(process.env.MYSQL_PORT)
 });
 
+let connection = create_connection()
 
 type ErrorHandler = (error?: Error) => void
 type SuccesHandler<T> = (results: T) => void
@@ -22,16 +24,16 @@ type DBResponse = any[]
 
 type RHandler<T> = { error?: Error, results: T[] }
 
-type CheckPassportR = { id: number, nick: String, p: String, group_id: number }
-type CheckPassportS = { id: number, nick: String, group_id: number[] }
+type CheckPassportR = { id: number, nick: string, p: string, group_id: number }
+type CheckPassportS = { id: number, nick: string, group_id: number[] }
 
-type addNewClassR = { id: number, nick: String, p: String, group_id: number }
+type addNewClassR = { id: number, nick: string, p: string, group_id: number }
 
-type GetGroupsR = { id: number, group_title: String }
+type GetGroupsR = { id: number, group_title: string }
 type CheckRegisterCollision = { collisions: number }
 type GetSessionsTokenR = {
-	token: String,
-	group_title: String,
+	token: string,
+	group_title: string,
 	user_id: number
 	is_teacher: number
 }
@@ -41,7 +43,7 @@ type GetRegisteredClassesParticial = {
 	start: number,
 	duration_minuts: number,
 	group_id: number,
-	freq_cron: String,
+	freq_cron: string,
 	week_cnt: number
 }
 type GetRegisteredClassesFull = {
@@ -60,14 +62,14 @@ type GetClassesR = {
 	teacher_id: number,
 	class_id: number,
 	group_id: number,
-	class_title: String,
-	group_title: String
+	class_title: string,
+	group_title: string
 }
 type RegisterNewClassesR = { id: number }
 
 connection.connect();
 
-function make_query<R>(query: String, params?: any[]): Promise<RHandler<R>> | undefined {
+function make_query<R>(query: string, params?: any[]): Promise<RHandler<R>> | undefined {
 	return connection
 		.promise()
 		.query(query, params)
@@ -81,38 +83,48 @@ function make_query<R>(query: String, params?: any[]): Promise<RHandler<R>> | un
 			})
 		.catch((error: Error) => {
 			logger._error(`error when query:\n\t${error.message}]`, true);
+			DataBase.is_connected = false
+			DataBase.start_check_connect()
 			return { error: error, results: [] }
 		})
 }
 
-const compare_password = async (passw_hash: String, passw: String): Promise<boolean> => {
+const compare_password = async (passw_hash: string, passw: string): Promise<boolean> => {
 	return await bcrypt.compare(passw, passw_hash)
 }
 
 export class DataBase {
 	static is_connected = false;
+	static check_connect_idle = false;
 	static async start_check_connect() {
-		logger.warn(`first connection to mysql`);
-		while (true) {
+		if (DataBase.check_connect_idle)
+			return
+		DataBase.check_connect_idle = true
+
+		const interval = setInterval(() => {
 			logger.warn(`check connect `);
+			connection = create_connection()
 			connection.connect(async (err: any) => {
 				if (err) {
 					logger._error(`connection failed`);
 					DataBase.is_connected = false
 				} else {
-					logger.warn(`still connect `);
+					logger.warn(`connect established`);
 					DataBase.is_connected = true
 				}
 			})
-			if (DataBase.is_connected) break
-			await new Promise(resolve => setTimeout(resolve, 5000))
-		}
+			if (DataBase.is_connected) {
+				DataBase.check_connect_idle = false
+				clearInterval(interval)
+			}
+
+		}, 15000)
 	}
 	static async check_user_password(
 		error: ErrorHandler,
 		success: SuccesHandler<CheckPassportS>,
-		user_nick: String,
-		password: String) {
+		user_nick: string,
+		password: string) {
 		logger._debug(`check passport of user [${user_nick}]`);
 		const q = "SELECT id, nick, passw_hash as p, group_id from users left join student_group on users.id=student_id where nick=?;"
 		const v = [user_nick]
@@ -164,7 +176,7 @@ export class DataBase {
 		error: ErrorHandler,
 		success: SuccesHandler<GetGroupsR[]>,
 		group_ids?: number[]) {
-		const q: String = `SELECT id, group_title FROM get_groups ${group_ids === undefined ?
+		const q: string = `SELECT id, group_title FROM get_groups ${group_ids === undefined ?
 			';' :
 			'where id in (' + new Array(group_ids?.length).fill('?').join() + ')'
 			}`
@@ -193,8 +205,8 @@ export class DataBase {
 		teacher_id: number,
 		group_id: number,
 
-		class_title: String) {
-		const q: String = "CALL add_new_class(?,?,?)"
+		class_title: string) {
+		const q: string = "CALL add_new_class(?,?,?)"
 		const v: any[] = [teacher_id, group_id, class_title]
 		const p = make_query<addNewClassR>(q, v)
 		if (p !== undefined)
@@ -208,7 +220,7 @@ export class DataBase {
 	static get_classes(
 		error: ErrorHandler,
 		success: SuccesHandler<GetClassesR[]>,
-		class_title: String,
+		class_title: string,
 		teacher_id: number) {
 		const q = "SELECT teacher_id, class_id, group_id, class_title, group_title FROM get_classes WHERE teacher_id=?" + (class_title === undefined ? ';' : ' and class_title like ?;')
 		const v = [teacher_id, class_title]
@@ -285,9 +297,19 @@ export class DataBase {
 		group_id: number[],
 		teacher_id?: number) {
 		logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`)
-		const q = `SELECT id, start, group_id, teacher_id, duration_minuts, freq_cron, class_title, group_title, first_name, second_name, thrid_name, week_cnt from get_registered_classes  where start>=? and start<=? ` +
+		const q = `
+		SELECT 
+			id, start, 
+			group_id, teacher_id, 
+			duration_minuts, freq_cron, 
+			class_title, group_title, 
+			first_name, second_name, thrid_name, 
+		week_cnt 
+		from 
+			get_registered_classes  where start>=? and start<=? ` +
 			(group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
 			(teacher_id === null ? '' : 'and teacher_id=? ')
+
 		const v: any = [from, to]
 
 		if (group_id != undefined && group_id.length > 0)
@@ -369,19 +391,12 @@ export class DataBase {
 	 * @param {ErrorHandler} success
 	 * @param {SuccesHandler<null>} error
 	*/
-	static clear_sessions(
-		error: ErrorHandler,
-		success: SuccesHandler<null>) {
+	static clear_sessions() {
 		logger._info(`clear saved sessions`, true)
 		const q = "delete from sessions"
 		const p = make_query<null>(q)
-		if (p !== undefined)
-			p.then((value) => {
-				if (value.error)
-					error(value.error)
-				else
-					success(null)
-			})
+
+		return p
 	}
 
 	static get_sessions_token(
@@ -389,7 +404,7 @@ export class DataBase {
 		success: SuccesHandler<GetSessionsTokenR[]>,
 		user_id: number) {
 
-		const q: String = `
+		const q: string = `
 			SELECT count(*) as is_teacher from teachers where id=?;`
 		const v: any[] = [user_id]
 		const p = make_query<GetSessionsTokenR>(q, v)
@@ -409,7 +424,7 @@ export class DataBase {
 				logger._debug(JSON.stringify(res))
 				if (res.error)
 					error(res.error)
-				else{
+				else {
 					success(res.results)
 				}
 			}).catch(err => {
@@ -422,7 +437,7 @@ export class DataBase {
 		success: SuccesHandler<GetSessionsTokenR[]>,
 		user_id: number) {
 
-		const q: String = `
+		const q: string = `
 			SELECT * from get_session_teacher_groups where user_id=?;`
 		const v: any[] = [user_id]
 		return make_query<GetSessionsTokenR>(q, v)
@@ -432,7 +447,7 @@ export class DataBase {
 		success: SuccesHandler<GetSessionsTokenR[]>,
 		user_id: number) {
 
-		const q: String = `
+		const q: string = `
 			SELECT * from get_session_student_groups where user_id=?;`
 		const v: any[] = [user_id]
 		return make_query<GetSessionsTokenR>(q, v)
@@ -476,8 +491,8 @@ export class DataBase {
 		success: SuccesHandler<null>,
 		id: number,
 		group_id: number,
-		openvidu_session: String) {
-		const q: String = "CALL save_session(?,?,?);"
+		openvidu_session: string) {
+		const q: string = "CALL save_session(?,?,?);"
 		const v: any = [id, group_id, openvidu_session]
 		logger._info(`save sessions for group: ${v}`, true)
 

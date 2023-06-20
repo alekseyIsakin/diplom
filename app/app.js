@@ -24,8 +24,13 @@ const ROUTES = require('./private/routes/ROUTES')
 const app = express()
 
 const { DataBase } = require('./private/ManagerDB')
+const { SessionManager } = require('./private/sessionManager')
 DataBase.start_check_connect()
-require('./private/sessionManager').SessionManager.first_load()
+const interval = setInterval(
+	async () => {
+		const is_connected = await SessionManager.first_load()
+		if (is_connected) clearInterval(interval)
+	}, 15000)
 
 app.set('views', __dirname + '/private/views')
 app.set("view engine", "pug");

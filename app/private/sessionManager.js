@@ -156,8 +156,21 @@ const setup_new_job = (class_el) => {
 }
 
 class SessionManager {
-	static first_load() {
-		DataBase.clear_sessions((error) => { }, () => { })
+	static async first_load() {
+		const cleared = await DataBase.clear_sessions()
+			.then((v) => {
+				if (!v.error) {
+					logger._info(`sesions cleared`)
+					return true
+				}
+				else {
+					logger._info(`sesions are not cleared ${JSON.stringify(v.error)}`)
+					return false
+				}
+			})
+		if (!cleared) { 
+			return false
+		}
 		SessionManager.fetchSesions().then(v => {
 			DataBase
 				.get_partial_registered_classes(
@@ -177,6 +190,7 @@ class SessionManager {
 		}).finally(() => {
 			openvidu.activeSessions.forEach(s => s.close())
 		})
+		return true
 	}
 	static delete_job(shedule_id) {
 		const job = job_list[String(shedule_id)]['job']
