@@ -193,11 +193,11 @@ class SessionManager {
 		return true
 	}
 	static delete_job(shedule_id) {
-		const job = job_list[String(shedule_id)]['job']
+		const job = job_list[String(shedule_id)]
 		logger._info(`stop cron job [${shedule_id}]`)
 
-		if (job !== undefined)
-			job.stop()
+		if (job !== undefined && job['job'] !== undefined)
+			job['job'].stop()
 		delete job_list[String(shedule_id)]
 	}
 	static new_registered_class(class_el) {

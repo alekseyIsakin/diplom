@@ -266,7 +266,7 @@ const delete_marked_classes = () => {
             to_delete_ids.push($(this)[0].getAttribute('class_id'))
         })
     if (to_delete_ids.length == 0) return
-    unregister_class(to_delete_ids)
+    delete_teacher_class(to_delete_ids)
         .then(() => {
             $('#class_holder').empty()
             fetch_teacher_classes(user_id)
