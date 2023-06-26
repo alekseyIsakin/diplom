@@ -14,9 +14,7 @@ const create_connection = () => mysql.createConnection({
 	database: process.env.MYSQL_DB,
 	password: process.env.MYSQL_SECRET,
 	port: Number(process.env.MYSQL_PORT)
-});
-
-let connection = create_connection()
+})
 
 type ErrorHandler = (error?: Error) => void
 type SuccesHandler<T> = (results: T) => void
@@ -67,9 +65,18 @@ type GetClassesR = {
 }
 type RegisterNewClassesR = { id: number }
 
-connection.connect();
+async function make_query<R>(query: string, params?: any[]): Promise<RHandler<R> | undefined> {
+	let connection = await create_connection()
 
-function make_query<R>(query: string, params?: any[]): Promise<RHandler<R>> | undefined {
+	let x = await connection
+		.promise()
+		.connect()
+		.then(
+			() => true
+		).catch(
+			() => false
+		)
+
 	return connection
 		.promise()
 		.query(query, params)
@@ -79,11 +86,13 @@ function make_query<R>(query: string, params?: any[]): Promise<RHandler<R>> | un
 					error: undefined,
 					results: results[0]
 				}
+				connection.end()
 				return r
 			})
 		.catch((error: Error) => {
 			logger._error(`error when query:\n\t${error.message}]`, true);
 			DataBase.is_connected = false
+			connection.end()
 			DataBase.start_check_connect()
 			return { error: error, results: [] }
 		})
@@ -103,13 +112,16 @@ export class DataBase {
 
 		const interval = setInterval(() => {
 			logger.warn(`check connect `);
-			connection = create_connection()
+			let connection = create_connection()
+
 			connection.connect(async (err: any) => {
 				if (err) {
 					logger._error(`connection failed`);
+					connection.end()
 					DataBase.is_connected = false
 				} else {
 					logger.warn(`connect established`);
+					connection.end()
 					DataBase.is_connected = true
 				}
 			})
@@ -133,9 +145,9 @@ export class DataBase {
 		if (p !== undefined)
 			p.then((value) => {
 				logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
-				if (value.results.length <= 0 || value.error) {
+				if (value === undefined || value.results.length <= 0 || value.error) {
 					logger._debug(`unknown user [${user_nick}]`);
-					error(value.error)
+					error(value?.error)
 					return
 				}
 				compare_password(value.results[0].p, password)
@@ -153,7 +165,7 @@ export class DataBase {
 						}
 						else {
 							logger._debug(`passport is invalid user:[${user_nick}]`);
-							error(value.error)
+							error(value?.error)
 						}
 					})
 			})
@@ -189,8 +201,8 @@ export class DataBase {
 		const p = make_query<GetGroupsR>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(value.results)
 			})
@@ -211,8 +223,8 @@ export class DataBase {
 		const p = make_query<addNewClassR>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(null)
 			})
@@ -227,8 +239,8 @@ export class DataBase {
 		const p = make_query<GetClassesR>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(value.results)
 			})
@@ -256,8 +268,8 @@ export class DataBase {
 		const p = make_query<CheckRegisterCollision>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(value.results[0].collisions == 0)
 			})
@@ -283,8 +295,8 @@ export class DataBase {
 		const p = make_query<GetRegisteredClassesParticial>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(value.results)
 			})
@@ -319,8 +331,8 @@ export class DataBase {
 		const p = make_query<GetRegisteredClassesFull>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(value.results)
 			})
@@ -339,8 +351,8 @@ export class DataBase {
 		const p = make_query<null>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(null)
 			})
@@ -360,8 +372,8 @@ export class DataBase {
 		const p = make_query<RegisterNewClassesR>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(value.results[0])
 			})
@@ -380,8 +392,8 @@ export class DataBase {
 		const p = make_query<null>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(null)
 			})
@@ -409,11 +421,11 @@ export class DataBase {
 		const v: any[] = [user_id]
 		const p = make_query<GetSessionsTokenR>(q, v)
 		p?.then((value) => {
-			if (value.error) {
-				error(value.error)
+			if (value === undefined || value.error) {
+				error(value?.error)
 				return
 			}
-			let p: Promise<RHandler<GetSessionsTokenR>> | undefined
+			let p: Promise<RHandler<GetSessionsTokenR> | undefined> | undefined
 
 			if (value.results[0].is_teacher == 0)
 				p = DataBase.get_sessions_token_for_students(error, success, user_id)
@@ -422,8 +434,8 @@ export class DataBase {
 
 			p?.then(res => {
 				logger._debug(JSON.stringify(res))
-				if (res.error)
-					error(res.error)
+				if (res === undefined || res.error)
+					error(res?.error)
 				else {
 					success(res.results)
 				}
@@ -464,8 +476,8 @@ export class DataBase {
 		const p = make_query<null>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(null)
 			})
@@ -480,8 +492,8 @@ export class DataBase {
 		const p = make_query<null>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(null)
 			})
@@ -499,8 +511,8 @@ export class DataBase {
 		const p = make_query<null>(q, v)
 		if (p !== undefined)
 			p.then((value) => {
-				if (value.error)
-					error(value.error)
+				if (value === undefined || value.error)
+					error(value?.error)
 				else
 					success(null)
 			})
@@ -514,13 +526,12 @@ export class DataBase {
 		logger._info(`close session [${group_id}]`, true)
 		const v: any[] = [group_id]
 		const p = make_query<string>(q, v)
-		if (p !== undefined)
-			p.then((value) => {
-				if (value.error || value.results.length == 0)
-					error(value.error)
-				else
-					success(value.results)
-			})
+		p.then((value) => {
+			if (value === undefined || value.error || value.results.length == 0)
+				error(value?.error)
+			else
+				success(value.results)
+		})
 	}
 }
 // for (let i=0; i<10;i++)

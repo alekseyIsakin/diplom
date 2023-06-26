@@ -11,32 +11,42 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DataBase = void 0;
 require('dotenv').config();
+// const { mysql } = require("mysql2");
 const mysql = require("mysql2");
-const { loggers } = require('winston');
 const logger = require('./logger')(__filename);
 const bcrypt = require('bcrypt');
-const connection = mysql.createConnection({
+const create_connection = () => mysql.createConnection({
     host: process.env.MYSQL_HOST,
     user: process.env.MYSQL_USER,
     database: process.env.MYSQL_DB,
     password: process.env.MYSQL_SECRET,
-    port: process.env.MYSQL_PORT
+    port: Number(process.env.MYSQL_PORT)
 });
-connection.connect();
 function make_query(query, params) {
-    return connection
-        .promise()
-        .query(query, params)
-        .then((results) => {
-        let r = {
-            error: undefined,
-            results: results[0]
-        };
-        return r;
-    })
-        .catch((error) => {
-        logger._error(`error when query:\n\t${error.message}]`, true);
-        return { error: error, results: [] };
+    return __awaiter(this, void 0, void 0, function* () {
+        let connection = yield create_connection();
+        let x = yield connection
+            .promise()
+            .connect()
+            .then(() => true).catch(() => false);
+        return connection
+            .promise()
+            .query(query, params)
+            .then((results) => {
+            let r = {
+                error: undefined,
+                results: results[0]
+            };
+            connection.end();
+            return r;
+        })
+            .catch((error) => {
+            logger._error(`error when query:\n\t${error.message}]`, true);
+            DataBase.is_connected = false;
+            connection.end();
+            DataBase.start_check_connect();
+            return { error: error, results: [] };
+        });
     });
 }
 const compare_password = (passw_hash, passw) => __awaiter(void 0, void 0, void 0, function* () {
@@ -45,23 +55,29 @@ const compare_password = (passw_hash, passw) => __awaiter(void 0, void 0, void 0
 class DataBase {
     static start_check_connect() {
         return __awaiter(this, void 0, void 0, function* () {
-            logger.warn(`first connection to mysql`);
-            while (true) {
+            if (DataBase.check_connect_idle)
+                return;
+            DataBase.check_connect_idle = true;
+            const interval = setInterval(() => {
                 logger.warn(`check connect `);
+                let connection = create_connection();
                 connection.connect((err) => __awaiter(this, void 0, void 0, function* () {
                     if (err) {
                         logger._error(`connection failed`);
+                        connection.end();
                         DataBase.is_connected = false;
                     }
                     else {
-                        logger.warn(`still connect `);
+                        logger.warn(`connect established`);
+                        connection.end();
                         DataBase.is_connected = true;
                     }
                 }));
-                if (DataBase.is_connected)
-                    break;
-                yield new Promise(resolve => setTimeout(resolve, 5000));
-            }
+                if (DataBase.is_connected) {
+                    DataBase.check_connect_idle = false;
+                    clearInterval(interval);
+                }
+            }, 15000);
         });
     }
     static check_user_password(error, success, user_nick, password) {
@@ -73,9 +89,9 @@ class DataBase {
             if (p !== undefined)
                 p.then((value) => {
                     logger._debug(`check_passw [${JSON.stringify(value)}]`, true);
-                    if (value.results.length <= 0 || value.error) {
+                    if (value === undefined || value.results.length <= 0 || value.error) {
                         logger._debug(`unknown user [${user_nick}]`);
-                        error(value.error);
+                        error(value === null || value === void 0 ? void 0 : value.error);
                         return;
                     }
                     compare_password(value.results[0].p, password)
@@ -92,7 +108,7 @@ class DataBase {
                         }
                         else {
                             logger._debug(`passport is invalid user:[${user_nick}]`);
-                            error(value.error);
+                            error(value === null || value === void 0 ? void 0 : value.error);
                         }
                     });
                 });
@@ -119,8 +135,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(value.results);
             });
@@ -133,8 +149,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(null);
             });
@@ -145,8 +161,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(value.results);
             });
@@ -167,8 +183,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(value.results[0].collisions == 0);
             });
@@ -186,15 +202,24 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(value.results);
             });
     }
     static get_full_registered_classes(error, success, from, to, group_id, teacher_id) {
         logger._info(`get registered classes for\n\t group:[${group_id}]; teacher:[${teacher_id}]; from:[${from}]; to[${to}]`);
-        const q = `SELECT id, start, group_id, teacher_id, duration_minuts, freq_cron, class_title, group_title, first_name, second_name, thrid_name, week_cnt from get_registered_classes  where start>=? and start<=? ` +
+        const q = `
+		SELECT 
+			id, start, 
+			group_id, teacher_id, 
+			duration_minuts, freq_cron, 
+			class_title, group_title, 
+			first_name, second_name, thrid_name, 
+		week_cnt 
+		from 
+			get_registered_classes  where start>=? and start<=? ` +
             (group_id.length == 0 ? '' : 'and group_id in (' + (new Array(group_id.length).fill('?')).join() + ')') +
             (teacher_id === null ? '' : 'and teacher_id=? ');
         const v = [from, to];
@@ -205,8 +230,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(value.results);
             });
@@ -220,8 +245,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(null);
             });
@@ -233,8 +258,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(value.results[0]);
             });
@@ -247,8 +272,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(null);
             });
@@ -257,17 +282,11 @@ class DataBase {
      * @param {ErrorHandler} success
      * @param {SuccesHandler<null>} error
     */
-    static clear_sessions(error, success) {
+    static clear_sessions() {
         logger._info(`clear saved sessions`, true);
         const q = "delete from sessions";
         const p = make_query(q);
-        if (p !== undefined)
-            p.then((value) => {
-                if (value.error)
-                    error(value.error);
-                else
-                    success(null);
-            });
+        return p;
     }
     static get_sessions_token(error, success, user_id) {
         const q = `
@@ -275,8 +294,8 @@ class DataBase {
         const v = [user_id];
         const p = make_query(q, v);
         p === null || p === void 0 ? void 0 : p.then((value) => {
-            if (value.error) {
-                error(value.error);
+            if (value === undefined || value.error) {
+                error(value === null || value === void 0 ? void 0 : value.error);
                 return;
             }
             let p;
@@ -286,10 +305,11 @@ class DataBase {
                 p = DataBase.get_sessions_token_for_teacher(error, success, user_id);
             p === null || p === void 0 ? void 0 : p.then(res => {
                 logger._debug(JSON.stringify(res));
-                if (res.error)
-                    error(res.error);
-                else
+                if (res === undefined || res.error)
+                    error(res === null || res === void 0 ? void 0 : res.error);
+                else {
                     success(res.results);
+                }
             }).catch(err => {
                 logger._debug(JSON.stringify(err));
             });
@@ -314,8 +334,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(null);
             });
@@ -327,8 +347,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(null);
             });
@@ -340,8 +360,8 @@ class DataBase {
         const p = make_query(q, v);
         if (p !== undefined)
             p.then((value) => {
-                if (value.error)
-                    error(value.error);
+                if (value === undefined || value.error)
+                    error(value === null || value === void 0 ? void 0 : value.error);
                 else
                     success(null);
             });
@@ -351,15 +371,15 @@ class DataBase {
         logger._info(`close session [${group_id}]`, true);
         const v = [group_id];
         const p = make_query(q, v);
-        if (p !== undefined)
-            p.then((value) => {
-                if (value.error || value.results.length == 0)
-                    error(value.error);
-                else
-                    success(value.results);
-            });
+        p.then((value) => {
+            if (value === undefined || value.error || value.results.length == 0)
+                error(value === null || value === void 0 ? void 0 : value.error);
+            else
+                success(value.results);
+        });
     }
 }
 exports.DataBase = DataBase;
 DataBase.is_connected = false;
+DataBase.check_connect_idle = false;
 //# sourceMappingURL=ManagerDB.js.map
