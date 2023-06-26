@@ -1,61 +1,63 @@
 doctype html
 html
-  head
-    title Личный кабинет учителя
-    script(src="https://code.jquery.com/jquery-3.3.1.min.js", integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=", crossorigin="anonymous")
-    script(src="scripts/teacher.js")
-    link(rel="stylesheet" href="css/header.css")
-    link(rel="stylesheet" href="css/teacher.css")
-  body
-    //- - const delay = 15 * 60 * 1000
-    //- - var dt = new Date(Date.now())
-    //- //- - var dt = new Date(Date.now())
-    //- - dt = dt.toISOString().split('.')[0].split(':').slice(0,2).join(':')
-    -var header_title= 'Личный кабинет'
-    -var Groups=[]
-    include header.pug
-    div
-      form.box.register#submit
-        p 
-          | Предмет:
-          span(type="text", name="title")#class_name
-          br
-          | Группа:
-          span(type="text", name="title")#group_name
-          br
-          | Дата:
-          input(type="datetime-local", name="date")#date_time
-          br
-          | Продолжительность:
-          input(type="number", name="duration_minuts", min="1", value="90")#duration
-          br
-          | Частота:
-          br
-          input.week_cnt(value=0, type="radio", name="week_cnt", checked=true)#week_cnt_once
-          label(for='week_cnt_once') Один раз
-          br
-          input.week_cnt(value=1, type="radio", name="week_cnt")#week_cnt_one
-          label(for='week_cnt_one') Раз в неделю
-          br
-          input.week_cnt(value=2, type="radio", name="week_cnt")#week_cnt_two
-          label(for='week_cnt_two') Раз в две недели
-        input(type="submit" value="Зарегистрировать предмет")
-    div.box 
-      | Запланированные занятия
-      div
-        div#registered_class_holder
-      button#unregister_classes Удалить
-    div.box edit exist
-      div
-        span Предмет:
-        input(type="text" maxlength=50)#new_class_title
-        br
-        span Группа:
-        select(class="group_holder")#group_id_for_new
-        br
-        button#new_class Добавить
-      div#class_holder
-      button#delete_classes Удалить
+	head
+		title Личный кабинет учителя
+		script(src="https://code.jquery.com/jquery-3.3.1.min.js", integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=", crossorigin="anonymous")
+		script(src="scripts/teacher.js")
+		link(rel="stylesheet" href="css/header.css")
+		link(rel="stylesheet" href="css/teacher.css")
+		link(rel="stylesheet" href="/css/cookie.css")
+	body
+		//- - const delay = 15 * 60 * 1000
+		//- - var dt = new Date(Date.now())
+		//- //- - var dt = new Date(Date.now())
+		//- - dt = dt.toISOString().split('.')[0].split(':').slice(0,2).join(':')
+		-var header_title= 'Личный кабинет'
+		-var Groups=[]
+		include header.pug
+		div
+			form.box.register#submit
+				p 
+					| Предмет:
+					span(type="text", name="title")#class_name
+					br
+					| Группа:
+					span(type="text", name="title")#group_name
+					br
+					| Дата:
+					input(type="datetime-local", name="date")#date_time
+					br
+					| Продолжительность:
+					input(type="number", name="duration_minuts", min="1", value="90")#duration
+					br
+					| Частота:
+					br
+					input.week_cnt(value=0, type="radio", name="week_cnt", checked=true)#week_cnt_once
+					label(for='week_cnt_once') Один раз
+					br
+					input.week_cnt(value=1, type="radio", name="week_cnt")#week_cnt_one
+					label(for='week_cnt_one') Раз в неделю
+					br
+					input.week_cnt(value=2, type="radio", name="week_cnt")#week_cnt_two
+					label(for='week_cnt_two') Раз в две недели
+				input(type="submit" value="Зарегистрировать предмет")
+		div.box 
+			| Запланированные занятия
+			div
+				div#registered_class_holder
+			button#unregister_classes Удалить
+		div.box edit exist
+			div
+				span Предмет:
+				input(type="text" maxlength=50)#new_class_title
+				br
+				span Группа:
+				select(class="group_holder")#group_id_for_new
+				br
+				button#new_class Добавить
+			div#class_holder
+			button#delete_classes Удалить
 
+		include cookie_accept.pug
 
-        
+				

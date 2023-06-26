@@ -1,0 +1,21 @@
+div#cookie_accept
+	script
+		| let cookie_acc = document.getElementById('cookie_accept')
+		| function getCookie(name) {
+		| let matches = document.cookie.match(new RegExp(
+		| 	"(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+		| ));
+		| return matches ? decodeURIComponent(matches[1]) : undefined;
+		| }
+		| function accept_cookie(){
+		|	document.cookie = 'accept_cookie=true; path=/'
+		| 	cookie_acc.remove()
+		| }
+		| let acc_c = getCookie('accept_cookie')
+		| if (acc_c === undefined || acc_c == false)
+		|	cookie_acc.hidden = false
+		| else
+		| 	cookie_acc.remove() 
+	p На этом сайте используются cookies, чтобы сделать посещение более удобным. Дальнейший просмотр страниц сайта означает разрешение их использования.
+	div
+		button#cookie_ok(onclick='accept_cookie()') Ok

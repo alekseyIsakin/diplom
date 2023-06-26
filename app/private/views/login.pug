@@ -1,17 +1,19 @@
 doctype html
 html
-  head
-    title Вход
-  body
-    h1=title 
-    form(action="/auth/login/password", method="post")
-      p 
-        label(for="nick") Пользователь:
-        input(type="text", name="nick")#nick
-        br
-        label(for="password") Пароль:
-        input(type="password", name="password")#password
-      br
-      input(type="submit" value="Войти") 
+	head
+		title Вход
+		link(rel="stylesheet" href="/css/cookie.css")
+	body
+		h1=title 
+		form(action="/auth/login/password", method="post")
+			p 
+				label(for="nick") Пользователь:
+				input(type="text", name="nick")#nick
+				br
+				label(for="password") Пароль:
+				input(type="password", name="password")#password
+			br
+			input(type="submit" value="Войти") 
+		include cookie_accept.pug
 
-        
+				

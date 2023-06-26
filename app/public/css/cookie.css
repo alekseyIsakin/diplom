@@ -1,0 +1,23 @@
+#cookie_accept {
+	display: flex;
+	position: fixed;
+	bottom: 0%;
+	width: 99%;
+
+	justify-content: center;
+	background-color: rgba(245, 245, 220, 0.209);
+	border: 1px black solid;
+	z-index: 1000;
+}
+
+#cookie_accept>p {
+	max-width: 700px;
+}
+
+#cookie_ok {
+	max-height: 25px;
+	display: flex;
+	position: relative;
+	transform: translate(0, -50%);
+	top: 50%;
+}

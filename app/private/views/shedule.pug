@@ -1,26 +1,28 @@
 doctype html
 
 html
-  head
-    title Раписание
-    script(src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous")
-    script(type="text/javascript" src="scripts/shedule.js")
-    link(rel="stylesheet" href="css/shedule.css")
-    link(rel="stylesheet" href="css/header.css")
-  body
-    -var header_title= 'Расписание'
-    include header.pug
+	head
+		title Раписание
+		script(src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous")
+		script(type="text/javascript" src="scripts/shedule.js")
+		link(rel="stylesheet" href="css/shedule.css")
+		link(rel="stylesheet" href="css/header.css")
+		link(rel="stylesheet" href="/css/cookie.css")
+	body
+		-var header_title= 'Расписание'
+		include header.pug
 
-    - var days=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье']
-    div(class='week week_media')
-      - for (d in days)
-        div.overflow_holder
-          div.day(id=`day${Number(d)+1}`)
-            div.day_name
-              span #{days[d]}
-            div.hours.grid
-              - for (let h=0; h<24; h++)
-                div #{h}
-            div.classes.grid.classes_no_selected
+		- var days=['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье']
+		div(class='week week_media')
+			- for (d in days)
+				div.overflow_holder
+					div.day(id=`day${Number(d)+1}`)
+						div.day_name
+							span #{days[d]}
+						div.hours.grid
+							- for (let h=0; h<24; h++)
+								div #{h}
+						div.classes.grid.classes_no_selected
+		include cookie_accept.pug
 
-          
+					

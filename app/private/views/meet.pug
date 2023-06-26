@@ -9,6 +9,7 @@ html
 		link(rel="stylesheet" href="css/openvidu-webcomponent-2.27.0.css")
 		link(rel="stylesheet" href="css/header.css")
 		link(rel="stylesheet" href="css/app.css")
+		link(rel="stylesheet" href="/css/cookie.css")
 	body
 		-var header_title= 'Личный кабинет'
 		-var Groups=[]
@@ -19,3 +20,4 @@ html
 			//- button(onclick="joinSession(); return false" style="padding: 80px; margin: auto")
 		div(style="height: 100%;")
 			openvidu-webcomponent(style="display: block;height: 100%;")
+		include cookie_accept.pug
