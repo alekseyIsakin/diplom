@@ -1,5 +1,7 @@
 'use strict'
 
+const VERSION = '0.2.0.1'
+
 require('dotenv').config();
 
 
@@ -66,7 +68,7 @@ app.use(function (req, res, next) {
 });
 
 app.listen(process.env._APP_PORT, async () => {
-	logger._info(`server has been started, listen: ${process.env._APP_PORT}`, true)
+	logger._info(`server has been started, listen: ${process.env._APP_PORT}\n\tApp version: ${VERSION}`, true)
 	logger._debug(`Node version: ${process.version}`, true)
 	logger._debug(`DEBUG is on`)
 })
